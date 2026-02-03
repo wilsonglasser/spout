@@ -50,13 +50,11 @@ class StyleManager implements StyleManagerInterface
      * Typically, set "wrap text" if a cell contains a new line.
      *
      * @param Cell|array $cell
-     * @return Style
+     * @return PossiblyUpdatedStyle The eventually updated style
      */
-    public function applyExtraStylesIfNeeded($cell)
+    public function applyExtraStylesIfNeeded($cell) : PossiblyUpdatedStyle
     {
-        $updatedStyle = $this->applyWrapTextIfCellContainsNewLine($cell);
-
-        return $updatedStyle;
+        return $this->applyWrapTextIfCellContainsNewLine($cell);
     }
 
     /**
@@ -69,29 +67,28 @@ class StyleManager implements StyleManagerInterface
      *        on the Windows version of Excel...
      *
      * @param Cell|array $cell The cell the style should be applied to
-     * @return \WilsonGlasser\Spout\Common\Entity\Style\Style The eventually updated style
+     * @return PossiblyUpdatedStyle The eventually updated style
      */
-    protected function applyWrapTextIfCellContainsNewLine($cell)
+    protected function applyWrapTextIfCellContainsNewLine($cell) : PossiblyUpdatedStyle
     {
         if ($cell instanceof Cell) {
             $cellStyle = $cell->getStyle();
             $value = $cell->isString() ? $cell->getValue() : null;
         } else {
-            $cellStyle = isset($cell[2]) ? $cell[2] : null;
+            $cellStyle = isset($cell[2]) ? $cell[2] : new Style();
             $value = $cell[0] === Cell::TYPE_STRING ? $cell[1] : null;
         }
 
         // if the "wrap text" option is already set, no-op
-        if ($cellStyle) {
-            if ($cellStyle->hasSetWrapText()) {
-                return $cellStyle;
-            }
-
-            if ($value !== null && strpos((string) $value, "\n") !== false) {
-                $cellStyle->setShouldWrapText();
-            }
+        if ($cellStyle->hasSetWrapText()) {
+            return new PossiblyUpdatedStyle($cellStyle, false);
         }
 
-        return $cellStyle;
+        if ($value !== null && strpos((string) $value, "\n") !== false) {
+            $cellStyle->setShouldWrapText();
+            return new PossiblyUpdatedStyle($cellStyle, true);
+        }
+
+        return new PossiblyUpdatedStyle($cellStyle, false);
     }
 }

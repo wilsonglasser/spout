@@ -4,12 +4,15 @@
 
 This fork is a modified version of Spout v3.0, with the ability to add merge cells, comment, formula cells, column dimensions and auto filter for XLSX Writer.
 
+> **Note:** The original box/spout project has been archived and is no longer maintained.
+> This fork continues development with additional features.
+
 ## About
 
 Spout is a PHP library to read and write spreadsheet files (CSV, XLSX and ODS), in a fast and scalable way.
-Contrary to other file readers or writers, it is capable of processing very large files while keeping the memory usage really low (less than 3MB).
+Unlike other file readers or writers, it is capable of processing very large files, while keeping the memory usage really low (less than 3MB).
 
-Join the community and come discuss about Spout: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/box/spout?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+Join the community and come discuss Spout: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/box/spout?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
 ## Documentation
@@ -18,7 +21,7 @@ Sorry but I can't create a documentation for the new methods at the moment.
 
 I will just list the small examples:
 
-**Merge cells** 
+**Merge cells**
 ```php
 $worksheet = $writer->getCurrentSheet();
 $worksheet->mergeCells('A1:B1');
@@ -43,7 +46,7 @@ $worksheet->addColumnDimension(
     new ColumnDimension('A', 50 )
 );
 
-// Autosize 
+// Autosize
 $worksheet->addColumnDimension(new ColumnDimension(
     'A',
     -1,
@@ -124,7 +127,7 @@ I will not offer full support for this fork, this is just a fork for a specific 
 
 ## Copyright and License
 
-Copyright 2017 Box, Inc. All rights reserved.
+Copyright 2022 Box, Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

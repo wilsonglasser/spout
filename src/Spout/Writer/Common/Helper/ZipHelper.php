@@ -10,11 +10,11 @@ use WilsonGlasser\Spout\Writer\Common\Creator\InternalEntityFactory;
  */
 class ZipHelper
 {
-    const ZIP_EXTENSION = '.zip';
+    public const ZIP_EXTENSION = '.zip';
 
     /** Controls what to do when trying to add an existing file */
-    const EXISTING_FILES_SKIP = 'skip';
-    const EXISTING_FILES_OVERWRITE = 'overwrite';
+    public const EXISTING_FILES_SKIP = 'skip';
+    public const EXISTING_FILES_OVERWRITE = 'overwrite';
 
     /** @var InternalEntityFactory Factory to create entities */
     private $entityFactory;
@@ -135,7 +135,7 @@ class ZipHelper
     public static function canChooseCompressionMethod()
     {
         // setCompressionName() is a PHP7+ method...
-        return (method_exists(new \ZipArchive(), 'setCompressionName'));
+        return (\method_exists(new \ZipArchive(), 'setCompressionName'));
     }
 
     /**
@@ -151,7 +151,7 @@ class ZipHelper
 
         foreach ($itemIterator as $itemInfo) {
             $itemRealPath = $this->getNormalizedRealPath($itemInfo->getPathname());
-            $itemLocalPath = str_replace($folderRealPath, '', $itemRealPath);
+            $itemLocalPath = \str_replace($folderRealPath, '', $itemRealPath);
 
             if ($itemInfo->isFile() && !$this->shouldSkipFile($zip, $itemLocalPath, $existingFileMode)) {
                 $zip->addFile($itemRealPath, $itemLocalPath);
@@ -181,9 +181,9 @@ class ZipHelper
      */
     protected function getNormalizedRealPath($path)
     {
-        $realPath = realpath($path);
+        $realPath = \realpath($path);
 
-        return str_replace(DIRECTORY_SEPARATOR, '/', $realPath);
+        return \str_replace(DIRECTORY_SEPARATOR, '/', $realPath);
     }
 
     /**
@@ -210,8 +210,8 @@ class ZipHelper
      */
     protected function copyZipToStream($zipFilePath, $pointer)
     {
-        $zipFilePointer = fopen($zipFilePath, 'r');
-        stream_copy_to_stream($zipFilePointer, $pointer);
-        fclose($zipFilePointer);
+        $zipFilePointer = \fopen($zipFilePath, 'r');
+        \stream_copy_to_stream($zipFilePointer, $pointer);
+        \fclose($zipFilePointer);
     }
 }

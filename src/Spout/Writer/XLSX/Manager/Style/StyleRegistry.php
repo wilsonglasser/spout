@@ -119,6 +119,10 @@ class StyleRegistry extends \WilsonGlasser\Spout\Writer\Common\Manager\Style\Sty
      */
     public function registerStyle(Style $style)
     {
+        if ($style->isRegistered()) {
+            return $style;
+        }
+
         $registeredStyle = parent::registerStyle($style);
         $this->registerFill($registeredStyle);
         $this->registerFormat($registeredStyle);
@@ -221,7 +225,7 @@ class StyleRegistry extends \WilsonGlasser\Spout\Writer\Common\Manager\Style\Sty
 
         if ($style->shouldApplyBorder()) {
             $border = $style->getBorder();
-            $serializedBorder = serialize($border);
+            $serializedBorder = \serialize($border);
 
             $isBorderAlreadyRegistered = isset($this->registeredBorders[$serializedBorder]);
 
@@ -231,7 +235,7 @@ class StyleRegistry extends \WilsonGlasser\Spout\Writer\Common\Manager\Style\Sty
                 $this->styleIdToBorderMappingTable[$styleId] = $registeredBorderId;
             } else {
                 $this->registeredBorders[$serializedBorder] = $styleId;
-                $this->styleIdToBorderMappingTable[$styleId] = count($this->registeredBorders);
+                $this->styleIdToBorderMappingTable[$styleId] = \count($this->registeredBorders);
             }
         } else {
             // If no border should be applied - the mapping is the default border: 0

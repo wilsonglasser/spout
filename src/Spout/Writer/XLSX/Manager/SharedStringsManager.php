@@ -11,9 +11,9 @@ use WilsonGlasser\Spout\Common\Helper\Escaper;
  */
 class SharedStringsManager
 {
-    const SHARED_STRINGS_FILE_NAME = 'sharedStrings.xml';
+    public const SHARED_STRINGS_FILE_NAME = 'sharedStrings.xml';
 
-    const SHARED_STRINGS_XML_FILE_FIRST_PART_HEADER = <<<'EOD'
+    public const SHARED_STRINGS_XML_FILE_FIRST_PART_HEADER = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 EOD;
@@ -22,7 +22,7 @@ EOD;
      * This number must be really big so that the no generated file will have more strings than that.
      * If the strings number goes above, characters will be overwritten in an unwanted way and will corrupt the file.
      */
-    const DEFAULT_STRINGS_COUNT_PART = 'count="9999999999999" uniqueCount="9999999999999"';
+    public const DEFAULT_STRINGS_COUNT_PART = 'count="9999999999999" uniqueCount="9999999999999"';
 
     /** @var resource Pointer to the sharedStrings.xml file */
     protected $sharedStringsFilePointer;
@@ -43,13 +43,13 @@ EOD;
     public function __construct($xlFolder, $stringsEscaper)
     {
         $sharedStringsFilePath = $xlFolder . '/' . self::SHARED_STRINGS_FILE_NAME;
-        $this->sharedStringsFilePointer = fopen($sharedStringsFilePath, 'w');
+        $this->sharedStringsFilePointer = \fopen($sharedStringsFilePath, 'w');
 
         $this->throwIfSharedStringsFilePointerIsNotAvailable();
 
         // the headers is split into different parts so that we can fseek and put in the correct count and uniqueCount later
         $header = self::SHARED_STRINGS_XML_FILE_FIRST_PART_HEADER . ' ' . self::DEFAULT_STRINGS_COUNT_PART . '>';
-        fwrite($this->sharedStringsFilePointer, $header);
+        \fwrite($this->sharedStringsFilePointer, $header);
 
         $this->stringsEscaper = $stringsEscaper;
     }
@@ -62,7 +62,7 @@ EOD;
      */
     protected function throwIfSharedStringsFilePointerIsNotAvailable()
     {
-        if (!$this->sharedStringsFilePointer) {
+        if (!is_resource($this->sharedStringsFilePointer)) {
             throw new IOException('Unable to open shared strings file for writing.');
         }
     }
@@ -82,7 +82,7 @@ EOD;
             return $this->strings[$escaped];
         } else {
 
-            fwrite($this->sharedStringsFilePointer, '<si><t>' . $escaped. '</t></si>');
+            fwrite($this->sharedStringsFilePointer, '<si><t xml:space="preserve">' . $escaped. '</t></si>');
             $this->strings[$escaped] = $this->numSharedStrings;
             $this->numSharedStrings++;
 
@@ -98,20 +98,20 @@ EOD;
      */
     public function close()
     {
-        if (!is_resource($this->sharedStringsFilePointer)) {
+        if (!\is_resource($this->sharedStringsFilePointer)) {
             return;
         }
 
-        fwrite($this->sharedStringsFilePointer, '</sst>');
+        \fwrite($this->sharedStringsFilePointer, '</sst>');
 
         // Replace the default strings count with the actual number of shared strings in the file header
-        $firstPartHeaderLength = strlen(self::SHARED_STRINGS_XML_FILE_FIRST_PART_HEADER);
-        $defaultStringsCountPartLength = strlen(self::DEFAULT_STRINGS_COUNT_PART);
+        $firstPartHeaderLength = \strlen(self::SHARED_STRINGS_XML_FILE_FIRST_PART_HEADER);
+        $defaultStringsCountPartLength = \strlen(self::DEFAULT_STRINGS_COUNT_PART);
 
         // Adding 1 to take into account the space between the last xml attribute and "count"
-        fseek($this->sharedStringsFilePointer, $firstPartHeaderLength + 1);
-        fwrite($this->sharedStringsFilePointer, sprintf("%-{$defaultStringsCountPartLength}s", 'count="' . $this->numSharedStrings . '" uniqueCount="' . $this->numSharedStrings . '"'));
+        \fseek($this->sharedStringsFilePointer, $firstPartHeaderLength + 1);
+        \fwrite($this->sharedStringsFilePointer, \sprintf("%-{$defaultStringsCountPartLength}s", 'count="' . $this->numSharedStrings . '" uniqueCount="' . $this->numSharedStrings . '"'));
 
-        fclose($this->sharedStringsFilePointer);
+        \fclose($this->sharedStringsFilePointer);
     }
 }

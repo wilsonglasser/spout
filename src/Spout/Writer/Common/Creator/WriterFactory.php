@@ -27,18 +27,32 @@ use WilsonGlasser\Spout\Writer\XLSX\Writer as XLSXWriter;
 class WriterFactory
 {
     /**
-     * This creates an instance of the appropriate writer, given the type of the file to be read
+     * This creates an instance of the appropriate writer, given the extension of the file to be written
      *
-     * @param  string $writerType Type of the writer to instantiate
+     * @param string $path The path to the spreadsheet file. Supported extensions are .csv,.ods and .xlsx
      * @throws \WilsonGlasser\Spout\Common\Exception\UnsupportedTypeException
      * @return WriterInterface
      */
-    public function create($writerType)
+    public static function createFromFile(string $path)
+    {
+        $extension = \strtolower(\pathinfo($path, PATHINFO_EXTENSION));
+
+        return self::createFromType($extension);
+    }
+
+    /**
+     * This creates an instance of the appropriate writer, given the type of the file to be written
+     *
+     * @param string $writerType Type of the writer to instantiate
+     * @throws \WilsonGlasser\Spout\Common\Exception\UnsupportedTypeException
+     * @return WriterInterface
+     */
+    public static function createFromType($writerType)
     {
         switch ($writerType) {
-            case Type::CSV: return $this->getCSVWriter();
-            case Type::XLSX: return $this->getXLSXWriter();
-            case Type::ODS: return $this->getODSWriter();
+            case Type::CSV: return self::createCSVWriter();
+            case Type::XLSX: return self::createXLSXWriter();
+            case Type::ODS: return self::createODSWriter();
             default:
                 throw new UnsupportedTypeException('No writers supporting the given type: ' . $writerType);
         }
@@ -47,7 +61,7 @@ class WriterFactory
     /**
      * @return CSVWriter
      */
-    private function getCSVWriter()
+    private static function createCSVWriter()
     {
         $optionsManager = new CSVOptionsManager();
         $globalFunctionsHelper = new GlobalFunctionsHelper();
@@ -60,7 +74,7 @@ class WriterFactory
     /**
      * @return XLSXWriter
      */
-    private function getXLSXWriter()
+    private static function createXLSXWriter()
     {
         $styleBuilder = new StyleBuilder();
         $optionsManager = new XLSXOptionsManager($styleBuilder);
@@ -75,7 +89,7 @@ class WriterFactory
     /**
      * @return ODSWriter
      */
-    private function getODSWriter()
+    private static function createODSWriter()
     {
         $styleBuilder = new StyleBuilder();
         $optionsManager = new ODSOptionsManager($styleBuilder);

@@ -15,26 +15,26 @@ use WilsonGlasser\Spout\Reader\Wrapper\XMLReader;
  */
 class SheetIterator implements IteratorInterface
 {
-    const CONTENT_XML_FILE_PATH = 'content.xml';
+    public const CONTENT_XML_FILE_PATH = 'content.xml';
 
-    const XML_STYLE_NAMESPACE = 'urn:oasis:names:tc:opendocument:xmlns:style:1.0';
+    public const XML_STYLE_NAMESPACE = 'urn:oasis:names:tc:opendocument:xmlns:style:1.0';
 
     /** Definition of XML nodes name and attribute used to parse sheet data */
-    const XML_NODE_AUTOMATIC_STYLES = 'office:automatic-styles';
-    const XML_NODE_STYLE_TABLE_PROPERTIES = 'table-properties';
-    const XML_NODE_TABLE = 'table:table';
-    const XML_ATTRIBUTE_STYLE_NAME = 'style:name';
-    const XML_ATTRIBUTE_TABLE_NAME = 'table:name';
-    const XML_ATTRIBUTE_TABLE_STYLE_NAME = 'table:style-name';
-    const XML_ATTRIBUTE_TABLE_DISPLAY = 'table:display';
+    public const XML_NODE_AUTOMATIC_STYLES = 'office:automatic-styles';
+    public const XML_NODE_STYLE_TABLE_PROPERTIES = 'table-properties';
+    public const XML_NODE_TABLE = 'table:table';
+    public const XML_ATTRIBUTE_STYLE_NAME = 'style:name';
+    public const XML_ATTRIBUTE_TABLE_NAME = 'table:name';
+    public const XML_ATTRIBUTE_TABLE_STYLE_NAME = 'table:style-name';
+    public const XML_ATTRIBUTE_TABLE_DISPLAY = 'table:display';
 
-    /** @var string $filePath Path of the file to be read */
+    /** @var string Path of the file to be read */
     protected $filePath;
 
     /** @var \WilsonGlasser\Spout\Common\Manager\OptionsManagerInterface Reader's options manager */
     protected $optionsManager;
 
-    /** @var InternalEntityFactory $entityFactory Factory to create entities */
+    /** @var InternalEntityFactory Factory to create entities */
     protected $entityFactory;
 
     /** @var XMLReader The XMLReader object that will help read sheet's XML data */
@@ -108,6 +108,7 @@ class SheetIterator implements IteratorInterface
         $sheetsVisibility = [];
 
         $this->xmlReader->readUntilNodeFound(self::XML_NODE_AUTOMATIC_STYLES);
+        /** @var \DOMElement $automaticStylesNode */
         $automaticStylesNode = $this->xmlReader->expand();
 
         $tableStyleNodes = $automaticStylesNode->getElementsByTagNameNS(self::XML_STYLE_NAMESPACE, self::XML_NODE_STYLE_TABLE_PROPERTIES);
@@ -116,6 +117,7 @@ class SheetIterator implements IteratorInterface
         foreach ($tableStyleNodes as $tableStyleNode) {
             $isSheetVisible = ($tableStyleNode->getAttribute(self::XML_ATTRIBUTE_TABLE_DISPLAY) !== 'false');
 
+            /** @var \DOMElement $parentStyleNode */
             $parentStyleNode = $tableStyleNode->parentNode;
             $styleName = $parentStyleNode->getAttribute(self::XML_ATTRIBUTE_STYLE_NAME);
 

@@ -3,6 +3,9 @@
 namespace WilsonGlasser\Spout\Reader\CSV;
 
 use WilsonGlasser\Spout\Common\Exception\IOException;
+use WilsonGlasser\Spout\Common\Helper\GlobalFunctionsHelper;
+use WilsonGlasser\Spout\Common\Manager\OptionsManagerInterface;
+use WilsonGlasser\Spout\Reader\Common\Creator\InternalEntityFactoryInterface;
 use WilsonGlasser\Spout\Reader\Common\Entity\Options;
 use WilsonGlasser\Spout\Reader\CSV\Creator\InternalEntityFactory;
 use WilsonGlasser\Spout\Reader\ReaderAbstract;
@@ -21,6 +24,23 @@ class Reader extends ReaderAbstract
 
     /** @var string Original value for the "auto_detect_line_endings" INI value */
     protected $originalAutoDetectLineEndings;
+
+    /** @var bool Whether the code is running with PHP >= 8.1 */
+    private $isRunningAtLeastPhp81;
+
+    /**
+     * @param OptionsManagerInterface $optionsManager
+     * @param GlobalFunctionsHelper $globalFunctionsHelper
+     * @param InternalEntityFactoryInterface $entityFactory
+     */
+    public function __construct(
+        OptionsManagerInterface $optionsManager,
+        GlobalFunctionsHelper $globalFunctionsHelper,
+        InternalEntityFactoryInterface $entityFactory
+    ) {
+        parent::__construct($optionsManager, $globalFunctionsHelper, $entityFactory);
+        $this->isRunningAtLeastPhp81 = \version_compare(PHP_VERSION, '8.1.0') >= 0;
+    }
 
     /**
      * Sets the field delimiter for the CSV.
@@ -84,8 +104,11 @@ class Reader extends ReaderAbstract
      */
     protected function openReader($filePath)
     {
-        $this->originalAutoDetectLineEndings = ini_get('auto_detect_line_endings');
-        ini_set('auto_detect_line_endings', '1');
+        // "auto_detect_line_endings" is deprecated in PHP 8.1
+        if (!$this->isRunningAtLeastPhp81) {
+            $this->originalAutoDetectLineEndings = \ini_get('auto_detect_line_endings');
+            \ini_set('auto_detect_line_endings', '1');
+        }
 
         $this->filePointer = $this->globalFunctionsHelper->fopen($filePath, 'r');
         if (!$this->filePointer) {
@@ -119,10 +142,13 @@ class Reader extends ReaderAbstract
      */
     protected function closeReader()
     {
-        if ($this->filePointer) {
+        if (is_resource($this->filePointer)) {
             $this->globalFunctionsHelper->fclose($this->filePointer);
         }
 
-        ini_set('auto_detect_line_endings', $this->originalAutoDetectLineEndings);
+        // "auto_detect_line_endings" is deprecated in PHP 8.1
+        if (!$this->isRunningAtLeastPhp81) {
+            \ini_set('auto_detect_line_endings', $this->originalAutoDetectLineEndings);
+        }
     }
 }

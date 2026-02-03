@@ -25,7 +25,7 @@ use WilsonGlasser\Spout\Writer\XLSX\Manager\Comment\CommentManager;
  */
 abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
 {
-    /** @var Workbook The workbook to manage */
+    /** @var Workbook|null The workbook to manage */
     protected $workbook;
 
     /** @var OptionsManagerInterface */
@@ -49,7 +49,7 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
     /** @var InternalEntityFactory Factory to create entities */
     protected $entityFactory;
 
-    /** @var ManagerFactoryInterface $managerFactory Factory to create managers */
+    /** @var ManagerFactoryInterface Factory to create managers */
     protected $managerFactory;
 
     /** @var Worksheet The worksheet where data will be written to */
@@ -100,7 +100,7 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
     abstract protected function getWorksheetFilePath(Sheet $sheet);
 
     /**
-     * @return Workbook
+     * @return Workbook|null
      */
     public function getWorkbook()
     {
@@ -132,7 +132,7 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
     {
         $worksheets = $this->getWorksheets();
 
-        $newSheetIndex = count($worksheets);
+        $newSheetIndex = \count($worksheets);
         $sheetManager = $this->managerFactory->createSheetManager();
         $sheet = $this->entityFactory->createSheet($newSheetIndex, $this->workbook->getInternalId(), $sheetManager);
 
@@ -269,7 +269,7 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
         // update max num columns for the worksheet
         $currentMaxNumColumns = $worksheet->getMaxNumColumns();
         $cellsCount = $row instanceof Row ? $row->getNumCells() : (isset($row[0]) ? count($row[0]) : 0);
-        $worksheet->setMaxNumColumns(max($currentMaxNumColumns, $cellsCount));
+        $worksheet->setMaxNumColumns(\max($currentMaxNumColumns, $cellsCount));
     }
 
     /**

@@ -37,7 +37,7 @@ class CachingStrategyFactory
      * This means that in order to store one shared string in memory, the memory amount needed is:
      *   => 20 * 600 ≈ 12KB
      */
-    const AMOUNT_MEMORY_NEEDED_PER_STRING_IN_KB = 12;
+    public const AMOUNT_MEMORY_NEEDED_PER_STRING_IN_KB = 12;
 
     /**
      * To avoid running out of memory when extracting a huge number of shared strings, they can be saved to temporary files
@@ -48,7 +48,7 @@ class CachingStrategyFactory
      * best when the indexes of the shared strings are sorted in the sheet data.
      * 10,000 was chosen because it creates small files that are fast to be loaded in memory.
      */
-    const MAX_NUM_STRINGS_PER_TEMP_FILE = 10000;
+    public const MAX_NUM_STRINGS_PER_TEMP_FILE = 10000;
 
     /**
      * Returns the best caching strategy, given the number of unique shared strings
@@ -84,7 +84,7 @@ class CachingStrategyFactory
 
         $memoryAvailable = $this->getMemoryLimitInKB();
 
-        if ($memoryAvailable === -1) {
+        if ((int) $memoryAvailable === -1) {
             // if cannot get memory limit or if memory limit set as unlimited, don't trust and play safe
             $isInMemoryStrategyUsageSafe = ($sharedStringsUniqueCount < self::MAX_NUM_STRINGS_PER_TEMP_FILE);
         } else {
@@ -103,14 +103,14 @@ class CachingStrategyFactory
     protected function getMemoryLimitInKB()
     {
         $memoryLimitFormatted = $this->getMemoryLimitFromIni();
-        $memoryLimitFormatted = strtolower(trim($memoryLimitFormatted));
+        $memoryLimitFormatted = \strtolower(\trim($memoryLimitFormatted));
 
         // No memory limit
         if ($memoryLimitFormatted === '-1') {
             return -1;
         }
 
-        if (preg_match('/(\d+)([bkmgt])b?/', $memoryLimitFormatted, $matches)) {
+        if (\preg_match('/(\d+)([bkmgt])b?/', $memoryLimitFormatted, $matches)) {
             $amount = (int) ($matches[1]);
             $unit = $matches[2];
 
@@ -133,6 +133,6 @@ class CachingStrategyFactory
      */
     protected function getMemoryLimitFromIni()
     {
-        return ini_get('memory_limit');
+        return \ini_get('memory_limit');
     }
 }

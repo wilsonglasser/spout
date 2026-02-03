@@ -5,6 +5,8 @@ namespace WilsonGlasser\Spout\Writer\Common\Creator;
 use WilsonGlasser\Spout\Common\Entity\Cell;
 use WilsonGlasser\Spout\Common\Entity\Row;
 use WilsonGlasser\Spout\Common\Entity\Style\Style;
+use WilsonGlasser\Spout\Common\Exception\UnsupportedTypeException;
+use WilsonGlasser\Spout\Common\Type;
 use WilsonGlasser\Spout\Writer\WriterInterface;
 
 /**
@@ -22,7 +24,64 @@ class WriterEntityFactory
      */
     public static function createWriter($writerType)
     {
-        return (new WriterFactory())->create($writerType);
+        return WriterFactory::createFromType($writerType);
+    }
+
+    /**
+     * This creates an instance of the appropriate writer, given the extension of the file to be written
+     *
+     * @param string $path The path to the spreadsheet file. Supported extensions are .csv, .ods and .xlsx
+     * @throws \WilsonGlasser\Spout\Common\Exception\UnsupportedTypeException
+     * @return WriterInterface
+     */
+    public static function createWriterFromFile(string $path)
+    {
+        return WriterFactory::createFromFile($path);
+    }
+
+    /**
+     * This creates an instance of a CSV writer
+     *
+     * @return \WilsonGlasser\Spout\Writer\CSV\Writer
+     */
+    public static function createCSVWriter()
+    {
+        try {
+            return WriterFactory::createFromType(Type::CSV);
+        } catch (UnsupportedTypeException $e) {
+            // should never happen
+            return null;
+        }
+    }
+
+    /**
+     * This creates an instance of a XLSX writer
+     *
+     * @return \WilsonGlasser\Spout\Writer\XLSX\Writer
+     */
+    public static function createXLSXWriter()
+    {
+        try {
+            return WriterFactory::createFromType(Type::XLSX);
+        } catch (UnsupportedTypeException $e) {
+            // should never happen
+            return null;
+        }
+    }
+
+    /**
+     * This creates an instance of a ODS writer
+     *
+     * @return \WilsonGlasser\Spout\Writer\ODS\Writer
+     */
+    public static function createODSWriter()
+    {
+        try {
+            return WriterFactory::createFromType(Type::ODS);
+        } catch (UnsupportedTypeException $e) {
+            // should never happen
+            return null;
+        }
     }
 
     /**
@@ -42,7 +101,7 @@ class WriterEntityFactory
      */
     public static function createRowFromArray(array $cellValues = [], Style $rowStyle = null)
     {
-        $cells = array_map(function ($cellValue) {
+        $cells = \array_map(function ($cellValue) {
             return new Cell($cellValue);
         }, $cellValues);
 

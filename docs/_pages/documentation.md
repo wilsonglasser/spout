@@ -10,9 +10,8 @@ It is possible to configure both the CSV reader and writer to adapt them to your
 
 ```php
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
-use Box\Spout\Common\Type;
 
-$reader = ReaderEntityFactory::createReader(Type::CSV);
+$reader = ReaderEntityFactory::createReaderFromFile('/path/to/file.csv');
 /** All of these methods have to be called before opening the reader. */
 $reader->setFieldDelimiter('|');
 $reader->setFieldEnclosure('@');
@@ -30,10 +29,8 @@ It is however possible to not include the BOM:
 
 ```php
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
-use Box\Spout\Common\Type;
 
-$writer = WriterEntityFactory::createWriter(Type::CSV);
-
+$writer = WriterEntityFactory::createWriterFromFile('/path/to/file.csv');
 $writer->setShouldAddBOM(false);
 ```
 
@@ -47,9 +44,8 @@ It is possible to change the behavior of the writers when the maximum number of 
 ```php
 
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
-use Box\Spout\Common\Type;
 
-$writer = WriterEntityFactory::createWriter(Type::ODS);
+$writer = WriterEntityFactory::createODSWriter();
 $writer->setShouldCreateNewSheetsAutomatically(true); // default value
 $writer->setShouldCreateNewSheetsAutomatically(false); // will stop writing new data when limit is reached
 ```
@@ -60,9 +56,8 @@ Processing XLSX and ODS files requires temporary files to be created. By default
 
 ```php
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
-use Box\Spout\Common\Type;
 
-$writer = WriterEntityFactory::createWriter(Type::XLSX);
+$writer = WriterEntityFactory::createXLSXWriter();
 $writer->setTempFolder($customTempFolderPath);
 ```
 
@@ -76,9 +71,8 @@ In order to keep the memory usage really low, {{ site.spout_html }} does not de-
 
 ```php
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
-use Box\Spout\Common\Type;
 
-$writer = WriterEntityFactory::createWriter(Type::XLSX);
+$writer = WriterEntityFactory::createXLSXWriter();
 $writer->setShouldUseInlineStrings(true); // default (and recommended) value
 $writer->setShouldUseInlineStrings(false); // will use shared strings
 ```
@@ -89,30 +83,64 @@ $writer->setShouldUseInlineStrings(false); // will use shared strings
 
 ### Date/Time formatting
 
-When reading a spreadsheet containing dates or times, {{ site.spout_html }} returns the values by default as DateTime objects.
+When reading a spreadsheet containing dates or times, {{ site.spout_html }} returns the values by default as `DateTime` objects.
 It is possible to change this behavior and have a formatted date returned instead (e.g. "2016-11-29 1:22 AM"). The format of the date corresponds to what is specified in the spreadsheet.
 
 ```php
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
-use Box\Spout\Common\Type;
 
-$reader = ReaderEntityFactory::createReader(Type::XLSX);
+$reader = ReaderEntityFactory::createXLSXReader();
 $reader->setShouldFormatDates(false); // default value
 $reader->setShouldFormatDates(true); // will return formatted dates
 ```
+ 
 
+## Empty rows
 
-## Styling rows
-
-It is possible to apply some formatting options to a row. {{ site.spout_html }} supports fonts, background, borders as well as alignment styles.
+By default, when {{ site.spout_html }} reads a spreadsheet it skips empty rows and only return rows containing data.
+This behavior can be changed so that {{ site.spout_html }} returns all rows:
 
 ```php
-use Box\Spout\Common\Type;
+use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
+
+$reader = ReaderEntityFactory::createReaderFromFile('/path/to/file.ext');
+$reader->setShouldPreserveEmptyRows(true);
+```
+
+
+## Styling
+
+### Available styles
+
+{{ site.spout_html }} supports styling at a row and cell level. It is possible to customize the fonts, backgrounds, alignment as well as borders.
+
+For fonts and alignments, {{ site.spout_html }} does not support all the possible formatting options yet. But you can find the most important ones:
+
+| Category             | Property       | API
+|:---------------------|:---------------|:--------------------------------------
+| Font                 | Bold           | `StyleBuilder::setFontBold()`
+|                      | Italic         | `StyleBuilder::setFontItalic()`
+|                      | Underline      | `StyleBuilder::setFontUnderline()`
+|                      | Strikethrough  | `StyleBuilder::setFontStrikethrough()`
+|                      | Font name      | `StyleBuilder::setFontName('Arial')`
+|                      | Font size      | `StyleBuilder::setFontSize(14)`
+|                      | Font color     | `StyleBuilder::setFontColor(Color::BLUE)`<br>`StyleBuilder::setFontColor(Color::rgb(0, 128, 255))`
+| Alignment            | Cell alignment | `StyleBuilder::setCellAlignment(CellAlignment::CENTER)`
+|                      | Wrap text      | `StyleBuilder::setShouldWrapText(true)`
+| Format _(XLSX only)_ | Number format  | `StyleBuilder::setFormat('0.000')`
+|                      | Date format    | `StyleBuilder::setFormat('m/d/yy h:mm')`
+
+### Styling rows
+
+It is possible to apply some formatting options to a row. In this case, all cells of the row will have the same style:
+
+```php
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout\Common\Entity\Style\CellAlignment;
 use Box\Spout\Common\Entity\Style\Color;
 
-$writer = WriterEntityFactory::createWriter(Type::XLSX);
+$writer = WriterEntityFactory::createXLSXWriter();
 $writer->openToFile($filePath);
 
 /** Create a style with the StyleBuilder */
@@ -121,17 +149,12 @@ $style = (new StyleBuilder())
            ->setFontSize(15)
            ->setFontColor(Color::BLUE)
            ->setShouldWrapText()
+           ->setCellAlignment(CellAlignment::RIGHT)
            ->setBackgroundColor(Color::YELLOW)
            ->build();
 
-$cells = [
-    WriterEntityFactory::createCell('Carl'),
-    WriterEntityFactory::createCell('is'),
-    WriterEntityFactory::createCell('great!'),
-];
-
-/** Create a row with cells and the style*/
-$row = WriterEntityFactory::createRow($cells, $style);
+/** Create a row with cells and apply the style to all cells */
+$row = WriterEntityFactory::createRowFromArray(['Carl', 'is', 'great'], $style);
 
 /** Add the row to the writer */
 $writer->addRow($row);
@@ -141,7 +164,6 @@ $writer->close();
 Adding borders to a row requires a ```Border``` object.
 
 ```php
-use Box\Spout\Common\Type;
 use Box\Spout\Common\Entity\Style\Border;
 use Box\Spout\Writer\Common\Creator\Style\BorderBuilder;
 use Box\Spout\Common\Entity\Style\Color;
@@ -156,44 +178,18 @@ $style = (new StyleBuilder())
     ->setBorder($border)
     ->build();
 
-$writer = WriterEntityFactory::createWriter(Type::XLSX);
+$writer = WriterEntityFactory::createXLSXWriter();
 $writer->openToFile($filePath);
 
-$row = WriterEntityFactory::createRowFromArray(['Border Bottom Green Thin Dashed']);
+$cells = WriterEntityFactory::createCell('Border Bottom Green Thin Dashed');
+$row = WriterEntityFactory::createRow($cells);
 $row->setStyle($style);
 $writer->addRow($row);
 
 $writer->close();
 ```
 
-{{ site.spout_html }} will use a default style for all created rows. This style can be overridden this way:
-
-```php
-$defaultStyle = (new StyleBuilder())
-                ->setFontName('Arial')
-                ->setFontSize(11)
-                ->build();
-
-$writer = WriterEntityFactory::createWriter(Type::XLSX);
-$writer->setDefaultRowStyle($defaultStyle)
-       ->openToFile($filePath);
-```
-
-Unfortunately, {{ site.spout_html }} does not support all the possible formatting options yet. But you can find the most important ones:
-
-| Category  | Property      | API
-|:----------|:--------------|:--------------------------------------
-| Font      | Bold          | `StyleBuilder::setFontBold()`
-|           | Italic        | `StyleBuilder::setFontItalic()`
-|           | Underline     | `StyleBuilder::setFontUnderline()`
-|           | Strikethrough | `StyleBuilder::setFontStrikethrough()`
-|           | Font name     | `StyleBuilder::setFontName('Arial')`
-|           | Font size     | `StyleBuilder::setFontSize(14)`
-|           | Font color    | `StyleBuilder::setFontColor(Color::BLUE)`<br>`StyleBuilder::setFontColor(Color::rgb(0, 128, 255))`
-| Alignment | Wrap text     | `StyleBuilder::setShouldWrapText(true|false)`
-
-
-## Styling cells
+### Styling cells
 
 The same styling techniques as described in [Styling rows](#styling-rows) can be applied to individual cells of a row as well.
 
@@ -204,7 +200,6 @@ The styles applied to a specific cell will override any parent styles if present
 Example:
 
 ```php
-use Box\Spout\Common\Type;
 use Box\Spout\Common\Entity\Style\Color;
 use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
@@ -213,7 +208,7 @@ $defaultStyle = (new StyleBuilder())
     ->setFontSize(8)
     ->build();
 
-$writer = WriterEntityFactory::createWriter(Type::XLSX);
+$writer = WriterEntityFactory::createXLSXWriter();
 $writer->setDefaultRowStyle($defaultStyle)
     ->openToFile($filePath);
 
@@ -244,6 +239,22 @@ $writer->addRow($row);
 $writer->close();
 ```
 
+### Default style
+
+{{ site.spout_html }} will use a default style for all created rows. This style can be overridden this way:
+
+```php
+$defaultStyle = (new StyleBuilder())
+                ->setFontName('Arial')
+                ->setFontSize(11)
+                ->build();
+
+$writer = WriterEntityFactory::createXLSXWriter();
+$writer->setDefaultRowStyle($defaultStyle)
+       ->openToFile($filePath);
+```
+
+
 ## Playing with sheets
 
 When creating a XLSX or ODS file, it is possible to control which sheet the data will be written into. At any time, you can retrieve or set the current sheet:
@@ -264,14 +275,18 @@ It is also possible to retrieve all the sheets currently created:
 $sheets = $writer->getSheets();
 ```
 
-If you rely on the sheet's name in your application, you can access it and customize it this way:
-
+It is possible to retrieve some sheet's attributes when reading:
 ```php
-// Accessing the sheet name when reading
 foreach ($reader->getSheetIterator() as $sheet) {
     $sheetName = $sheet->getName();
+    $isSheetVisible = $sheet->isVisible();
+    $isSheetActive = $sheet->isActive(); // active sheet when spreadsheet last saved
 }
+```
 
+If you rely on the sheet's name in your application, you can customize it this way:
+
+```php
 // Accessing the sheet name when writing
 $sheet = $writer->getCurrentSheet();
 $sheetName = $sheet->getName();
@@ -290,16 +305,6 @@ $sheet->setName('My custom name');
 >
 > Handling these restrictions is the developer's responsibility. {{ site.spout_html }} does not try to automatically change the sheet's name, as one may rely on this name to be exactly what was passed in.
 
-Finally, it is possible to know which sheet was active when the spreadsheet was last saved. This can be useful if you are only interested in processing the one sheet that was last focused.
-
-```php
-foreach ($reader->getSheetIterator() as $sheet) {
-    // only process data for the active sheet
-    if ($sheet->isActive()) {
-        // do something...
-    }
-}
-```
 
 ## Fluent interface
 
@@ -307,9 +312,8 @@ Because fluent interfaces are great, you can use them with {{ site.spout_html }}
 
 ```php
 use Box\Spout\Writer\WriterEntityFactory;
-use Box\Spout\Common\Type;
 
-$writer = WriterEntityFactory::create(Type::XLSX);
+$writer = WriterEntityFactory::createWriterFromFile('path/to/file.ext');
 $writer->setTempFolder($customTempFolderPath)
        ->setShouldUseInlineStrings(true)
        ->openToFile($filePath)

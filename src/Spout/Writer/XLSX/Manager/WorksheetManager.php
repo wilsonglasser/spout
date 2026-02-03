@@ -20,7 +20,6 @@ use WilsonGlasser\Spout\Writer\Common\Manager\Style\StyleMerger;
 use WilsonGlasser\Spout\Writer\Common\Manager\WorksheetManagerInterface;
 use WilsonGlasser\Spout\Writer\XLSX\Manager\Style\StyleManager;
 
-
 /**
  * Class WorksheetManager
  * XLSX worksheet manager, providing the interfaces to work with XLSX worksheets.
@@ -33,9 +32,9 @@ class WorksheetManager implements WorksheetManagerInterface
      * @see https://support.office.com/en-us/article/Excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3 [Excel 2010]
      * @see https://support.office.com/en-us/article/Excel-specifications-and-limits-ca36e2dc-1f09-4620-b726-67c00b05040f [Excel 2013/2016]
      */
-    const MAX_CHARACTERS_PER_CELL = 32767;
+    public const MAX_CHARACTERS_PER_CELL = 32767;
 
-    const SHEET_XML_FILE_HEADER = <<<'EOD'
+    public const SHEET_XML_FILE_HEADER = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xml:space="preserve" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
            xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -92,8 +91,7 @@ EOD;
         SharedStringsManager $sharedStringsManager,
         XLSXEscaper $stringsEscaper,
         InternalEntityFactory $entityFactory
-    )
-    {
+    ) {
         $this->shouldUseInlineStrings = $optionsManager->getOption(Options::SHOULD_USE_INLINE_STRINGS);
         $this->rowManager = $rowManager;
         $this->styleManager = $styleManager;
@@ -121,11 +119,11 @@ EOD;
 
         $worksheet->setFilePointer($sheetFilePointer);
 
-        fwrite($sheetFilePointer, self::SHEET_XML_FILE_HEADER.PHP_EOL);
+        fwrite($sheetFilePointer, self::SHEET_XML_FILE_HEADER . PHP_EOL);
 
         $this->beforeSheetDataPointer = ftell($sheetFilePointer);
 
-        fwrite($sheetFilePointer, '<sheetData>'.PHP_EOL);
+        fwrite($sheetFilePointer, '<sheetData>' . PHP_EOL);
     }
 
     /**
@@ -151,7 +149,7 @@ EOD;
             if (isset($row[0]) && count($row[0]) > 0) {
                 $this->addNonEmptyRow($worksheet, $row);
             }
-        } else if (!$this->rowManager->isEmpty($row)) {
+        } elseif (!$this->rowManager->isEmpty($row)) {
             $this->addNonEmptyRow($worksheet, $row);
         }
 
@@ -185,19 +183,19 @@ EOD;
         $rowXML = '<row r="' . $rowIndex . '" spans="1:' . $numCells . '" ';
 
         if (!empty($rowStyle->getHeight())) {
-            $rowXML .= ' ht="'.$rowStyle->getHeight() .'" customHeight="1" ';
+            $rowXML .= ' ht="' . $rowStyle->getHeight() . '" customHeight="1" ';
         }
 
-        $rowXML .= '  >'.PHP_EOL;
+        $rowXML .= '  >' . PHP_EOL;
 
         foreach ($cells as $cell) {
-            $rowXML .= "\t".$this->applyStyleAndGetCellXML($cell, $rowStyle, $rowIndex, $cellIndex);
+            $rowXML .= "\t" . $this->applyStyleAndGetCellXML($cell, $rowStyle, $rowIndex, $cellIndex);
             $cellIndex++;
         }
 
-        $rowXML .= '</row>'.PHP_EOL;
+        $rowXML .= '</row>' . PHP_EOL;
 
-        $wasWriteSuccessful = fwrite($worksheet->getFilePointer(), $rowXML);
+        $wasWriteSuccessful = \fwrite($worksheet->getFilePointer(), $rowXML);
         if ($wasWriteSuccessful === false) {
             throw new IOException("Unable to write data in {$worksheet->getFilePath()}");
         }
@@ -205,7 +203,6 @@ EOD;
 
     /**
      * Applies styles to the given style, merging the cell's style with its row's style
-     * Then builds and returns xml for the cell.
      *
      * @param Cell|array $cell
      * @param Style $rowStyle
@@ -232,7 +229,11 @@ EOD;
         }
         $newCellStyle = $this->styleManager->applyExtraStylesIfNeeded($cell);
 
-        $registeredStyle = $this->styleManager->registerStyle($newCellStyle);
+        if ($newCellStyle->isUpdated()) {
+            $registeredStyle = $this->styleManager->registerStyle($newCellStyle->getStyle());
+        } else {
+            $registeredStyle = $this->styleManager->registerStyle($mergedCellAndRowStyle);
+        }
 
         return $this->getCellXML($rowIndex, $cellIndex, $cell, $registeredStyle->getId());
     }
@@ -254,7 +255,6 @@ EOD;
      */
     protected function setColumnMaxCharacters($columnIndex, $text)
     {
-
         if (strpos($text, "\n") !== false) {
             $lineTexts = explode("\n", $text);
             $lineWidths = array();
@@ -266,10 +266,11 @@ EOD;
             $length = StringHelper::getStringLength($text);
         }
 
-        if (!isset($this->columnsMaxTextLength[$columnIndex]))
+        if (!isset($this->columnsMaxTextLength[$columnIndex])) {
             $this->columnsMaxTextLength[$columnIndex] = $length;
-        else
+        } else {
             $this->columnsMaxTextLength[$columnIndex] = max($this->columnsMaxTextLength[$columnIndex], $length);
+        }
         return $text;
     }
 
@@ -285,7 +286,7 @@ EOD;
      */
     private function getCellXML($rowIndex, $cellNumber, $cell, $styleId)
     {
-        $columnIndex = CellHelper::getCellIndexFromColumnIndex($cellNumber);
+        $columnIndex = CellHelper::getColumnLettersFromColumnIndex($cellNumber);
         $cellXML = '<c r="' . $columnIndex . $rowIndex . '"';
         $cellXML .= ' s="' . $styleId . '"';
 
@@ -301,26 +302,30 @@ EOD;
             $value = $cell[1];
         }
 
-        if ($value === null)
+        if ($value === null) {
             $value = '';
+        }
 
         if ($type === Cell::TYPE_STRING && preg_match('/[^-.0-9]/', $value)) {
             $cellXML .= $this->getCellXMLFragmentForNonEmptyString($this->setColumnMaxCharacters($columnIndex, $value));
         } elseif ($type === Cell::TYPE_FORMULA) {
-            $formulaType = '';                                                                                                                                                                                                                                                                
-            if (is_string($value[0]) && !is_numeric($value[0])) {                                                                                                                                                                                                                             
-                $formulaType = ' t="str"';                                                                                                                                                                                                                                                    
-            } elseif (is_bool($value[0])) {                                                                                                                                                                                                                                                   
-                $formulaType = ' t="b"';                                                                                                                                                                                                                                                      
-            }                                                                                                                                                                                                                                                                                 
-            $cellXML .= $formulaType . '><f>' . $value[1]. '</f><v>' . $this->setColumnMaxCharacters($columnIndex, $value[0]) . '</v></c>';    
+            $formulaType = '';
+            if (is_string($value[0]) && !is_numeric($value[0])) {
+                $formulaType = ' t="str"';
+            } elseif (is_bool($value[0])) {
+                $formulaType = ' t="b"';
+            }
+            $cellXML .= $formulaType . '><f>' . $value[1] . '</f><v>' . $this->setColumnMaxCharacters($columnIndex, $value[0]) . '</v></c>';
         } elseif ($type === Cell::TYPE_BOOLEAN) {
             $cellXML .= ' t="b"><v>' . $this->setColumnMaxCharacters($columnIndex, (int)($value)) . '</v></c>';
         } elseif ($type === Cell::TYPE_NUMERIC || ($type == Cell::TYPE_STRING && !preg_match('/[^-.0-9]/', $value) && is_numeric($value))) {
-            $cellXML .= ' t="n"><v>' . $this->setColumnMaxCharacters($columnIndex, $value) . '</v></c>';
+            $cellXML .= '><v>' . $this->setColumnMaxCharacters($columnIndex, StringHelper::formatNumericValue($value)) . '</v></c>';
         } elseif ($type === Cell::TYPE_DATE) {
-            $cellXML .= ' t="n"><v>' . $this->setColumnMaxCharacters($columnIndex, DateFormatHelper::toExcelDateFormat($value)) . '</v></c>';
-        } elseif ($type === Cell::TYPE_EMPTY || empty($value) ) {
+            $cellXML .= '><v>' . $this->setColumnMaxCharacters($columnIndex, DateFormatHelper::toExcelDateFormat($value)) . '</v></c>';
+        } elseif ($type === Cell::TYPE_ERROR && $cell instanceof Cell && is_string($cell->getValueEvenIfError())) {
+            // only writes the error value if it's a string
+            $cellXML .= ' t="e"><v>' . $cell->getValueEvenIfError() . '</v></c>';
+        } elseif ($type === Cell::TYPE_EMPTY || empty($value)) {
             if ($this->styleManager->shouldApplyStyleOnEmptyCell($styleId)) {
                 $cellXML .= '/>';
             } else {
@@ -328,14 +333,13 @@ EOD;
                 // NOTE: not appending to $cellXML is the right behavior!!
                 $cellXML = '';
             }
-        } else if ($type === Cell::TYPE_STRING && !preg_match('/[^-.0-9]/', $value)) {
+        } elseif ($type === Cell::TYPE_STRING && !preg_match('/[^-.0-9]/', $value)) {
             $cellXML .= $this->getCellXMLFragmentForNonEmptyString($this->setColumnMaxCharacters($columnIndex, $value));
         } else {
             throw new InvalidArgumentException('Trying to add a value with an unsupported type: ' . gettype($value));
         }
 
-
-        return $cellXML.PHP_EOL;
+        return $cellXML . PHP_EOL;
     }
 
     /**
@@ -368,24 +372,21 @@ EOD;
     {
         $worksheetFilePointer = $worksheet->getFilePointer();
 
-        if (!is_resource($worksheetFilePointer)) {
+        if (!\is_resource($worksheetFilePointer)) {
             return;
         }
 
-        fwrite($worksheetFilePointer, '</sheetData>'.PHP_EOL);
-
+        fwrite($worksheetFilePointer, '</sheetData>' . PHP_EOL);
 
         $sheet = $worksheet->getExternalSheet();
 
-
         if (count($sheet->getColumnDimensions())) {
-
             // I didn't found a way to append a file in the middle without storing all content =/
-            $afterContent =  stream_get_contents($worksheetFilePointer, -1, $this->beforeSheetDataPointer);
+            $afterContent = stream_get_contents($worksheetFilePointer, -1, $this->beforeSheetDataPointer);
 
             fseek($worksheetFilePointer, $this->beforeSheetDataPointer);
 
-            fwrite($worksheetFilePointer, '<cols>'.PHP_EOL);
+            fwrite($worksheetFilePointer, '<cols>' . PHP_EOL);
             /**
              * Autosize columns
              */
@@ -422,39 +423,35 @@ EOD;
                 }
 
                 $xml = '';
-                foreach($attributes as $k => $v) {
-                    $xml .= $k.'="'.$v.'" ';
+                foreach ($attributes as $k => $v) {
+                    $xml .= $k . '="' . $v . '" ';
                 }
 
-                fwrite($worksheetFilePointer, "\t".'<col '.$xml.' />'.PHP_EOL);
-
-
-
+                fwrite($worksheetFilePointer, "\t" . '<col ' . $xml . ' />' . PHP_EOL);
             }
 
-            fwrite($worksheetFilePointer, '</cols>'.PHP_EOL);
+            fwrite($worksheetFilePointer, '</cols>' . PHP_EOL);
 
             fwrite($worksheetFilePointer, $afterContent);
             unset($afterContent);
         }
 
         if ($sheet->getAutoFilter() !== null) {
-            fwrite($worksheetFilePointer, ' <autoFilter ref="' . $sheet->getAutoFilter() . '"><extLst /></autoFilter>'.PHP_EOL);
+            fwrite($worksheetFilePointer, ' <autoFilter ref="' . $sheet->getAutoFilter() . '"><extLst /></autoFilter>' . PHP_EOL);
         }
         if (count($sheet->getMergeCells()) > 0) {
-            fwrite($worksheetFilePointer, '<mergeCells>'.PHP_EOL);
+            fwrite($worksheetFilePointer, '<mergeCells>' . PHP_EOL);
             foreach ($sheet->getMergeCells() as $mergeCell) {
-                fwrite($worksheetFilePointer, "\t".' <mergeCell ref="' . $mergeCell . '"/>'.PHP_EOL);
+                fwrite($worksheetFilePointer, "\t" . ' <mergeCell ref="' . $mergeCell . '"/>' . PHP_EOL);
             }
-            fwrite($worksheetFilePointer, '</mergeCells>'.PHP_EOL);
+            fwrite($worksheetFilePointer, '</mergeCells>' . PHP_EOL);
         }
 
         if (count($worksheet->getExternalSheet()->getComments())) {
-            fwrite($worksheetFilePointer, '<legacyDrawing r:id="rId_comments_vml'.$worksheet->getId().'"/>');
+            fwrite($worksheetFilePointer, '<legacyDrawing r:id="rId_comments_vml' . $worksheet->getId() . '"/>');
         }
 
         fwrite($worksheetFilePointer, '</worksheet>');
         fclose($worksheetFilePointer);
-
     }
 }

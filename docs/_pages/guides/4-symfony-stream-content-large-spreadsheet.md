@@ -27,7 +27,7 @@ class MyRegularController extends Controller
         // before it can be sent to the browser.
         $content = '';
 
-        $reader = ReaderFactory::create(Type::XLSX);
+        $reader = ReaderEntityFactory::createReaderFromFile($filePath);
         $reader->open($filePath);
 
         foreach ($reader->getSheetIterator() as $sheet) {
@@ -36,7 +36,7 @@ class MyRegularController extends Controller
                 $content .= '<tr>';
                 $content .= implode(array_map(function($cell) {
                     return '<td>' . $cell . '</td>';
-                }, $row));
+                }, $row->getCells()));
                 $content .= '</tr>';
             }
             $content .= '</table><br>';
@@ -77,7 +77,7 @@ class MyStreamController extends Controller
         // a callback function to retrieve data chunks.
         $response->setCallback(function() use ($filePath) {
             // Same code goes inside the callback.
-            $reader = ReaderFactory::create(Type::XLSX);
+            $reader = ReaderEntityFactory::createXLSXReader();
             $reader->open($filePath);
 
             $i = 0;
@@ -89,12 +89,12 @@ class MyStreamController extends Controller
                     echo '<tr>';
                     echo implode(array_map(function($cell) {
                         return '<td>' . $cell . '</td>';
-                    }, $row));
+                    }, $row->getCells()));
                     echo '</tr>';
 
                     $i++;
                     // Flushing the buffer every N rows to stream echo'ed content.
-                    if ($i % FLUSH_THRESHOLD === 0) {
+                    if ($i % self::FLUSH_THRESHOLD === 0) {
                         flush();
                     }
                 }

@@ -13,7 +13,7 @@ use WilsonGlasser\Spout\Writer\Exception\InvalidSheetNameException;
 class SheetManager
 {
     /** Sheet name should not exceed 31 characters */
-    const MAX_LENGTH_SHEET_NAME = 31;
+    public const MAX_LENGTH_SHEET_NAME = 31;
 
     /** @var array Invalid characters that cannot be contained in the sheet name */
     private static $INVALID_CHARACTERS_IN_SHEET_NAME = ['\\', '/', '?', '*', ':', '[', ']'];
@@ -32,8 +32,8 @@ class SheetManager
      */
     public function throwIfNameIsInvalid($name, Sheet $sheet)
     {
-        if (!is_string($name)) {
-            $actualType = gettype($name);
+        if (!\is_string($name)) {
+            $actualType = \gettype($name);
             $errorMessage = "The sheet's name is invalid. It must be a string ($actualType given).";
             throw new InvalidSheetNameException($errorMessage);
         }
@@ -61,9 +61,9 @@ class SheetManager
             }
         }
 
-        if (count($failedRequirements) !== 0) {
+        if (\count($failedRequirements) !== 0) {
             $errorMessage = "The sheet's name (\"$name\") is invalid. It did not respect these rules:\n - ";
-            $errorMessage .= implode("\n - ", $failedRequirements);
+            $errorMessage .= \implode("\n - ", $failedRequirements);
             throw new InvalidSheetNameException($errorMessage);
         }
     }
@@ -77,7 +77,7 @@ class SheetManager
      */
     private function doesContainInvalidCharacters($name)
     {
-        return (str_replace(self::$INVALID_CHARACTERS_IN_SHEET_NAME, '', $name) !== $name);
+        return (\str_replace(self::$INVALID_CHARACTERS_IN_SHEET_NAME, '', $name) !== $name);
     }
 
     /**

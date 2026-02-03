@@ -2,6 +2,7 @@
 
 namespace WilsonGlasser\Spout\Writer\XLSX\Manager\Style;
 
+use WilsonGlasser\Spout\Common\Entity\Style\BorderPart;
 use WilsonGlasser\Spout\Common\Entity\Style\Color;
 use WilsonGlasser\Spout\Common\Entity\Style\Style;
 use WilsonGlasser\Spout\Writer\XLSX\Helper\BorderHelper;
@@ -33,7 +34,10 @@ class StyleManager extends \WilsonGlasser\Spout\Writer\Common\Manager\Style\Styl
         $associatedBorderId = $this->styleRegistry->getBorderIdForStyleId($styleId);
         $hasStyleCustomBorders = ($associatedBorderId !== null && $associatedBorderId !== 0);
 
-        return ($hasStyleCustomFill || $hasStyleCustomBorders);
+        $associatedFormatId = $this->styleRegistry->getFormatIdForStyleId($styleId);
+        $hasStyleCustomFormats = ($associatedFormatId !== null && $associatedFormatId !== 0);
+
+        return ($hasStyleCustomFill || $hasStyleCustomBorders || $hasStyleCustomFormats);
     }
 
     /**
@@ -68,8 +72,8 @@ EOD;
      *
      * @return string
      */
-    protected function getNumberFormatContent() {
-
+    protected function getNumberFormatContent()
+    {
         $registeredStyles = $this->styleRegistry->getRegisteredStyles();
         $numberFormats = [];
 
@@ -92,28 +96,28 @@ EOD;
             /** @var Style $style */
             $style = $this->styleRegistry->getStyleFromStyleId($styleId);
             $format = $style->getFormat();
-            if ($numFmtId > $minNumFmtId)
+            if ($numFmtId > $minNumFmtId) {
                 $minNumFmtId = $numFmtId;
+            }
             $tags[] = '<numFmt numFmtId="' . $numFmtId . '" formatCode="' . $format . '"/>';
         }
 
-        if (count($numberFormats) + count($tags) == 0)
+        if (count($numberFormats) + count($tags) == 0) {
             return '';
+        }
 
-        $content = '<numFmts count="'.(count($numberFormats) + count($tags)).'">';
-
+        $content = '<numFmts count="' . (count($numberFormats) + count($tags)) . '">';
 
         $id = ++$minNumFmtId;
 
-        foreach($numberFormats as $numberFormat) {
+        foreach ($numberFormats as $numberFormat) {
             $numberFormat->setId($id);
-            $content .= '<numFmt numFmtId="'.$numberFormat->getId().'" formatCode="'.$numberFormat->getFormatCode().'" />';
+            $content .= '<numFmt numFmtId="' . $numberFormat->getId() . '" formatCode="' . $numberFormat->getFormatCode() . '" />';
             $id++;
         }
 
         $content .= \implode('', $tags);
         $content .= '</numFmts>';
-
 
         return $content;
     }
@@ -127,7 +131,7 @@ EOD;
     {
         $registeredStyles = $this->styleRegistry->getRegisteredStyles();
 
-        $content = '<fonts count="' . count($registeredStyles) . '">';
+        $content = '<fonts count="' . \count($registeredStyles) . '">';
 
         /** @var Style $style */
         foreach ($registeredStyles as $style) {
@@ -168,8 +172,8 @@ EOD;
         $registeredFills = $this->styleRegistry->getRegisteredFills();
 
         // Excel reserves two default fills
-        $fillsCount = count($registeredFills) + 2;
-        $content = sprintf('<fills count="%d">', $fillsCount);
+        $fillsCount = \count($registeredFills) + 2;
+        $content = \sprintf('<fills count="%d">', $fillsCount);
 
         $content .= '<fill><patternFill patternType="none"/></fill>';
         $content .= '<fill><patternFill patternType="gray125"/></fill>';
@@ -180,7 +184,7 @@ EOD;
             $style = $this->styleRegistry->getStyleFromStyleId($styleId);
 
             $backgroundColor = $style->getBackgroundColor();
-            $content .= sprintf(
+            $content .= \sprintf(
                 '<fill><patternFill patternType="solid"><fgColor rgb="%s"/></patternFill></fill>',
                 $backgroundColor
             );
@@ -201,7 +205,7 @@ EOD;
         $registeredBorders = $this->styleRegistry->getRegisteredBorders();
 
         // There is one default border with index 0
-        $borderCount = count($registeredBorders) + 1;
+        $borderCount = \count($registeredBorders) + 1;
 
         $content = '<borders count="' . $borderCount . '">';
 
@@ -209,7 +213,7 @@ EOD;
         $content .= '<border><left/><right/><top/><bottom/></border>';
 
         foreach ($registeredBorders as $styleId) {
-            /** @var \WilsonGlasser\Spout\Common\Entity\Style\Style $style */
+            /** @var Style $style */
             $style = $this->styleRegistry->getStyleFromStyleId($styleId);
             $border = $style->getBorder();
             $content .= '<border>';
@@ -219,7 +223,7 @@ EOD;
 
             foreach ($sortOrder as $partName) {
                 if ($border->hasPart($partName)) {
-                    /** @var $part \WilsonGlasser\Spout\Common\Entity\Style\BorderPart */
+                    /** @var BorderPart $part */
                     $part = $border->getPart($partName);
                     $content .= BorderHelper::serializeBorderPart($part);
                 }
@@ -256,7 +260,7 @@ EOD;
     {
         $registeredStyles = $this->styleRegistry->getRegisteredStyles();
 
-        $content = '<cellXfs count="' . count($registeredStyles) . '">';
+        $content = '<cellXfs count="' . \count($registeredStyles) . '">';
 
         foreach ($registeredStyles as $style) {
             $styleId = $style->getId();
@@ -264,16 +268,19 @@ EOD;
             $borderId = $this->getBorderIdForStyleId($styleId);
             $numFmtId = $this->getFormatIdForStyleId($styleId);
 
-            $content .= '<xf
-            '.($style->getNumberFormat() !== null ? 'numFmtId="'.$style->getNumberFormat()->getId() .'" applyNumberFormat="1"': 'numFmtId="' . $numFmtId . '"' ).'
-            fontId="' . $styleId . '" fillId="' . $fillId . '" borderId="' . $borderId . '" xfId="0"';
+            $content .= '<xf ';
+            if ($style->getNumberFormat() !== null) {
+                $content .= 'numFmtId="' . $style->getNumberFormat()->getId() . '" applyNumberFormat="1" ';
+            } else {
+                $content .= 'numFmtId="' . $numFmtId . '" ';
+            }
+            $content .= 'fontId="' . $styleId . '" fillId="' . $fillId . '" borderId="' . $borderId . '" xfId="0"';
 
             if ($style->shouldApplyFont()) {
                 $content .= ' applyFont="1"';
             }
 
-            $content .= sprintf(' applyBorder="%d"', $style->shouldApplyBorder() ? 1 : 0);
-
+            $content .= \sprintf(' applyBorder="%d"', $style->shouldApplyBorder() ? 1 : 0);
 
             $alignment = [];
 
@@ -292,10 +299,11 @@ EOD;
             if ($style->getShrinkToFit()) {
                 $alignment['shrinkToFit'] = $style->getShrinkToFit();
             }
+
             if (count($alignment)) {
                 $content .= ' applyAlignment="1"><alignment ';
-                foreach($alignment as $k => $v) {
-                    $content .= $k.'="'.$v.'" ';
+                foreach ($alignment as $k => $v) {
+                    $content .= $k . '="' . $v . '" ';
                 }
                 $content .= '/></xf>';
             } else {
@@ -339,7 +347,6 @@ EOD;
 
         return $isDefaultStyle ? 0 : ($this->styleRegistry->getBorderIdForStyleId($styleId) ?: 0);
     }
-
 
     /**
      * Returns the format ID associated to the given style ID.

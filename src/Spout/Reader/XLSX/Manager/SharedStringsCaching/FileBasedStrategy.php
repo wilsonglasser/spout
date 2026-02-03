@@ -15,7 +15,7 @@ use WilsonGlasser\Spout\Reader\XLSX\Creator\HelperFactory;
 class FileBasedStrategy implements CachingStrategyInterface
 {
     /** Value to use to escape the line feed character ("\n") */
-    const ESCAPED_LINE_FEED_CHARACTER = '_x000A_';
+    public const ESCAPED_LINE_FEED_CHARACTER = '_x000A_';
 
     /** @var \WilsonGlasser\Spout\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
     protected $globalFunctionsHelper;
@@ -32,7 +32,7 @@ class FileBasedStrategy implements CachingStrategyInterface
      */
     protected $maxNumStringsPerTempFile;
 
-    /** @var resource Pointer to the last temp file a shared string was written to */
+    /** @var resource|null Pointer to the last temp file a shared string was written to */
     protected $tempFilePointer;
 
     /**
@@ -55,7 +55,7 @@ class FileBasedStrategy implements CachingStrategyInterface
     public function __construct($tempFolder, $maxNumStringsPerTempFile, $helperFactory)
     {
         $this->fileSystemHelper = $helperFactory->createFileSystemHelper($tempFolder);
-        $this->tempFolder = $this->fileSystemHelper->createFolder($tempFolder, uniqid('sharedstrings'));
+        $this->tempFolder = $this->fileSystemHelper->createFolder($tempFolder, \uniqid('sharedstrings'));
 
         $this->maxNumStringsPerTempFile = $maxNumStringsPerTempFile;
 
@@ -135,7 +135,7 @@ class FileBasedStrategy implements CachingStrategyInterface
             // free memory
             unset($this->inMemoryTempFileContents);
 
-            $this->inMemoryTempFileContents = explode(PHP_EOL, $this->globalFunctionsHelper->file_get_contents($tempFilePath));
+            $this->inMemoryTempFileContents = \explode(PHP_EOL, $this->globalFunctionsHelper->file_get_contents($tempFilePath));
             $this->inMemoryTempFilePath = $tempFilePath;
         }
 
@@ -151,7 +151,7 @@ class FileBasedStrategy implements CachingStrategyInterface
             throw new SharedStringNotFoundException("Shared string not found for index: $sharedStringIndex");
         }
 
-        return rtrim($sharedString, PHP_EOL);
+        return \rtrim($sharedString, PHP_EOL);
     }
 
     /**
@@ -162,7 +162,7 @@ class FileBasedStrategy implements CachingStrategyInterface
      */
     private function escapeLineFeed($unescapedString)
     {
-        return str_replace("\n", self::ESCAPED_LINE_FEED_CHARACTER, $unescapedString);
+        return \str_replace("\n", self::ESCAPED_LINE_FEED_CHARACTER, $unescapedString);
     }
 
     /**
@@ -173,7 +173,7 @@ class FileBasedStrategy implements CachingStrategyInterface
      */
     private function unescapeLineFeed($escapedString)
     {
-        return str_replace(self::ESCAPED_LINE_FEED_CHARACTER, "\n", $escapedString);
+        return \str_replace(self::ESCAPED_LINE_FEED_CHARACTER, "\n", $escapedString);
     }
 
     /**

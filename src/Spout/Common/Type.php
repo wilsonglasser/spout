@@ -8,7 +8,7 @@ namespace WilsonGlasser\Spout\Common;
  */
 abstract class Type
 {
-    const CSV = 'csv';
-    const XLSX = 'xlsx';
-    const ODS = 'ods';
+    public const CSV = 'csv';
+    public const XLSX = 'xlsx';
+    public const ODS = 'ods';
 }

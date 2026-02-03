@@ -6,7 +6,7 @@ use WilsonGlasser\Spout\Common\Entity\Cell;
 use WilsonGlasser\Spout\Common\Entity\Style\Style;
 
 /**
- * Interface StyleHManagernterface
+ * Interface StyleManagerInterface
  */
 interface StyleManagerInterface
 {
@@ -24,7 +24,7 @@ interface StyleManagerInterface
      * Typically, set "wrap text" if a cell contains a new line.
      *
      * @param Cell|array $cell
-     * @return Style The updated style
+     * @return PossiblyUpdatedStyle The eventually updated style
      */
-    public function applyExtraStylesIfNeeded($cell);
+    public function applyExtraStylesIfNeeded($cell) : PossiblyUpdatedStyle;
 }

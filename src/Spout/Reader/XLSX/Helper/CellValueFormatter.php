@@ -13,32 +13,24 @@ use WilsonGlasser\Spout\Reader\XLSX\Manager\StyleManager;
 class CellValueFormatter
 {
     /** Definition of all possible cell types */
-    const CELL_TYPE_INLINE_STRING = 'inlineStr';
-    const CELL_TYPE_STR = 'str';
-    const CELL_TYPE_SHARED_STRING = 's';
-    const CELL_TYPE_BOOLEAN = 'b';
-    const CELL_TYPE_NUMERIC = 'n';
-    const CELL_TYPE_DATE = 'd';
-    const CELL_TYPE_ERROR = 'e';
+    public const CELL_TYPE_INLINE_STRING = 'inlineStr';
+    public const CELL_TYPE_STR = 'str';
+    public const CELL_TYPE_SHARED_STRING = 's';
+    public const CELL_TYPE_BOOLEAN = 'b';
+    public const CELL_TYPE_NUMERIC = 'n';
+    public const CELL_TYPE_DATE = 'd';
+    public const CELL_TYPE_ERROR = 'e';
 
     /** Definition of XML nodes names used to parse data */
-    const XML_NODE_VALUE = 'v';
-    const XML_NODE_INLINE_STRING_VALUE = 't';
+    public const XML_NODE_VALUE = 'v';
+    public const XML_NODE_INLINE_STRING_VALUE = 't';
 
     /** Definition of XML attributes used to parse data */
-    const XML_ATTRIBUTE_TYPE = 't';
-    const XML_ATTRIBUTE_STYLE_ID = 's';
+    public const XML_ATTRIBUTE_TYPE = 't';
+    public const XML_ATTRIBUTE_STYLE_ID = 's';
 
     /** Constants used for date formatting */
-    const NUM_SECONDS_IN_ONE_DAY = 86400;
-    const NUM_SECONDS_IN_ONE_HOUR = 3600;
-    const NUM_SECONDS_IN_ONE_MINUTE = 60;
-
-    /**
-     * February 29th, 1900 is NOT a leap year but Excel thinks it is...
-     * @see https://en.wikipedia.org/wiki/Year_1900_problem#Microsoft_Excel
-     */
-    const ERRONEOUS_EXCEL_LEAP_YEAR_DAY = 60;
+    public const NUM_SECONDS_IN_ONE_DAY = 86400;
 
     /** @var SharedStringsManager Manages shared strings */
     protected $sharedStringsManager;
@@ -74,7 +66,7 @@ class CellValueFormatter
     /**
      * Returns the (unescaped) correctly marshalled, cell value associated to the given XML node.
      *
-     * @param \DOMNode $node
+     * @param \DOMElement $node
      * @throws InvalidValueException If the value is not valid
      * @return string|int|float|bool|\DateTime The value associated with the cell
      */
@@ -110,7 +102,7 @@ class CellValueFormatter
     /**
      * Returns the cell's string value from a node's nested value node
      *
-     * @param \DOMNode $node
+     * @param \DOMElement $node
      * @return string The value associated with the cell
      */
     protected function getVNodeValue($node)
@@ -125,15 +117,20 @@ class CellValueFormatter
     /**
      * Returns the cell String value where string is inline.
      *
-     * @param \DOMNode $node
+     * @param \DOMElement $node
      * @return string The value associated with the cell
      */
     protected function formatInlineStringCellValue($node)
     {
-        // inline strings are formatted this way:
-        // <c r="A1" t="inlineStr"><is><t>[INLINE_STRING]</t></is></c>
-        $tNode = $node->getElementsByTagName(self::XML_NODE_INLINE_STRING_VALUE)->item(0);
-        $cellValue = $this->escaper->unescape($tNode->nodeValue);
+        // inline strings are formatted this way (they can contain any number of <t> nodes):
+        // <c r="A1" t="inlineStr"><is><t>[INLINE_STRING]</t><t>[INLINE_STRING_2]</t></is></c>
+        $tNodes = $node->getElementsByTagName(self::XML_NODE_INLINE_STRING_VALUE);
+
+        $cellValue = '';
+        for ($i = 0; $i < $tNodes->count(); $i++) {
+            $tNode = $tNodes->item($i);
+            $cellValue .= $this->escaper->unescape($tNode->nodeValue);
+        }
 
         return $cellValue;
     }
@@ -163,7 +160,7 @@ class CellValueFormatter
      */
     protected function formatStrCellValue($nodeValue)
     {
-        $escapedCellValue = trim($nodeValue);
+        $escapedCellValue = \trim($nodeValue);
         $cellValue = $this->escaper->unescape($escapedCellValue);
 
         return $cellValue;
@@ -248,8 +245,8 @@ class CellValueFormatter
         $baseDate = $this->shouldUse1904Dates ? '1904-01-01' : '1899-12-30';
 
         $daysSinceBaseDate = (int) $nodeValue;
-        $timeRemainder = fmod($nodeValue, 1);
-        $secondsRemainder = round($timeRemainder * self::NUM_SECONDS_IN_ONE_DAY, 0);
+        $timeRemainder = \fmod($nodeValue, 1);
+        $secondsRemainder = \round($timeRemainder * self::NUM_SECONDS_IN_ONE_DAY, 0);
 
         $dateObj = \DateTime::createFromFormat('|Y-m-d', $baseDate);
         $dateObj->modify('+' . $daysSinceBaseDate . 'days');

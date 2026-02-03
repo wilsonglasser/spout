@@ -19,9 +19,9 @@ class RowIterator implements IteratorInterface
     /**
      * Value passed to fgetcsv. 0 means "unlimited" (slightly slower but accomodates for very long lines).
      */
-    const MAX_READ_BYTES_PER_LINE = 0;
+    public const MAX_READ_BYTES_PER_LINE = 0;
 
-    /** @var resource Pointer to the CSV file to read */
+    /** @var resource|null Pointer to the CSV file to read */
     protected $filePointer;
 
     /** @var int Number of read rows */
@@ -84,7 +84,7 @@ class RowIterator implements IteratorInterface
      *
      * @return void
      */
-    public function rewind()
+    public function rewind() : void
     {
         $this->rewindAndSkipBom();
 
@@ -114,7 +114,7 @@ class RowIterator implements IteratorInterface
      *
      * @return bool
      */
-    public function valid()
+    public function valid() : bool
     {
         return ($this->filePointer && !$this->hasReachedEndOfFile);
     }
@@ -126,7 +126,7 @@ class RowIterator implements IteratorInterface
      * @throws \WilsonGlasser\Spout\Common\Exception\EncodingConversionException If unable to convert data to UTF-8
      * @return void
      */
-    public function next()
+    public function next() : void
     {
         $this->hasReachedEndOfFile = $this->globalFunctionsHelper->feof($this->filePointer);
 
@@ -146,8 +146,8 @@ class RowIterator implements IteratorInterface
         } while ($this->shouldReadNextRow($rowData));
 
         if ($rowData !== false) {
-            // str_replace will replace NULL values by empty strings
-            $rowDataBufferAsArray = str_replace(null, null, $rowData);
+            // array_map will replace NULL values by empty strings
+            $rowDataBufferAsArray = array_map(function ($value) { return (string) $value; }, $rowData);
             $this->rowBuffer = $this->entityFactory->createRowFromArray($rowDataBufferAsArray);
             $this->numReadRows++;
         } else {
@@ -193,13 +193,13 @@ class RowIterator implements IteratorInterface
                 case EncodingHelper::ENCODING_UTF16_LE:
                 case EncodingHelper::ENCODING_UTF32_LE:
                     // remove whitespace from the beginning of a string as fgetcsv() add extra whitespace when it try to explode non UTF-8 data
-                    $cellValue = ltrim($cellValue);
+                    $cellValue = \ltrim($cellValue);
                     break;
 
                 case EncodingHelper::ENCODING_UTF16_BE:
                 case EncodingHelper::ENCODING_UTF32_BE:
                     // remove whitespace from the end of a string as fgetcsv() add extra whitespace when it try to explode non UTF-8 data
-                    $cellValue = rtrim($cellValue);
+                    $cellValue = \rtrim($cellValue);
                     break;
             }
 
@@ -215,7 +215,7 @@ class RowIterator implements IteratorInterface
      */
     protected function isEmptyLine($lineData)
     {
-        return (is_array($lineData) && count($lineData) === 1 && $lineData[0] === null);
+        return (\is_array($lineData) && \count($lineData) === 1 && $lineData[0] === null);
     }
 
     /**
@@ -224,7 +224,7 @@ class RowIterator implements IteratorInterface
      *
      * @return Row|null
      */
-    public function current()
+    public function current() : ?Row
     {
         return $this->rowBuffer;
     }
@@ -235,7 +235,7 @@ class RowIterator implements IteratorInterface
      *
      * @return int
      */
-    public function key()
+    public function key() : int
     {
         return $this->numReadRows;
     }
@@ -245,7 +245,7 @@ class RowIterator implements IteratorInterface
      *
      * @return void
      */
-    public function end()
+    public function end() : void
     {
         // do nothing
     }

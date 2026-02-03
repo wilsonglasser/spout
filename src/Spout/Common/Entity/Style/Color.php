@@ -8,21 +8,21 @@ use WilsonGlasser\Spout\Common\Exception\InvalidColorException;
  * Class Color
  * This class provides constants and functions to work with colors
  */
-class Color
+abstract class Color
 {
     /** Standard colors - based on Office Online */
-    const BLACK = '000000';
-    const WHITE = 'FFFFFF';
-    const RED = 'FF0000';
-    const DARK_RED = 'C00000';
-    const ORANGE = 'FFC000';
-    const YELLOW = 'FFFF00';
-    const LIGHT_GREEN = '92D040';
-    const GREEN = '00B050';
-    const LIGHT_BLUE = '00B0E0';
-    const BLUE = '0070C0';
-    const DARK_BLUE = '002060';
-    const PURPLE = '7030A0';
+    public const BLACK = '000000';
+    public const WHITE = 'FFFFFF';
+    public const RED = 'FF0000';
+    public const DARK_RED = 'C00000';
+    public const ORANGE = 'FFC000';
+    public const YELLOW = 'FFFF00';
+    public const LIGHT_GREEN = '92D040';
+    public const GREEN = '00B050';
+    public const LIGHT_BLUE = '00B0E0';
+    public const BLUE = '0070C0';
+    public const DARK_BLUE = '002060';
+    public const PURPLE = '7030A0';
 
     /**
      * Returns an RGB color from R, G and B values
@@ -38,7 +38,7 @@ class Color
         self::throwIfInvalidColorComponentValue($green);
         self::throwIfInvalidColorComponentValue($blue);
 
-        return strtoupper(
+        return \strtoupper(
             self::convertColorComponentToHex($red) .
             self::convertColorComponentToHex($green) .
             self::convertColorComponentToHex($blue)
@@ -54,7 +54,7 @@ class Color
      */
     protected static function throwIfInvalidColorComponentValue($colorComponent)
     {
-        if (!is_int($colorComponent) || $colorComponent < 0 || $colorComponent > 255) {
+        if (!\is_int($colorComponent) || $colorComponent < 0 || $colorComponent > 255) {
             throw new InvalidColorException("The RGB components must be between 0 and 255. Received: $colorComponent");
         }
     }
@@ -67,7 +67,7 @@ class Color
      */
     protected static function convertColorComponentToHex($colorComponent)
     {
-        return str_pad(dechex($colorComponent), 2, '0', STR_PAD_LEFT);
+        return \str_pad(\dechex($colorComponent), 2, '0', STR_PAD_LEFT);
     }
 
     /**

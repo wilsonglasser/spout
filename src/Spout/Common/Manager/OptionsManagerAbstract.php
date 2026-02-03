@@ -7,7 +7,7 @@ namespace WilsonGlasser\Spout\Common\Manager;
  */
 abstract class OptionsManagerAbstract implements OptionsManagerInterface
 {
-    const PREFIX_OPTION = 'OPTION_';
+    public const PREFIX_OPTION = 'OPTION_';
 
     /** @var string[] List of all supported option names */
     private $supportedOptions = [];
@@ -46,7 +46,7 @@ abstract class OptionsManagerAbstract implements OptionsManagerInterface
      */
     public function setOption($optionName, $optionValue)
     {
-        if (in_array($optionName, $this->supportedOptions)) {
+        if (\in_array($optionName, $this->supportedOptions)) {
             $this->options[$optionName] = $optionValue;
         }
     }

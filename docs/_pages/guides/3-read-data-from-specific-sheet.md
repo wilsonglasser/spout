@@ -5,12 +5,16 @@ category: guide
 permalink: /guides/read-data-from-specific-sheet/
 ---
 
-Even though a spreadsheet contains multiple sheets, you may be interested in reading only one of them and skip the other ones. Here is how you can do it with Spout:
+Even though a spreadsheet contains multiple sheets, you may be interested in reading only one of them and skip the other ones. Here is how you can do it with {{ site.spout_html }}:
 
 * If you know the name of the sheet
 
-```php?start_inline=1
-$reader = ReaderFactory::create(Type:XLSX);
+```php
+<?php
+
+use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
+
+$reader = ReaderEntityFactory::createXLSXReader();
 $reader->open($filePath);
 
 foreach ($reader->getSheetIterator() as $sheet) {
@@ -28,8 +32,12 @@ $reader->close();
 
 * If you know the position of the sheet
 
-```php?start_inline=1
-$reader = ReaderFactory::create(Type:XLSX);
+```php
+<?php
+
+use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
+
+$reader = ReaderEntityFactory::createXLSXReader();
 $reader->open($filePath);
 
 foreach ($reader->getSheetIterator() as $sheet) {

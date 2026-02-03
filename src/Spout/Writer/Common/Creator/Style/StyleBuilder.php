@@ -3,8 +3,10 @@
 namespace WilsonGlasser\Spout\Writer\Common\Creator\Style;
 
 use WilsonGlasser\Spout\Common\Entity\Style\Border;
+use WilsonGlasser\Spout\Common\Entity\Style\CellAlignment;
 use WilsonGlasser\Spout\Common\Entity\Style\NumberFormat;
 use WilsonGlasser\Spout\Common\Entity\Style\Style;
+use WilsonGlasser\Spout\Common\Exception\InvalidArgumentException;
 
 /**
  * Class StyleBuilder
@@ -126,12 +128,31 @@ class StyleBuilder
     /**
      * Makes the text shrink to fit in the cell if requested
      *
-     * @param bool $$shouldShrink Should the text be shrinked
+     * @param bool $shouldShrink Should the text be shrinked
      * @return StyleBuilder
      */
     public function setShrinkToFit($shouldShrink = false)
     {
         $this->style->setShrinkToFit($shouldShrink);
+
+        return $this;
+    }
+
+    /**
+     * Sets the cell alignment.
+     *
+     * @param string $cellAlignment The cell alignment
+     *
+     * @throws InvalidArgumentException If the given cell alignment is not valid
+     * @return StyleBuilder
+     */
+    public function setCellAlignment($cellAlignment)
+    {
+        if (class_exists(CellAlignment::class) && !CellAlignment::isValid($cellAlignment)) {
+            throw new InvalidArgumentException('Invalid cell alignment value');
+        }
+
+        $this->style->setCellAlignment($cellAlignment);
 
         return $this;
     }

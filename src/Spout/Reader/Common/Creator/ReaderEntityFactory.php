@@ -2,6 +2,8 @@
 
 namespace WilsonGlasser\Spout\Reader\Common\Creator;
 
+use WilsonGlasser\Spout\Common\Exception\UnsupportedTypeException;
+use WilsonGlasser\Spout\Common\Type;
 use WilsonGlasser\Spout\Reader\ReaderInterface;
 
 /**
@@ -19,19 +21,63 @@ class ReaderEntityFactory
      */
     public static function createReader($readerType)
     {
-        return (new ReaderFactory())->create($readerType);
+        return ReaderFactory::createFromType($readerType);
     }
 
     /**
      * Creates a reader by file extension
      *
-     * @param string The path to the spreadsheet file. Supported extensions are .csv,.ods and .xlsx
-     * @throws \WilsonGlasser\Spout\Common\Exception\IOException
+     * @param string $path The path to the spreadsheet file. Supported extensions are .csv, .ods and .xlsx
      * @throws \WilsonGlasser\Spout\Common\Exception\UnsupportedTypeException
      * @return ReaderInterface
      */
     public static function createReaderFromFile($path)
     {
-        return (new ReaderFactory())->createFromFile($path);
+        return ReaderFactory::createFromFile($path);
+    }
+
+    /**
+     * This creates an instance of a CSV reader
+     *
+     * @return \WilsonGlasser\Spout\Reader\CSV\Reader
+     */
+    public static function createCSVReader()
+    {
+        try {
+            return ReaderFactory::createFromType(Type::CSV);
+        } catch (UnsupportedTypeException $e) {
+            // should never happen
+            return null;
+        }
+    }
+
+    /**
+     * This creates an instance of a XLSX reader
+     *
+     * @return \WilsonGlasser\Spout\Reader\XLSX\Reader
+     */
+    public static function createXLSXReader()
+    {
+        try {
+            return ReaderFactory::createFromType(Type::XLSX);
+        } catch (UnsupportedTypeException $e) {
+            // should never happen
+            return null;
+        }
+    }
+
+    /**
+     * This creates an instance of a ODS reader
+     *
+     * @return \WilsonGlasser\Spout\Reader\ODS\Reader
+     */
+    public static function createODSReader()
+    {
+        try {
+            return ReaderFactory::createFromType(Type::ODS);
+        } catch (UnsupportedTypeException $e) {
+            // should never happen
+            return null;
+        }
     }
 }

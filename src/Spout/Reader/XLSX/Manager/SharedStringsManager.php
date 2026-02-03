@@ -16,20 +16,17 @@ use WilsonGlasser\Spout\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategy
  */
 class SharedStringsManager
 {
-    /** Main namespace for the sharedStrings.xml file */
-    const MAIN_NAMESPACE_FOR_SHARED_STRINGS_XML = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
-
     /** Definition of XML nodes names used to parse data */
-    const XML_NODE_SST = 'sst';
-    const XML_NODE_SI = 'si';
-    const XML_NODE_R = 'r';
-    const XML_NODE_T = 't';
+    public const XML_NODE_SST = 'sst';
+    public const XML_NODE_SI = 'si';
+    public const XML_NODE_R = 'r';
+    public const XML_NODE_T = 't';
 
     /** Definition of XML attributes used to parse data */
-    const XML_ATTRIBUTE_COUNT = 'count';
-    const XML_ATTRIBUTE_UNIQUE_COUNT = 'uniqueCount';
-    const XML_ATTRIBUTE_XML_SPACE = 'xml:space';
-    const XML_ATTRIBUTE_VALUE_PRESERVE = 'preserve';
+    public const XML_ATTRIBUTE_COUNT = 'count';
+    public const XML_ATTRIBUTE_UNIQUE_COUNT = 'uniqueCount';
+    public const XML_ATTRIBUTE_XML_SPACE = 'xml:space';
+    public const XML_ATTRIBUTE_VALUE_PRESERVE = 'preserve';
 
     /** @var string Path of the XLSX file being read */
     protected $filePath;
@@ -43,7 +40,7 @@ class SharedStringsManager
     /** @var InternalEntityFactory Factory to create entities */
     protected $entityFactory;
 
-    /** @var HelperFactory $helperFactory Factory to create helpers */
+    /** @var HelperFactory Factory to create helpers */
     protected $helperFactory;
 
     /** @var CachingStrategyFactory Factory to create shared strings caching strategies */
@@ -185,6 +182,7 @@ class SharedStringsManager
         $sharedStringValue = '';
 
         // NOTE: expand() will automatically decode all XML entities of the child nodes
+        /** @var \DOMElement $siNode */
         $siNode = $xmlReader->expand();
         $textNodes = $siNode->getElementsByTagName(self::XML_NODE_T);
 
@@ -193,7 +191,7 @@ class SharedStringsManager
                 $textNodeValue = $textNode->nodeValue;
                 $shouldPreserveWhitespace = $this->shouldPreserveWhitespace($textNode);
 
-                $sharedStringValue .= ($shouldPreserveWhitespace) ? $textNodeValue : trim($textNodeValue);
+                $sharedStringValue .= ($shouldPreserveWhitespace) ? $textNodeValue : \trim($textNodeValue);
             }
         }
 
@@ -247,7 +245,7 @@ class SharedStringsManager
      */
     public function cleanup()
     {
-        if ($this->cachingStrategy) {
+        if ($this->cachingStrategy !== null) {
             $this->cachingStrategy->clearCache();
         }
     }

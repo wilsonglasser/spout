@@ -53,7 +53,7 @@ abstract class ReaderAbstract implements ReaderInterface
     /**
      * Closes the reader. To be used after reading the file.
      *
-     * @return ReaderAbstract
+     * @return void
      */
     abstract protected function closeReader();
 
@@ -145,7 +145,7 @@ abstract class ReaderAbstract implements ReaderInterface
         }
 
         // Need to use realpath to fix "Can't open file" on some Windows setup
-        return realpath($filePath);
+        return \realpath($filePath);
     }
 
     /**
@@ -158,7 +158,7 @@ abstract class ReaderAbstract implements ReaderInterface
     protected function getStreamWrapperScheme($filePath)
     {
         $streamScheme = null;
-        if (preg_match('/^(\w+):\/\//', $filePath, $matches)) {
+        if (\preg_match('/^(\w+):\/\//', $filePath, $matches)) {
             $streamScheme = $matches[1];
         }
 
@@ -190,7 +190,7 @@ abstract class ReaderAbstract implements ReaderInterface
         $streamScheme = $this->getStreamWrapperScheme($filePath);
 
         return ($streamScheme !== null) ?
-            in_array($streamScheme, $this->globalFunctionsHelper->stream_get_wrappers()) :
+            \in_array($streamScheme, $this->globalFunctionsHelper->stream_get_wrappers()) :
             true;
     }
 
@@ -233,7 +233,7 @@ abstract class ReaderAbstract implements ReaderInterface
             $this->closeReader();
 
             $sheetIterator = $this->getConcreteSheetIterator();
-            if ($sheetIterator) {
+            if ($sheetIterator !== null) {
                 $sheetIterator->end();
             }
 

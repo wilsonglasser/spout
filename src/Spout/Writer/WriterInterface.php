@@ -45,7 +45,7 @@ interface WriterInterface
      * Appends a row to the end of the stream.
      *
      * @param Row|array $row The row to be appended to the stream
-     * @throws \WilsonGlasser\Spout\Writer\Exception\WriterNotOpenedException If the writer has not been opened yetthe writer
+     * @throws \WilsonGlasser\Spout\Writer\Exception\WriterNotOpenedException If the writer has not been opened yet
      * @throws \WilsonGlasser\Spout\Common\Exception\IOException If unable to write data
      * @return WriterInterface
      */
