@@ -307,7 +307,13 @@ EOD;
         if ($type === Cell::TYPE_STRING && preg_match('/[^-.0-9]/', $value)) {
             $cellXML .= $this->getCellXMLFragmentForNonEmptyString($this->setColumnMaxCharacters($columnIndex, $value));
         } elseif ($type === Cell::TYPE_FORMULA) {
-            $cellXML .= '><f>' . $value[1]. '</f><v>' . $this->setColumnMaxCharacters($columnIndex, $value[0]) . '</v></c>';
+            $formulaType = '';                                                                                                                                                                                                                                                                
+            if (is_string($value[0]) && !is_numeric($value[0])) {                                                                                                                                                                                                                             
+                $formulaType = ' t="str"';                                                                                                                                                                                                                                                    
+            } elseif (is_bool($value[0])) {                                                                                                                                                                                                                                                   
+                $formulaType = ' t="b"';                                                                                                                                                                                                                                                      
+            }                                                                                                                                                                                                                                                                                 
+            $cellXML .= $formulaType . '><f>' . $value[1]. '</f><v>' . $this->setColumnMaxCharacters($columnIndex, $value[0]) . '</v></c>';    
         } elseif ($type === Cell::TYPE_BOOLEAN) {
             $cellXML .= ' t="b"><v>' . $this->setColumnMaxCharacters($columnIndex, (int)($value)) . '</v></c>';
         } elseif ($type === Cell::TYPE_NUMERIC || ($type == Cell::TYPE_STRING && !preg_match('/[^-.0-9]/', $value) && is_numeric($value))) {
