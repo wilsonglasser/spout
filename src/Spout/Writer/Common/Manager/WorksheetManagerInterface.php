@@ -39,5 +39,5 @@ interface WorksheetManagerInterface
      * @param Style $defaultStyle
      * @return void
      */
-    public function close(Worksheet $worksheet, Style $defaultStyle=null);
+    public function close(Worksheet $worksheet, ?Style $defaultStyle = null);
 }
