@@ -73,7 +73,7 @@ class Cell
      * @param $value mixed
      * @param Style|null $style
      */
-    public function __construct($value, Style $style = null)
+    public function __construct($value, ?Style $style = null)
     {
         $this->setValue($value);
         $this->setStyle($style);

@@ -216,7 +216,7 @@ class ColumnDimension
      * @param Style $style
      * @return int Text width in pixels (no padding added)
      */
-    public static function getTextWidthPixelsApprox($cellLength, Style $style = null)
+    public static function getTextWidthPixelsApprox($cellLength, ?Style $style = null)
     {
         $fontName = $style->getFontName();
         $fontSize = $style->getFontSize();

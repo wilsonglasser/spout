@@ -80,7 +80,7 @@ class Comment
      * @param $value mixed
      * @param Style|null $style
      */
-    public function __construct($cell, $text, $author = null, Style $style = null)
+    public function __construct($cell, $text, $author = null, ?Style $style = null)
     {
         $this->setCell($cell);
         $this->setText($text);
