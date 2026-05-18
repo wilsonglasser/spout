@@ -204,7 +204,7 @@ class Sheet
      * @param Style $defaultStyle
      * @return Sheet;
      */
-    public function calculateColumnWidths($columnMaxLengths, Style $defaultStyle = null)
+    public function calculateColumnWidths($columnMaxLengths, ?Style $defaultStyle = null)
     {
 
         foreach ($this->getColumnDimensions() as $colDimension) {

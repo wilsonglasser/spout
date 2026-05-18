@@ -31,7 +31,7 @@ class GlobalFunctionsHelper
      * @param int|null $length
      * @return string
      */
-    public function fgets($handle, $length = null)
+    public function fgets($handle, ?int $length = null)
     {
         return fgets($handle, $length);
     }
@@ -84,7 +84,7 @@ class GlobalFunctionsHelper
      * @param string|null $enclosure
      * @return array
      */
-    public function fgetcsv($handle, $length = null, $delimiter = null, $enclosure = null)
+    public function fgetcsv($handle, ?int $length = null, ?string $delimiter = null, ?string $enclosure = null)
     {
         // PHP uses '\' as the default escape character. This is not RFC-4180 compliant...
         // To fix that, simply disable the escape character.
@@ -105,7 +105,7 @@ class GlobalFunctionsHelper
      * @param string|null $enclosure
      * @return int
      */
-    public function fputcsv($handle, array $fields, $delimiter = null, $enclosure = null)
+    public function fputcsv($handle, array $fields, ?string $delimiter = null, ?string $enclosure = null)
     {
         // PHP uses '\' as the default escape character. This is not RFC-4180 compliant...
         // To fix that, simply disable the escape character.

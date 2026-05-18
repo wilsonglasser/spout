@@ -364,7 +364,7 @@ EOD;
     /**
      * {@inheritdoc}
      */
-    public function close(Worksheet $worksheet, Style $defaultStyle = null)
+    public function close(Worksheet $worksheet, ?Style $defaultStyle = null)
     {
         $worksheetFilePointer = $worksheet->getFilePointer();
 

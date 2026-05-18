@@ -30,7 +30,7 @@ class WriterEntityFactory
      * @param Style|null $rowStyle
      * @return Row
      */
-    public static function createRow(array $cells = [], Style $rowStyle = null)
+    public static function createRow(array $cells = [], ?Style $rowStyle = null)
     {
         return new Row($cells, $rowStyle);
     }
@@ -40,7 +40,7 @@ class WriterEntityFactory
      * @param Style|null $rowStyle
      * @return Row
      */
-    public static function createRowFromArray(array $cellValues = [], Style $rowStyle = null)
+    public static function createRowFromArray(array $cellValues = [], ?Style $rowStyle = null)
     {
         $cells = array_map(function ($cellValue) {
             return new Cell($cellValue);
@@ -54,7 +54,7 @@ class WriterEntityFactory
      * @param Style|null $cellStyle
      * @return Cell
      */
-    public static function createCell($cellValue, Style $cellStyle = null)
+    public static function createCell($cellValue, ?Style $cellStyle = null)
     {
         return new Cell($cellValue, $cellStyle);
     }
