@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="3"><font><sz val="12"/><color rgb="FF000000"/><name val="Calibri"/></font><font><sz val="14"/><color rgb="FFFFFFFF"/><name val="Calibri"/><b/></font><font><sz val="12"/><color rgb="FF000000"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="C00000"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/></border><border><top style="thin"><color rgb="FF0000"/></top>
+<bottom style="mediumDashed"><color rgb="000000"/></bottom>
+</border></borders><cellStyleXfs count="1">
+    <xf borderId="0" fillId="0" fontId="0" numFmtId="0"/>
+</cellStyleXfs><cellXfs count="3"><xf
+            numFmtId="0"
+            fontId="0" fillId="0" borderId="0" xfId="0" applyFont="1" applyBorder="0" applyAlignment="1"><alignment vertical="center" /></xf><xf
+            numFmtId="0"
+            fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="center" /></xf><xf
+            numFmtId="4"
+            fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyBorder="0" applyAlignment="1"><alignment horizontal="right" vertical="center" /></xf></cellXfs><cellStyles count="1">
+    <cellStyle builtinId="0" name="Normal" xfId="0"/>
+</cellStyles></styleSheet>

@@ -19,3 +19,6 @@ Makefile            text eol=lf
 /docker-compose.yml     export-ignore
 /Makefile               export-ignore
 /phpunit.xml            export-ignore
+
+# Golden fixtures are byte-stable; do not convert line endings
+tests/fixtures/golden/*.xml -text
