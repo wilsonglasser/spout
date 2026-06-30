@@ -19,7 +19,7 @@ interface FileSystemHelperInterface
      * @throws \SpoutX\Common\Exception\IOException If unable to create the folder or if the folder path is not inside of the base folder
      * @return string Path of the created folder
      */
-    public function createFolder($parentFolderPath, $folderName);
+    public function createFolder(string $parentFolderPath, string $folderName): string;
 
     /**
      * Creates a file with the given name and content in the given folder.
@@ -31,23 +31,21 @@ interface FileSystemHelperInterface
      * @throws \SpoutX\Common\Exception\IOException If unable to create the file or if the file path is not inside of the base folder
      * @return string Path of the created file
      */
-    public function createFileWithContents($parentFolderPath, $fileName, $fileContents);
+    public function createFileWithContents(string $parentFolderPath, string $fileName, string $fileContents): string;
 
     /**
      * Delete the file at the given path
      *
      * @param string $filePath Path of the file to delete
      * @throws \SpoutX\Common\Exception\IOException If the file path is not inside of the base folder
-     * @return void
      */
-    public function deleteFile($filePath);
+    public function deleteFile(string $filePath): void;
 
     /**
      * Delete the folder at the given path as well as all its contents
      *
      * @param string $folderPath Path of the folder to delete
      * @throws \SpoutX\Common\Exception\IOException If the folder path is not inside of the base folder
-     * @return void
      */
-    public function deleteFolderRecursively($folderPath);
+    public function deleteFolderRecursively(string $folderPath): void;
 }
