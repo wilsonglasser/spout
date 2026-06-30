@@ -1,34 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/7.5/phpunit.xsd"
-        bootstrap="tests/bootstrap.php"
-        colors="true"
-        convertErrorsToExceptions="false"
-        convertWarningsToExceptions="false"
-        defaultTestSuite="unit-tests"
-        verbose="false">
-
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
     <testsuites>
-
         <testsuite name="unit-tests">
-            <directory>tests/</directory>
+            <directory>tests/SpoutX</directory>
         </testsuite>
-
     </testsuites>
-
-    <groups>
+    <source>
+        <include>
+            <directory suffix=".php">src/SpoutX</directory>
+        </include>
         <exclude>
-            <group>perf-tests</group>
+            <directory>src/SpoutX/Autoloader</directory>
         </exclude>
-    </groups>
-
-    <filter>
-        <whitelist>
-            <directory suffix=".php">src/</directory>
-            <exclude>
-                <directory>src/Spout/Autoloader</directory>
-            </exclude>
-        </whitelist>
-    </filter>
-
+    </source>
 </phpunit>

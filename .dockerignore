@@ -1,0 +1,5 @@
+.git
+vendor
+.phpunit.cache
+tests/resources/generated
+tests/coverage
