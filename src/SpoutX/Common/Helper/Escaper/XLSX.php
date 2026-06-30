@@ -11,21 +11,21 @@ namespace SpoutX\Common\Helper\Escaper;
 class XLSX implements EscaperInterface
 {
     /** @var bool Whether the escaper has already been initialized */
-    private $isAlreadyInitialized = false;
+    private bool $isAlreadyInitialized = false;
 
     /** @var string Regex pattern to detect control characters that need to be escaped */
-    private $escapableControlCharactersPattern;
+    private string $escapableControlCharactersPattern;
 
     /** @var string[] Map containing control characters to be escaped (key) and their escaped value (value) */
-    private $controlCharactersEscapingMap;
+    private array $controlCharactersEscapingMap;
 
     /** @var string[] Map containing control characters to be escaped (value) and their escaped value (key) */
-    private $controlCharactersEscapingReverseMap;
+    private array $controlCharactersEscapingReverseMap;
 
     /**
      * Initializes the control characters if not already done
      */
-    protected function initIfNeeded()
+    protected function initIfNeeded(): void
     {
         if (!$this->isAlreadyInitialized) {
             $this->escapableControlCharactersPattern = $this->getEscapableControlCharactersPattern();
@@ -42,7 +42,7 @@ class XLSX implements EscaperInterface
      * @param string $string The string to escape
      * @return string The escaped string
      */
-    public function escape($string)
+    public function escape(string $string): string
     {
         $this->initIfNeeded();
 
@@ -60,7 +60,7 @@ class XLSX implements EscaperInterface
      * @param string $string The string to unescape
      * @return string The unescaped string
      */
-    public function unescape($string)
+    public function unescape(string $string): string
     {
         $this->initIfNeeded();
 
@@ -78,7 +78,7 @@ class XLSX implements EscaperInterface
     /**
      * @return string Regex pattern containing all escapable control characters
      */
-    protected function getEscapableControlCharactersPattern()
+    protected function getEscapableControlCharactersPattern(): string
     {
         // control characters values are from 0 to 1F (hex values) in the ASCII table
         // some characters should not be escaped though: "\t", "\r" and "\n".
@@ -99,7 +99,7 @@ class XLSX implements EscaperInterface
      *
      * @return string[]
      */
-    protected function getControlCharactersEscapingMap()
+    protected function getControlCharactersEscapingMap(): array
     {
         $controlCharactersEscapingMap = [];
 
@@ -129,7 +129,7 @@ class XLSX implements EscaperInterface
      * @param string $string String to escape
      * @return string
      */
-    protected function escapeControlCharacters($string)
+    protected function escapeControlCharacters(string $string): string
     {
         $escapedString = $this->escapeEscapeCharacter($string);
 
@@ -149,7 +149,7 @@ class XLSX implements EscaperInterface
      * @param string $string String to escape
      * @return string The escaped string
      */
-    protected function escapeEscapeCharacter($string)
+    protected function escapeEscapeCharacter(string $string): string
     {
         return preg_replace('/_(x[\dA-F]{4})_/', '_x005F_$1_', $string);
     }
@@ -167,7 +167,7 @@ class XLSX implements EscaperInterface
      * @param string $string String to unescape
      * @return string
      */
-    protected function unescapeControlCharacters($string)
+    protected function unescapeControlCharacters(string $string): string
     {
         $unescapedString = $string;
 
@@ -185,7 +185,7 @@ class XLSX implements EscaperInterface
      * @param string $string String to unescape
      * @return string The unescaped string
      */
-    protected function unescapeEscapeCharacter($string)
+    protected function unescapeEscapeCharacter(string $string): string
     {
         return preg_replace('/_x005F(_x[\dA-F]{4}_)/', '$1', $string);
     }

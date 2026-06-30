@@ -14,7 +14,7 @@ class CellTypeHelper
      * @param $value
      * @return bool Whether the given value is considered "empty"
      */
-    public static function isEmpty($value)
+    public static function isEmpty(mixed $value): bool
     {
         return ($value === null || $value === '');
     }
@@ -23,7 +23,7 @@ class CellTypeHelper
      * @param $value
      * @return bool Whether the given value is a non empty string
      */
-    public static function isNonEmptyString($value)
+    public static function isNonEmptyString(mixed $value): bool
     {
         return (gettype($value) === 'string' && $value !== '');
     }
@@ -35,7 +35,7 @@ class CellTypeHelper
      * @param $value
      * @return bool Whether the given value is numeric
      */
-    public static function isNumeric($value)
+    public static function isNumeric(mixed $value): bool
     {
         $valueType = gettype($value);
 
@@ -49,7 +49,7 @@ class CellTypeHelper
      * @param $value
      * @return bool Whether the given value is boolean
      */
-    public static function isBoolean($value)
+    public static function isBoolean(mixed $value): bool
     {
         return gettype($value) === 'boolean';
     }
@@ -60,7 +60,7 @@ class CellTypeHelper
      * @param $value
      * @return bool Whether the given value is a DateTime or DateInterval object
      */
-    public static function isDateTimeOrDateInterval($value)
+    public static function isDateTimeOrDateInterval(mixed $value): bool
     {
         return (
             $value instanceof \DateTime ||

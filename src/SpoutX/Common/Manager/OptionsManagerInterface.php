@@ -9,16 +9,10 @@ namespace SpoutX\Common\Manager;
  */
 interface OptionsManagerInterface
 {
-    /**
-     * @param string $optionName
-     * @param mixed $optionValue
-     * @return void
-     */
-    public function setOption($optionName, $optionValue);
+    public function setOption(string $optionName, mixed $optionValue): void;
 
     /**
-     * @param string $optionName
      * @return mixed|null The set option or NULL if no option with given name found
      */
-    public function getOption($optionName);
+    public function getOption(string $optionName): mixed;
 }

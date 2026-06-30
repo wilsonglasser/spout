@@ -34,7 +34,7 @@ class OptionsManager extends OptionsManagerAbstract
     /**
      * {@inheritdoc}
      */
-    protected function getSupportedOptions()
+    protected function getSupportedOptions(): array
     {
         return [
             Options::TEMP_FOLDER,
@@ -47,7 +47,7 @@ class OptionsManager extends OptionsManagerAbstract
     /**
      * {@inheritdoc}
      */
-    protected function setDefaultOptions()
+    protected function setDefaultOptions(): void
     {
         $defaultRowStyle = $this->styleBuilder
             ->setFontSize(self::DEFAULT_FONT_SIZE)

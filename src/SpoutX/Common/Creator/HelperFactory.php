@@ -14,30 +14,21 @@ use SpoutX\Common\Helper\GlobalFunctionsHelper;
  */
 class HelperFactory
 {
-    /**
-     * @return GlobalFunctionsHelper
-     */
-    public function createGlobalFunctionsHelper()
+    public function createGlobalFunctionsHelper(): GlobalFunctionsHelper
     {
         return new GlobalFunctionsHelper();
     }
 
     /**
      * @param string $baseFolderPath The path of the base folder where all the I/O can occur
-     * @return FileSystemHelper
      */
-    public function createFileSystemHelper($baseFolderPath)
+    public function createFileSystemHelper(string $baseFolderPath): FileSystemHelper
     {
         return new FileSystemHelper($baseFolderPath);
     }
 
-    /**
-     * @param GlobalFunctionsHelper $globalFunctionsHelper
-     * @return EncodingHelper
-     */
-    public function createEncodingHelper(GlobalFunctionsHelper $globalFunctionsHelper)
+    public function createEncodingHelper(GlobalFunctionsHelper $globalFunctionsHelper): EncodingHelper
     {
         return new EncodingHelper($globalFunctionsHelper);
     }
-
 }
