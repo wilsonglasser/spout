@@ -1,247 +1,148 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Common\Entity;
 
 use SpoutX\Common\Entity\Style\Style;
 use SpoutX\Common\Helper\CellTypeHelper;
 
 /**
- * Class Cell
+ * A single cell. Mutable by design: build it then mutate value/style/type as needed.
  */
 class Cell
 {
-    /**
-     * Numeric cell type (whole numbers, fractional numbers, dates)
-     */
-    const TYPE_NUMERIC = 0;
+    /** The formula of this cell (without the leading "="), when it holds a formula. */
+    protected ?string $formula = null;
 
-    /**
-     * String (text) cell type
-     */
-    const TYPE_STRING = 1;
+    /** The value of this cell. */
+    protected mixed $value = null;
 
-    /**
-     * Formula cell type
-     * Not used at the moment
-     */
-    const TYPE_FORMULA = 2;
+    /** The cell type. */
+    protected CellType $type = CellType::Empty;
 
-    /**
-     * Empty cell type
-     */
-    const TYPE_EMPTY = 3;
+    /** The cell style. */
+    protected Style $style;
 
-    /**
-     * Boolean cell type
-     */
-    const TYPE_BOOLEAN = 4;
-
-    /**
-     * Date cell type
-     */
-    const TYPE_DATE = 5;
-
-    /**
-     * Error cell type
-     */
-    const TYPE_ERROR = 6;
-
-    /**
-     * The formula of this cell
-     * @var string
-     */
-    protected $formula;
-    /**
-     * The value of this cell
-     * @var mixed|null
-     */
-    protected $value;
-
-    /**
-     * The cell type
-     * @var int|null
-     */
-    protected $type;
-
-    /**
-     * The cell style
-     * @var Style
-     */
-    protected $style;
-
-    /**
-     * @param $value mixed
-     * @param Style|null $style
-     */
-    public function __construct($value, ?Style $style = null)
+    public function __construct(mixed $value, ?Style $style = null)
     {
         $this->setValue($value);
         $this->setStyle($style);
     }
 
-    /**
-     * @param mixed|null $value
-     */
-    public function setValue($value)
+    public function setValue(mixed $value): void
     {
         $this->type = self::detectType($value);
 
         if ($this->isFormula()) {
-            $this->formula = ltrim($value,'=');
+            $this->formula = ltrim((string) $value, '=');
             $this->value = '';
         } else {
             $this->value = $value;
         }
     }
 
-
     /**
-     * @param mixed|null $value
+     * Overrides the displayed value for a formula cell (SpoutX does not compute formulas).
      */
-    public function setCalculatedValue($value)
+    public function setCalculatedValue(mixed $value): void
     {
         $this->value = $value;
     }
 
-    /**
-     * @return mixed|null
-     */
-    public function getValue()
+    public function getValue(): mixed
     {
         return !$this->isError() ? $this->value : null;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getFormula()
+    public function getFormula(): ?string
     {
         return !$this->isError() ? $this->formula : null;
     }
 
-    /**
-     * @param Style|null $style
-     */
-    public function setStyle($style)
+    public function setStyle(?Style $style): void
     {
-        $this->style = $style ?: new Style();
+        $this->style = $style ?? new Style();
     }
 
-    /**
-     * @return Style
-     */
-    public function getStyle()
+    public function getStyle(): Style
     {
         return $this->style;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getType()
+    public function getType(): CellType
     {
         return $this->type;
     }
 
-    /**
-     * @param int $type
-     */
-    public function setType($type)
+    public function setType(CellType $type): void
     {
         $this->type = $type;
     }
 
     /**
-     * Get the current value type
-     *
-     * @param mixed|null $value
-     * @return int
+     * Detects the type of a value.
      */
-    static function detectType($value)
+    public static function detectType(mixed $value): CellType
     {
         if (CellTypeHelper::isBoolean($value)) {
-            return self::TYPE_BOOLEAN;
+            return CellType::Boolean;
         }
-        if (is_string($value) && substr($value,0,1) === '=') {
-            return self::TYPE_FORMULA;
+        if (is_string($value) && str_starts_with($value, '=')) {
+            return CellType::Formula;
         }
         if (CellTypeHelper::isEmpty($value)) {
-            return self::TYPE_EMPTY;
+            return CellType::Empty;
         }
         if (CellTypeHelper::isNumeric($value)) {
-            return self::TYPE_NUMERIC;
+            return CellType::Numeric;
         }
         if (CellTypeHelper::isDateTimeOrDateInterval($value)) {
-            return self::TYPE_DATE;
+            return CellType::Date;
         }
         if (CellTypeHelper::isNonEmptyString($value)) {
-            return self::TYPE_STRING;
+            return CellType::String;
         }
 
-        return self::TYPE_ERROR;
+        return CellType::Error;
     }
 
-    /**
-     * @return bool
-     */
-    public function isBoolean()
+    public function isBoolean(): bool
     {
-        return $this->type === self::TYPE_BOOLEAN;
+        return $this->type === CellType::Boolean;
     }
 
-
-    /**
-     * @return bool
-     */
-    public function isFormula()
+    public function isFormula(): bool
     {
-        return $this->type === self::TYPE_FORMULA;
+        return $this->type === CellType::Formula;
     }
 
-    /**
-     * @return bool
-     */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
-        return $this->type === self::TYPE_EMPTY;
+        return $this->type === CellType::Empty;
     }
 
-    /**
-     * @return bool
-     */
-    public function isNumeric()
+    public function isNumeric(): bool
     {
-        return $this->type === self::TYPE_NUMERIC;
+        return $this->type === CellType::Numeric;
     }
 
-    /**
-     * @return bool
-     */
-    public function isString()
+    public function isString(): bool
     {
-        return $this->type === self::TYPE_STRING;
+        return $this->type === CellType::String;
     }
 
-    /**
-     * @return bool
-     */
-    public function isDate()
+    public function isDate(): bool
     {
-        return $this->type === self::TYPE_DATE;
+        return $this->type === CellType::Date;
     }
 
-    /**
-     * @return bool
-     */
-    public function isError()
+    public function isError(): bool
     {
-        return $this->type === self::TYPE_ERROR;
+        return $this->type === CellType::Error;
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->getValue();
     }

@@ -17,45 +17,45 @@ class CellHelper
      *
      * @var array
      */
-    public static $defaultColumnWidths = array(
-        'Arial' => array(
-            1 => array('px' => 24, 'width' => 12.00000000),
-            2 => array('px' => 24, 'width' => 12.00000000),
-            3 => array('px' => 32, 'width' => 10.66406250),
-            4 => array('px' => 32, 'width' => 10.66406250),
-            5 => array('px' => 40, 'width' => 10.00000000),
-            6 => array('px' => 48, 'width' =>  9.59765625),
-            7 => array('px' => 48, 'width' =>  9.59765625),
-            8 => array('px' => 56, 'width' =>  9.33203125),
-            9 => array('px' => 64, 'width' =>  9.14062500),
-            10 => array('px' => 64, 'width' =>  9.14062500),
-        ),
-        'Calibri' => array(
-            1 => array('px' => 24, 'width' => 12.00000000),
-            2 => array('px' => 24, 'width' => 12.00000000),
-            3 => array('px' => 32, 'width' => 10.66406250),
-            4 => array('px' => 32, 'width' => 10.66406250),
-            5 => array('px' => 40, 'width' => 10.00000000),
-            6 => array('px' => 48, 'width' =>  9.59765625),
-            7 => array('px' => 48, 'width' =>  9.59765625),
-            8 => array('px' => 56, 'width' =>  9.33203125),
-            9 => array('px' => 56, 'width' =>  9.33203125),
-            10 => array('px' => 64, 'width' =>  9.14062500),
-            11 => array('px' => 64, 'width' =>  9.14062500),
-        ),
-        'Verdana' => array(
-            1 => array('px' => 24, 'width' => 12.00000000),
-            2 => array('px' => 24, 'width' => 12.00000000),
-            3 => array('px' => 32, 'width' => 10.66406250),
-            4 => array('px' => 32, 'width' => 10.66406250),
-            5 => array('px' => 40, 'width' => 10.00000000),
-            6 => array('px' => 48, 'width' =>  9.59765625),
-            7 => array('px' => 48, 'width' =>  9.59765625),
-            8 => array('px' => 64, 'width' =>  9.14062500),
-            9 => array('px' => 72, 'width' =>  9.00000000),
-            10 => array('px' => 72, 'width' =>  9.00000000),
-        ),
-    );
+    public static $defaultColumnWidths = [
+        'Arial' => [
+            1 => ['px' => 24, 'width' => 12.00000000],
+            2 => ['px' => 24, 'width' => 12.00000000],
+            3 => ['px' => 32, 'width' => 10.66406250],
+            4 => ['px' => 32, 'width' => 10.66406250],
+            5 => ['px' => 40, 'width' => 10.00000000],
+            6 => ['px' => 48, 'width' =>  9.59765625],
+            7 => ['px' => 48, 'width' =>  9.59765625],
+            8 => ['px' => 56, 'width' =>  9.33203125],
+            9 => ['px' => 64, 'width' =>  9.14062500],
+            10 => ['px' => 64, 'width' =>  9.14062500],
+        ],
+        'Calibri' => [
+            1 => ['px' => 24, 'width' => 12.00000000],
+            2 => ['px' => 24, 'width' => 12.00000000],
+            3 => ['px' => 32, 'width' => 10.66406250],
+            4 => ['px' => 32, 'width' => 10.66406250],
+            5 => ['px' => 40, 'width' => 10.00000000],
+            6 => ['px' => 48, 'width' =>  9.59765625],
+            7 => ['px' => 48, 'width' =>  9.59765625],
+            8 => ['px' => 56, 'width' =>  9.33203125],
+            9 => ['px' => 56, 'width' =>  9.33203125],
+            10 => ['px' => 64, 'width' =>  9.14062500],
+            11 => ['px' => 64, 'width' =>  9.14062500],
+        ],
+        'Verdana' => [
+            1 => ['px' => 24, 'width' => 12.00000000],
+            2 => ['px' => 24, 'width' => 12.00000000],
+            3 => ['px' => 32, 'width' => 10.66406250],
+            4 => ['px' => 32, 'width' => 10.66406250],
+            5 => ['px' => 40, 'width' => 10.00000000],
+            6 => ['px' => 48, 'width' =>  9.59765625],
+            7 => ['px' => 48, 'width' =>  9.59765625],
+            8 => ['px' => 64, 'width' =>  9.14062500],
+            9 => ['px' => 72, 'width' =>  9.00000000],
+            10 => ['px' => 72, 'width' =>  9.00000000],
+        ],
+    ];
 
     /** @var array Cache containing the mapping column index => cell index */
     private static $columnIndexToCellIndexCache = [];
@@ -104,16 +104,16 @@ class CellHelper
      */
     public static function getColumnToIndexFromCellIndex($columnIndex)
     {
-        $originalColumnIndex =  preg_replace('/[0-9]+/', '',strtoupper($columnIndex));
+        $originalColumnIndex =  preg_replace('/[0-9]+/', '', strtoupper($columnIndex));
 
-        $capitalAAsciiValue = ord('A')-1;
+        $capitalAAsciiValue = ord('A') - 1;
 
         $columnIndex = strrev($originalColumnIndex);
 
         $cellIndex = 0;
 
-        for($i = 0 ; $i<strlen($columnIndex); $i++) {
-            $cellIndex += (ord(substr($columnIndex,$i,1)) - $capitalAAsciiValue)  * pow(26, $i);
+        for ($i = 0 ; $i < strlen($columnIndex); $i++) {
+            $cellIndex += (ord(substr($columnIndex, $i, 1)) - $capitalAAsciiValue)  * pow(26, $i);
         }
 
         return $cellIndex - 1;
@@ -157,7 +157,7 @@ class CellHelper
     {
         return (strpos($coord, ':') !== false) || (strpos($coord, ',') !== false);
     }
-    
+
     /**
      * Coordinate from string.
      *

@@ -2,8 +2,8 @@
 
 namespace SpoutX\Writer\XLSX\Manager\Comment;
 
-use SpoutX\Common\Helper\Escaper;
 use SpoutX\Common\Entity\Style\Style;
+use SpoutX\Common\Helper\Escaper;
 use SpoutX\Writer\Common\Entity\Comment;
 use SpoutX\Writer\Common\Entity\Worksheet;
 use SpoutX\Writer\Common\Helper\CellHelper;
@@ -14,7 +14,6 @@ use SpoutX\Writer\Common\Helper\CellHelper;
  */
 class CommentManager
 {
-
     /** @var Escaper\XLSX Strings escaper */
     protected $stringsEscaper;
 
@@ -119,7 +118,7 @@ EOD;
                 $content .= '<rPr><sz val="' . $fontSize . '"/><rFont val="' . $fontFamily . '"/><charset val="0"/></rPr>';
 
                 $content .= '<t xml:space="preserve">' . $this->stringsEscaper->escape($comment->getText()) . '</t></r></text>';
-            
+
 
                 $content .= '</comment>' . PHP_EOL;
             }

@@ -18,8 +18,9 @@ class StringHelper
      */
     public static function hasMbstringSupport()
     {
-        if (self::$hasMbstringSupport === null)
+        if (self::$hasMbstringSupport === null) {
             self::$hasMbstringSupport = extension_loaded('mbstring');
+        }
         return self::$hasMbstringSupport;
     }
 

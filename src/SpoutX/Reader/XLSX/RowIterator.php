@@ -3,6 +3,7 @@
 namespace SpoutX\Reader\XLSX;
 
 use SpoutX\Common\Entity\Cell;
+use SpoutX\Common\Entity\CellType;
 use SpoutX\Common\Entity\Row;
 use SpoutX\Common\Exception\IOException;
 use SpoutX\Reader\Common\Manager\RowManager;
@@ -21,16 +22,16 @@ use SpoutX\Reader\XLSX\Helper\CellValueFormatter;
 class RowIterator implements IteratorInterface
 {
     /** Definition of XML nodes names used to parse data */
-    const XML_NODE_DIMENSION = 'dimension';
-    const XML_NODE_WORKSHEET = 'worksheet';
-    const XML_NODE_ROW = 'row';
-    const XML_NODE_CELL = 'c';
+    public const XML_NODE_DIMENSION = 'dimension';
+    public const XML_NODE_WORKSHEET = 'worksheet';
+    public const XML_NODE_ROW = 'row';
+    public const XML_NODE_CELL = 'c';
 
     /** Definition of XML attributes used to parse data */
-    const XML_ATTRIBUTE_REF = 'ref';
-    const XML_ATTRIBUTE_SPANS = 'spans';
-    const XML_ATTRIBUTE_ROW_INDEX = 'r';
-    const XML_ATTRIBUTE_CELL_INDEX = 'r';
+    public const XML_ATTRIBUTE_REF = 'ref';
+    public const XML_ATTRIBUTE_SPANS = 'spans';
+    public const XML_ATTRIBUTE_ROW_INDEX = 'r';
+    public const XML_ATTRIBUTE_CELL_INDEX = 'r';
 
     /** @var string Path of the XLSX file being read */
     protected $filePath;
@@ -139,7 +140,7 @@ class RowIterator implements IteratorInterface
      * @throws \SpoutX\Common\Exception\IOException If the sheet data XML cannot be read
      * @return void
      */
-    public function rewind():void
+    public function rewind(): void
     {
         $this->xmlReader->close();
 
@@ -176,7 +177,7 @@ class RowIterator implements IteratorInterface
      * @throws \SpoutX\Common\Exception\IOException If unable to read the sheet data XML
      * @return void
      */
-    public function next():void
+    public function next(): void
     {
         $this->nextRowIndexToBeProcessed++;
 
@@ -362,7 +363,7 @@ class RowIterator implements IteratorInterface
             $cell = $this->entityFactory->createCell($cellValue);
         } catch (InvalidValueException $exception) {
             $cell = $this->entityFactory->createCell($exception->getInvalidValue());
-            $cell->setType(Cell::TYPE_ERROR);
+            $cell->setType(CellType::Error);
         }
 
         return $cell;
@@ -374,7 +375,7 @@ class RowIterator implements IteratorInterface
      *
      * @return Row|null
      */
-    public function current() : mixed
+    public function current(): mixed
     {
         $rowToBeProcessed = $this->rowBuffer;
 
@@ -399,7 +400,7 @@ class RowIterator implements IteratorInterface
      *
      * @return int
      */
-    public function key() : mixed
+    public function key(): mixed
     {
         // TODO: This should return $this->nextRowIndexToBeProcessed
         //       but to avoid a breaking change, the return value for

@@ -8,5 +8,5 @@ namespace SpoutX\Common;
  */
 abstract class Type
 {
-    const XLSX = 'xlsx';
+    public const XLSX = 'xlsx';
 }

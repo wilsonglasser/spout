@@ -3,6 +3,7 @@
 namespace SpoutX\Writer\XLSX\Manager;
 
 use SpoutX\Common\Entity\Cell;
+use SpoutX\Common\Entity\CellType;
 use SpoutX\Common\Entity\Row;
 use SpoutX\Common\Entity\Style\Style;
 use SpoutX\Common\Exception\InvalidArgumentException;
@@ -20,7 +21,6 @@ use SpoutX\Writer\Common\Manager\Style\StyleMerger;
 use SpoutX\Writer\Common\Manager\WorksheetManagerInterface;
 use SpoutX\Writer\XLSX\Manager\Style\StyleManager;
 
-
 /**
  * Class WorksheetManager
  * XLSX worksheet manager, providing the interfaces to work with XLSX worksheets.
@@ -33,9 +33,9 @@ class WorksheetManager implements WorksheetManagerInterface
      * @see https://support.office.com/en-us/article/Excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3 [Excel 2010]
      * @see https://support.office.com/en-us/article/Excel-specifications-and-limits-ca36e2dc-1f09-4620-b726-67c00b05040f [Excel 2013/2016]
      */
-    const MAX_CHARACTERS_PER_CELL = 32767;
+    public const MAX_CHARACTERS_PER_CELL = 32767;
 
-    const SHEET_XML_FILE_HEADER = <<<'EOD'
+    public const SHEET_XML_FILE_HEADER = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xml:space="preserve" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
            xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -92,8 +92,7 @@ EOD;
         SharedStringsManager $sharedStringsManager,
         XLSXEscaper $stringsEscaper,
         InternalEntityFactory $entityFactory
-    )
-    {
+    ) {
         $this->shouldUseInlineStrings = $optionsManager->getOption(Options::SHOULD_USE_INLINE_STRINGS);
         $this->rowManager = $rowManager;
         $this->styleManager = $styleManager;
@@ -151,7 +150,7 @@ EOD;
             if (isset($row[0]) && count($row[0]) > 0) {
                 $this->addNonEmptyRow($worksheet, $row);
             }
-        } else if (!$this->rowManager->isEmpty($row)) {
+        } elseif (!$this->rowManager->isEmpty($row)) {
             $this->addNonEmptyRow($worksheet, $row);
         }
 
@@ -257,7 +256,7 @@ EOD;
 
         if (strpos($text, "\n") !== false) {
             $lineTexts = explode("\n", $text);
-            $lineWidths = array();
+            $lineWidths = [];
             foreach ($lineTexts as $lineText) {
                 $lineWidths[] = StringHelper::getStringLength($lineText);
             }
@@ -266,10 +265,11 @@ EOD;
             $length = StringHelper::getStringLength($text);
         }
 
-        if (!isset($this->columnsMaxTextLength[$columnIndex]))
+        if (!isset($this->columnsMaxTextLength[$columnIndex])) {
             $this->columnsMaxTextLength[$columnIndex] = $length;
-        else
+        } else {
             $this->columnsMaxTextLength[$columnIndex] = max($this->columnsMaxTextLength[$columnIndex], $length);
+        }
         return $text;
     }
 
@@ -301,26 +301,27 @@ EOD;
             $value = $cell[1];
         }
 
-        if ($value === null)
+        if ($value === null) {
             $value = '';
+        }
 
-        if ($type === Cell::TYPE_STRING && preg_match('/[^-.0-9]/', $value)) {
+        if ($type === CellType::String && preg_match('/[^-.0-9]/', $value)) {
             $cellXML .= $this->getCellXMLFragmentForNonEmptyString($this->setColumnMaxCharacters($columnIndex, $value));
-        } elseif ($type === Cell::TYPE_FORMULA) {
-            $formulaType = '';                                                                                                                                                                                                                                                                
-            if (is_string($value[0]) && !is_numeric($value[0])) {                                                                                                                                                                                                                             
-                $formulaType = ' t="str"';                                                                                                                                                                                                                                                    
-            } elseif (is_bool($value[0])) {                                                                                                                                                                                                                                                   
-                $formulaType = ' t="b"';                                                                                                                                                                                                                                                      
-            }                                                                                                                                                                                                                                                                                 
-            $cellXML .= $formulaType . '><f>' . $value[1]. '</f><v>' . $this->setColumnMaxCharacters($columnIndex, $value[0]) . '</v></c>';    
-        } elseif ($type === Cell::TYPE_BOOLEAN) {
+        } elseif ($type === CellType::Formula) {
+            $formulaType = '';
+            if (is_string($value[0]) && !is_numeric($value[0])) {
+                $formulaType = ' t="str"';
+            } elseif (is_bool($value[0])) {
+                $formulaType = ' t="b"';
+            }
+            $cellXML .= $formulaType . '><f>' . $value[1]. '</f><v>' . $this->setColumnMaxCharacters($columnIndex, $value[0]) . '</v></c>';
+        } elseif ($type === CellType::Boolean) {
             $cellXML .= ' t="b"><v>' . $this->setColumnMaxCharacters($columnIndex, (int)($value)) . '</v></c>';
-        } elseif ($type === Cell::TYPE_NUMERIC || ($type == Cell::TYPE_STRING && !preg_match('/[^-.0-9]/', $value) && is_numeric($value))) {
+        } elseif ($type === CellType::Numeric || ($type == CellType::String && !preg_match('/[^-.0-9]/', $value) && is_numeric($value))) {
             $cellXML .= ' t="n"><v>' . $this->setColumnMaxCharacters($columnIndex, $value) . '</v></c>';
-        } elseif ($type === Cell::TYPE_DATE) {
+        } elseif ($type === CellType::Date) {
             $cellXML .= ' t="n"><v>' . $this->setColumnMaxCharacters($columnIndex, DateFormatHelper::toExcelDateFormat($value)) . '</v></c>';
-        } elseif ($type === Cell::TYPE_EMPTY || empty($value) ) {
+        } elseif ($type === CellType::Empty || empty($value)) {
             if ($this->styleManager->shouldApplyStyleOnEmptyCell($styleId)) {
                 $cellXML .= '/>';
             } else {
@@ -328,7 +329,7 @@ EOD;
                 // NOTE: not appending to $cellXML is the right behavior!!
                 $cellXML = '';
             }
-        } else if ($type === Cell::TYPE_STRING && !preg_match('/[^-.0-9]/', $value)) {
+        } elseif ($type === CellType::String && !preg_match('/[^-.0-9]/', $value)) {
             $cellXML .= $this->getCellXMLFragmentForNonEmptyString($this->setColumnMaxCharacters($columnIndex, $value));
         } else {
             throw new InvalidArgumentException('Trying to add a value with an unsupported type: ' . gettype($value));
@@ -398,7 +399,7 @@ EOD;
                     'min' => $cellIndex,
                     'max' => $cellIndex,
                     'width' => $columnDimension->getWidth() + ($sheet->getAutoFilter() !== null ? 2 : 0),
-                    'customWidth' => 'true'
+                    'customWidth' => 'true',
                 ];
 
                 // Column visibility
@@ -422,7 +423,7 @@ EOD;
                 }
 
                 $xml = '';
-                foreach($attributes as $k => $v) {
+                foreach ($attributes as $k => $v) {
                     $xml .= $k.'="'.$v.'" ';
                 }
 

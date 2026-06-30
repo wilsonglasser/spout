@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Common\Entity;
 
 use SpoutX\Common\Entity\Style\Style;
@@ -10,20 +12,15 @@ class Row
      * The cells in this row
      * @var Cell[]
      */
-    protected $cells = [];
+    protected array $cells = [];
+
+    /** The row style */
+    protected Style $style;
 
     /**
-     * The row style
-     * @var Style
-     */
-    protected $style;
-
-    /**
-     * Row constructor.
      * @param Cell[] $cells
-     * @param Style|null $style
      */
-    public function __construct(array $cells, $style)
+    public function __construct(array $cells, ?Style $style = null)
     {
         $this
             ->setCells($cells)
@@ -31,18 +28,17 @@ class Row
     }
 
     /**
-     * @return Cell[] $cells
+     * @return Cell[]
      */
-    public function getCells()
+    public function getCells(): array
     {
         return $this->cells;
     }
 
     /**
      * @param Cell[] $cells
-     * @return Row
      */
-    public function setCells(array $cells)
+    public function setCells(array $cells): self
     {
         $this->cells = [];
         foreach ($cells as $cell) {
@@ -52,61 +48,38 @@ class Row
         return $this;
     }
 
-    /**
-     * @param Cell $cell
-     * @param int $cellIndex
-     * @return Row
-     */
-    public function setCellAtIndex(Cell $cell, $cellIndex)
+    public function setCellAtIndex(Cell $cell, int $cellIndex): self
     {
         $this->cells[$cellIndex] = $cell;
 
         return $this;
     }
 
-    /**
-     * @param int $cellIndex
-     * @return Cell|null
-     */
-    public function getCellAtIndex($cellIndex)
+    public function getCellAtIndex(int $cellIndex): ?Cell
     {
-        return isset($this->cells[$cellIndex]) ? $this->cells[$cellIndex] : null;
+        return $this->cells[$cellIndex] ?? null;
     }
 
-    /**
-     * @param Cell $cell
-     * @return Row
-     */
-    public function addCell(Cell $cell)
+    public function addCell(Cell $cell): self
     {
         $this->cells[] = $cell;
 
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getNumCells()
+    public function getNumCells(): int
     {
         return count($this->cells);
     }
 
-    /**
-     * @return Style
-     */
-    public function getStyle()
+    public function getStyle(): Style
     {
         return $this->style;
     }
 
-    /**
-     * @param Style|null $style
-     * @return Row
-     */
-    public function setStyle($style)
+    public function setStyle(?Style $style): self
     {
-        $this->style = $style ?: new Style();
+        $this->style = $style ?? new Style();
 
         return $this;
     }
@@ -114,10 +87,8 @@ class Row
     /**
      * @return array The row values, as array
      */
-    public function toArray()
+    public function toArray(): array
     {
-        return array_map(function (Cell $cell) {
-            return $cell->getValue();
-        }, $this->cells);
+        return array_map(static fn (Cell $cell) => $cell->getValue(), $this->cells);
     }
 }

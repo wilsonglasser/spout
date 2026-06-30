@@ -3,6 +3,7 @@
 namespace SpoutX\Writer\Common\Manager\Style;
 
 use SpoutX\Common\Entity\Cell;
+use SpoutX\Common\Entity\CellType;
 use SpoutX\Common\Entity\Style\Style;
 
 /**
@@ -78,7 +79,7 @@ class StyleManager implements StyleManagerInterface
             $value = $cell->isString() ? $cell->getValue() : null;
         } else {
             $cellStyle = isset($cell[2]) ? $cell[2] : null;
-            $value = $cell[0] === Cell::TYPE_STRING ? $cell[1] : null;
+            $value = $cell[0] === CellType::String ? $cell[1] : null;
         }
 
         // if the "wrap text" option is already set, no-op

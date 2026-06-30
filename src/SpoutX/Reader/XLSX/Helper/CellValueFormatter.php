@@ -13,32 +13,32 @@ use SpoutX\Reader\XLSX\Manager\StyleManager;
 class CellValueFormatter
 {
     /** Definition of all possible cell types */
-    const CELL_TYPE_INLINE_STRING = 'inlineStr';
-    const CELL_TYPE_STR = 'str';
-    const CELL_TYPE_SHARED_STRING = 's';
-    const CELL_TYPE_BOOLEAN = 'b';
-    const CELL_TYPE_NUMERIC = 'n';
-    const CELL_TYPE_DATE = 'd';
-    const CELL_TYPE_ERROR = 'e';
+    public const CELL_TYPE_INLINE_STRING = 'inlineStr';
+    public const CELL_TYPE_STR = 'str';
+    public const CELL_TYPE_SHARED_STRING = 's';
+    public const CELL_TYPE_BOOLEAN = 'b';
+    public const CELL_TYPE_NUMERIC = 'n';
+    public const CELL_TYPE_DATE = 'd';
+    public const CELL_TYPE_ERROR = 'e';
 
     /** Definition of XML nodes names used to parse data */
-    const XML_NODE_VALUE = 'v';
-    const XML_NODE_INLINE_STRING_VALUE = 't';
+    public const XML_NODE_VALUE = 'v';
+    public const XML_NODE_INLINE_STRING_VALUE = 't';
 
     /** Definition of XML attributes used to parse data */
-    const XML_ATTRIBUTE_TYPE = 't';
-    const XML_ATTRIBUTE_STYLE_ID = 's';
+    public const XML_ATTRIBUTE_TYPE = 't';
+    public const XML_ATTRIBUTE_STYLE_ID = 's';
 
     /** Constants used for date formatting */
-    const NUM_SECONDS_IN_ONE_DAY = 86400;
-    const NUM_SECONDS_IN_ONE_HOUR = 3600;
-    const NUM_SECONDS_IN_ONE_MINUTE = 60;
+    public const NUM_SECONDS_IN_ONE_DAY = 86400;
+    public const NUM_SECONDS_IN_ONE_HOUR = 3600;
+    public const NUM_SECONDS_IN_ONE_MINUTE = 60;
 
     /**
      * February 29th, 1900 is NOT a leap year but Excel thinks it is...
      * @see https://en.wikipedia.org/wiki/Year_1900_problem#Microsoft_Excel
      */
-    const ERRONEOUS_EXCEL_LEAP_YEAR_DAY = 60;
+    public const ERRONEOUS_EXCEL_LEAP_YEAR_DAY = 60;
 
     /** @var SharedStringsManager Manages shared strings */
     protected $sharedStringsManager;

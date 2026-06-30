@@ -9,15 +9,15 @@ namespace SpoutX\Common\Entity\Style;
 class Style
 {
     /** Default font values */
-    const DEFAULT_FONT_SIZE = 11;
-    const DEFAULT_FONT_COLOR = Color::BLACK;
-    const DEFAULT_FONT_NAME = 'Arial';
-    const ALIGN_TOP = 'top';
-    const ALIGN_MIDDLE = 'center';
-    const ALIGN_DEFAULT = 'general';
-    const ALIGN_BOTTOM = 'bottom';
-    const ALIGN_LEFT = 'left';
-    const ALIGN_RIGHT = 'right';
+    public const DEFAULT_FONT_SIZE = 11;
+    public const DEFAULT_FONT_COLOR = Color::BLACK;
+    public const DEFAULT_FONT_NAME = 'Arial';
+    public const ALIGN_TOP = 'top';
+    public const ALIGN_MIDDLE = 'center';
+    public const ALIGN_DEFAULT = 'general';
+    public const ALIGN_BOTTOM = 'bottom';
+    public const ALIGN_LEFT = 'left';
+    public const ALIGN_RIGHT = 'right';
 
     /** @var int|null Style ID */
     private $id;
@@ -103,7 +103,8 @@ class Style
 
     private static $instance;
 
-    public static function defaultStyle() {
+    public static function defaultStyle()
+    {
         if (self::$instance === null) {
             self::$instance = new Style();
         }
@@ -427,7 +428,7 @@ class Style
      * @param string $verticalAlign Set text vertical align
      * @return Style
      */
-    public function setVerticalAlign($verticalAlign )
+    public function setVerticalAlign($verticalAlign)
     {
         $this->verticalAlign = $verticalAlign;
 
@@ -446,7 +447,7 @@ class Style
      * @param string $verticalAlign Set text vertical align
      * @return Style
      */
-    public function setHorizontalAlign($horizontalAlign )
+    public function setHorizontalAlign($horizontalAlign)
     {
         $this->horizontalAlign = $horizontalAlign;
 
@@ -457,7 +458,7 @@ class Style
      * @param bool
      * @return Style
      */
-    public function setShrinkToFit($shouldShrink=false)
+    public function setShrinkToFit($shouldShrink = false)
     {
         $this->shrinkToFit = $shouldShrink;
 
@@ -534,24 +535,24 @@ class Style
     /**
      * @return bool
      */
-    public function isRegistered() : bool
+    public function isRegistered(): bool
     {
         return $this->isRegistered;
     }
 
-    public function markAsRegistered(?int $id) : void
+    public function markAsRegistered(?int $id): void
     {
         $this->setId($id);
         $this->isRegistered = true;
     }
 
-    public function unmarkAsRegistered() : void
+    public function unmarkAsRegistered(): void
     {
         $this->setId(0);
         $this->isRegistered = false;
     }
 
-    public function isEmpty() : bool
+    public function isEmpty(): bool
     {
         return $this->isEmpty;
     }

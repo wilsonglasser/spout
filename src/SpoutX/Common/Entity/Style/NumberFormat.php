@@ -11,7 +11,7 @@ class NumberFormat
     protected $formatCode;
     protected $id;
 
-    function __construct($formatCode='')
+    public function __construct($formatCode = '')
     {
         $this->setFormatCode($formatCode);
     }
@@ -21,17 +21,20 @@ class NumberFormat
         return $this->id;
     }
 
-    public function setId($id) {
+    public function setId($id)
+    {
         $this->id = $id;
         return $this;
     }
 
-    public function getFormatCode() {
+    public function getFormatCode()
+    {
         return $this->formatCode;
     }
 
-    public function setFormatCode($formatCode) {
-        $this->formatCode = str_replace('"',"&quot;",$formatCode);
+    public function setFormatCode($formatCode)
+    {
+        $this->formatCode = str_replace('"', '&quot;', $formatCode);
         return $this;
     }
 }

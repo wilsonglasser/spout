@@ -79,7 +79,7 @@ class WorkbookManager extends WorkbookManagerAbstract
             ->createContentTypesFile($worksheets)
             ->createWorkbookFile($worksheets)
             ->createCommentsFile($this->getCommentManager(), $worksheets)
-            ->createWorkbookRelsFile($this->getCommentManager(),$worksheets)
+            ->createWorkbookRelsFile($this->getCommentManager(), $worksheets)
             ->createStylesFile($this->styleManager)
             ->zipRootFolderAndCopyToStream($finalFilePointer);
     }

@@ -24,8 +24,9 @@ class StyleMerger
      */
     public function merge($style, $baseStyle)
     {
-        if ($style === null)
+        if ($style === null) {
             return $baseStyle;
+        }
 
         $mergedStyle = clone $style;
 

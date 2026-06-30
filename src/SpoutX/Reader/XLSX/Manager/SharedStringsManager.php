@@ -17,19 +17,19 @@ use SpoutX\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyInterface;
 class SharedStringsManager
 {
     /** Main namespace for the sharedStrings.xml file */
-    const MAIN_NAMESPACE_FOR_SHARED_STRINGS_XML = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+    public const MAIN_NAMESPACE_FOR_SHARED_STRINGS_XML = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
 
     /** Definition of XML nodes names used to parse data */
-    const XML_NODE_SST = 'sst';
-    const XML_NODE_SI = 'si';
-    const XML_NODE_R = 'r';
-    const XML_NODE_T = 't';
+    public const XML_NODE_SST = 'sst';
+    public const XML_NODE_SI = 'si';
+    public const XML_NODE_R = 'r';
+    public const XML_NODE_T = 't';
 
     /** Definition of XML attributes used to parse data */
-    const XML_ATTRIBUTE_COUNT = 'count';
-    const XML_ATTRIBUTE_UNIQUE_COUNT = 'uniqueCount';
-    const XML_ATTRIBUTE_XML_SPACE = 'xml:space';
-    const XML_ATTRIBUTE_VALUE_PRESERVE = 'preserve';
+    public const XML_ATTRIBUTE_COUNT = 'count';
+    public const XML_ATTRIBUTE_UNIQUE_COUNT = 'uniqueCount';
+    public const XML_ATTRIBUTE_XML_SPACE = 'xml:space';
+    public const XML_ATTRIBUTE_VALUE_PRESERVE = 'preserve';
 
     /** @var string Path of the XLSX file being read */
     protected $filePath;

@@ -4,8 +4,8 @@ namespace SpoutX\Writer\Common\Entity;
 
 use SpoutX\Common\Entity\ColumnDimension;
 use SpoutX\Common\Entity\Style\Style;
-use SpoutX\Writer\Exception\InvalidSheetNameException ;
 use SpoutX\Writer\Common\Manager\SheetManager;
+use SpoutX\Writer\Exception\InvalidSheetNameException ;
 
 /**
  * Class Sheet
@@ -13,7 +13,7 @@ use SpoutX\Writer\Common\Manager\SheetManager;
  */
 class Sheet
 {
-    const DEFAULT_SHEET_NAME_PREFIX = 'Sheet';
+    public const DEFAULT_SHEET_NAME_PREFIX = 'Sheet';
 
     /** @var int Index of the sheet, based on order in the workbook (zero-based) */
     private $index;
@@ -117,7 +117,8 @@ class Sheet
     /**
      * @param string $range
      */
-    public function setAutoFilter($range) {
+    public function setAutoFilter($range)
+    {
         $this->autoFilter = $range;
     }
 
@@ -209,7 +210,7 @@ class Sheet
 
         foreach ($this->getColumnDimensions() as $colDimension) {
             if ($colDimension->getAutoSize() && isset($columnMaxLengths[$colDimension->getColumnIndex()])) {
-                $width = ColumnDimension::calculateColumnWidth($columnMaxLengths[$colDimension->getColumnIndex()],$defaultStyle); // tem q ver se tem style D: );
+                $width = ColumnDimension::calculateColumnWidth($columnMaxLengths[$colDimension->getColumnIndex()], $defaultStyle); // tem q ver se tem style D: );
                 $colDimension->setWidth($width > 0 ? $width : ColumnDimension::DEFAULT_COLUMN_WIDTH);
             }
         }

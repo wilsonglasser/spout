@@ -5,7 +5,6 @@ namespace SpoutX\Common\Creator;
 use SpoutX\Common\Helper\EncodingHelper;
 use SpoutX\Common\Helper\FileSystemHelper;
 use SpoutX\Common\Helper\GlobalFunctionsHelper;
-use SpoutX\Common\Helper\StringHelper;
 
 /**
  * Class HelperFactory

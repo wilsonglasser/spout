@@ -2,9 +2,7 @@
 
 namespace SpoutX\Reader\XLSX\Helper;
 
-use DateInterval;
 use DateTime;
-use PHPExcel_Shared_TimeZone;
 
 /**
  * Class DateFormatHelper
@@ -12,9 +10,9 @@ use PHPExcel_Shared_TimeZone;
  */
 class DateFormatHelper
 {
-    const KEY_GENERAL = 'general';
-    const KEY_HOUR_12 = '12h';
-    const KEY_HOUR_24 = '24h';
+    public const KEY_GENERAL = 'general';
+    public const KEY_HOUR_12 = '12h';
+    public const KEY_HOUR_24 = '24h';
 
     /**
      * This map is used to replace Excel format characters by their PHP equivalent.
@@ -71,9 +69,9 @@ class DateFormatHelper
         // TODO fix old dates
 
         $utc = new \DateTimeZone('UTC');
-        $dt = new \DateTime($year.'-'.$month.'-'.$day.'T'.str_pad($hours,2, '0', STR_PAD_LEFT).':'.str_pad($minutes,2, '0', STR_PAD_LEFT).':'.str_pad($seconds,2, '0', STR_PAD_LEFT), $utc);
+        $dt = new \DateTime($year.'-'.$month.'-'.$day.'T'.str_pad($hours, 2, '0', STR_PAD_LEFT).':'.str_pad($minutes, 2, '0', STR_PAD_LEFT).':'.str_pad($seconds, 2, '0', STR_PAD_LEFT), $utc);
 
-        return ($dt->getTimestamp()/86400)+25569;
+        return ($dt->getTimestamp() / 86400) + 25569;
 
 
     }

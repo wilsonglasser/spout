@@ -68,7 +68,8 @@ EOD;
      *
      * @return string
      */
-    protected function getNumberFormatContent() {
+    protected function getNumberFormatContent()
+    {
 
         $registeredStyles = $this->styleRegistry->getRegisteredStyles();
         $numberFormats = [];
@@ -92,20 +93,22 @@ EOD;
             /** @var Style $style */
             $style = $this->styleRegistry->getStyleFromStyleId($styleId);
             $format = $style->getFormat();
-            if ($numFmtId > $minNumFmtId)
+            if ($numFmtId > $minNumFmtId) {
                 $minNumFmtId = $numFmtId;
+            }
             $tags[] = '<numFmt numFmtId="' . $numFmtId . '" formatCode="' . $format . '"/>';
         }
 
-        if (count($numberFormats) + count($tags) == 0)
+        if (count($numberFormats) + count($tags) == 0) {
             return '';
+        }
 
         $content = '<numFmts count="'.(count($numberFormats) + count($tags)).'">';
 
 
         $id = ++$minNumFmtId;
 
-        foreach($numberFormats as $numberFormat) {
+        foreach ($numberFormats as $numberFormat) {
             $numberFormat->setId($id);
             $content .= '<numFmt numFmtId="'.$numberFormat->getId().'" formatCode="'.$numberFormat->getFormatCode().'" />';
             $id++;
@@ -265,7 +268,7 @@ EOD;
             $numFmtId = $this->getFormatIdForStyleId($styleId);
 
             $content .= '<xf
-            '.($style->getNumberFormat() !== null ? 'numFmtId="'.$style->getNumberFormat()->getId() .'" applyNumberFormat="1"': 'numFmtId="' . $numFmtId . '"' ).'
+            '.($style->getNumberFormat() !== null ? 'numFmtId="'.$style->getNumberFormat()->getId() .'" applyNumberFormat="1"' : 'numFmtId="' . $numFmtId . '"').'
             fontId="' . $styleId . '" fillId="' . $fillId . '" borderId="' . $borderId . '" xfId="0"';
 
             if ($style->shouldApplyFont()) {
@@ -294,7 +297,7 @@ EOD;
             }
             if (count($alignment)) {
                 $content .= ' applyAlignment="1"><alignment ';
-                foreach($alignment as $k => $v) {
+                foreach ($alignment as $k => $v) {
                     $content .= $k.'="'.$v.'" ';
                 }
                 $content .= '/></xf>';

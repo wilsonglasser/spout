@@ -12,20 +12,20 @@ use SpoutX\Reader\XLSX\Creator\InternalEntityFactory;
  */
 class WorkbookRelationshipsManager
 {
-    const BASE_PATH = 'xl/';
+    public const BASE_PATH = 'xl/';
 
     /** Path of workbook relationships XML file inside the XLSX file */
-    const WORKBOOK_RELS_XML_FILE_PATH = 'xl/_rels/workbook.xml.rels';
+    public const WORKBOOK_RELS_XML_FILE_PATH = 'xl/_rels/workbook.xml.rels';
 
     /** Relationships types */
-    const RELATIONSHIP_TYPE_SHARED_STRINGS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings';
-    const RELATIONSHIP_TYPE_STYLES = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles';
-    const RELATIONSHIP_TYPE_WORKSHEET = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet';
+    public const RELATIONSHIP_TYPE_SHARED_STRINGS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings';
+    public const RELATIONSHIP_TYPE_STYLES = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles';
+    public const RELATIONSHIP_TYPE_WORKSHEET = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet';
 
     /** Nodes and attributes used to find relevant information in the workbook relationships XML file */
-    const XML_NODE_RELATIONSHIP = 'Relationship';
-    const XML_ATTRIBUTE_TYPE = 'Type';
-    const XML_ATTRIBUTE_TARGET = 'Target';
+    public const XML_NODE_RELATIONSHIP = 'Relationship';
+    public const XML_ATTRIBUTE_TYPE = 'Type';
+    public const XML_ATTRIBUTE_TARGET = 'Target';
 
     /** @var string Path of the XLSX file being read */
     private $filePath;

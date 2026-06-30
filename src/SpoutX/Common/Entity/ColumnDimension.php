@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Common\Entity;
 
 use SpoutX\Common\Entity\Style\Style;
@@ -7,232 +9,126 @@ use SpoutX\Writer\Common\Helper\CellHelper;
 
 class ColumnDimension
 {
+    public const DEFAULT_COLUMN_WIDTH = 9.1;
 
-    const DEFAULT_COLUMN_WIDTH = 9.1;
-    /**
-     * Visible?
-     *
-     * @var bool
-     */
-    private $visible = true;
+    /** Outline level */
+    private int $outlineLevel = 0;
 
-    /**
-     * Outline level
-     *
-     * @var int
-     */
-    private $outlineLevel = 0;
+    /** Collapsed */
+    private bool $collapsed = false;
 
     /**
-     * Collapsed
-     *
-     * @var bool
+     * @param string|int $columnIndex Character column index
+     * @param float      $width       Column width. A negative value means the width should be ignored by the writer.
+     * @param bool       $autoSize    Whether the column width should be calculated from its content
+     * @param bool       $visible     Whether the column is visible
      */
-    private $collapsed = false;
-
-    /**
-     * Column index
-     *
-     * @var int
-     */
-    private $columnIndex;
-
-    /**
-     * Column width
-     *
-     * When this is set to a negative value, the column width should be ignored by IWriter
-     *
-     * @var double
-     */
-    private $width = -1;
-
-    /**
-     * Auto size?
-     *
-     * @var bool
-     */
-    private $autoSize = false;
-
-    /**
-     * Create a new ColumnDimension
-     *
-     * @param string|int $pIndex Character column index
-     * @param float $width Column width
-     * @param bool $autoSize Set to calculate the column width
-     * @param bool $visible Is visible?
-     */
-    public function __construct($pIndex = 'A', $width=-1, $autoSize = false, $visible= true)
-    {
-        // Initialise values
-        $this->columnIndex = $pIndex;
-        $this->width = $width;
-        $this->autoSize = $autoSize;
-        $this->visible = $visible;
+    public function __construct(
+        private string|int $columnIndex = 'A',
+        private float $width = -1,
+        private bool $autoSize = false,
+        private bool $visible = true,
+    ) {
     }
 
     /**
-     * Get ColumnIndex
-     *
-     * @return string
+     * @return string|int
      */
-    public function getColumnIndex()
+    public function getColumnIndex(): string|int
     {
         return $this->columnIndex;
     }
 
-    /**
-     * Set ColumnIndex
-     *
-     * @param string $pValue
-     * @return ColumnDimension
-     */
-    public function setColumnIndex($pValue)
+    public function setColumnIndex(string|int $value): self
     {
-        $this->columnIndex = $pValue;
+        $this->columnIndex = $value;
+
         return $this;
     }
 
-    /**
-     * Get Width
-     *
-     * @return double
-     */
-    public function getWidth()
+    public function getWidth(): float
     {
         return $this->width;
     }
 
-    /**
-     * Set Width
-     *
-     * @param double $pValue
-     * @return ColumnDimension
-     */
-    public function setWidth($pValue = -1)
+    public function setWidth(float $value = -1): self
     {
-        $this->width = $pValue;
+        $this->width = $value;
+
         return $this;
     }
 
-    /**
-     * Get Auto Size
-     *
-     * @return bool
-     */
-    public function getAutoSize()
+    public function getAutoSize(): bool
     {
         return $this->autoSize;
     }
 
-    /**
-     * Set Auto Size
-     *
-     * @param bool $pValue
-     * @return ColumnDimension
-     */
-    public function setAutoSize($pValue = false)
+    public function setAutoSize(bool $value = false): self
     {
-        $this->autoSize = $pValue;
+        $this->autoSize = $value;
+
         return $this;
     }
 
-    /**
-     * Get Visible
-     *
-     * @return bool
-     */
-    public function getVisible()
+    public function getVisible(): bool
     {
         return $this->visible;
     }
 
-    /**
-     * Set Visible
-     *
-     * @param bool $pValue
-     * @return ColumnDimension
-     */
-    public function setVisible($pValue = true)
+    public function setVisible(bool $value = true): self
     {
-        $this->visible = $pValue;
+        $this->visible = $value;
+
         return $this;
     }
 
-    /**
-     * Get Outline Level
-     *
-     * @return int
-     */
-    public function getOutlineLevel()
+    public function getOutlineLevel(): int
     {
         return $this->outlineLevel;
     }
 
     /**
-     * Set Outline Level
+     * Value must be between 0 and 7.
      *
-     * Value must be between 0 and 7
-     *
-     * @param int $pValue
-     * @return ColumnDimension
-     * @throws
+     * @throws \InvalidArgumentException
      */
-    public function setOutlineLevel($pValue)
+    public function setOutlineLevel(int $value): self
     {
-        if ($pValue < 0 || $pValue > 7) {
-            throw new \Exception("Outline level must range between 0 and 7.");
+        if ($value < 0 || $value > 7) {
+            throw new \InvalidArgumentException('Outline level must range between 0 and 7.');
         }
 
-        $this->outlineLevel = $pValue;
+        $this->outlineLevel = $value;
+
         return $this;
     }
 
-    /**
-     * Get Collapsed
-     *
-     * @return bool
-     */
-    public function getCollapsed()
+    public function getCollapsed(): bool
     {
         return $this->collapsed;
     }
 
-    /**
-     * Set Collapsed
-     *
-     * @param bool $pValue
-     * @return ColumnDimension
-     */
-    public function setCollapsed($pValue = true)
+    public function setCollapsed(bool $value = true): self
     {
-        $this->collapsed = $pValue;
+        $this->collapsed = $value;
+
         return $this;
     }
 
     /**
-     * Get approximate width in pixels for a string of text in a certain font at a certain rotation angle
+     * Approximate width in pixels for a string of text in a given font.
      *
-     * @param int $cellLength
-     * @param Style $style
      * @return int Text width in pixels (no padding added)
      */
-    public static function getTextWidthPixelsApprox($cellLength, ?Style $style = null)
+    public static function getTextWidthPixelsApprox(int $cellLength, ?Style $style = null): int
     {
         $fontName = $style->getFontName();
         $fontSize = $style->getFontSize();
 
         // Calculate column width in pixels. We assume fixed glyph width. Result varies with font name and size.
         switch ($fontName) {
-            case 'Calibri':
-            default:
-                // value 8.26 was found via interpolation by inspecting real Excel files with Calibri 11 font.
-                $byWidth = 8.26;
-                $bySize = 11;
-                break;
-
             case 'Arial':
                 // value 7 was found via interpolation by inspecting real Excel files with Arial 10 font.
-//                $columnWidth = (int) (7 * PHPExcel_Shared_String::CountCharacters($columnText));
                 // value 8 was set because of experience in different exports at Arial 10 font.
                 $byWidth = 8;
                 $bySize = 10;
@@ -241,25 +137,29 @@ class ColumnDimension
             case 'Verdana':
                 $byWidth = 8;
                 $bySize = 10;
+                break;
 
+            case 'Calibri':
+            default:
+                // value 8.26 was found via interpolation by inspecting real Excel files with Calibri 11 font.
+                $byWidth = 8.26;
+                $bySize = 11;
                 break;
         }
 
-        $columnWidth = (int)($byWidth * $cellLength);
+        $columnWidth = (int) ($byWidth * $cellLength);
         $columnWidth = $columnWidth * $fontSize / $bySize; // extrapolate from font size
 
         // pixel width is an integer
-        return (int)$columnWidth;
+        return (int) $columnWidth;
     }
 
     /**
-     * Calculate an (approximate) OpenXML column width, based on font size and text contained
+     * Calculate an (approximate) OpenXML column width, based on font size and text contained.
      *
-     * @param int $cellLength
-     * @param Style $defaultStyle Style object
-     * @return integer Column width
+     * @return float Column width
      */
-    public static function calculateColumnWidth($cellLength,  Style $defaultStyle)
+    public static function calculateColumnWidth(int $cellLength, Style $defaultStyle): float
     {
         $columnWidthAdjust = self::getTextWidthPixelsApprox(1, $defaultStyle);
         // Width of text in pixels excl. padding, approximation
@@ -269,7 +169,6 @@ class ColumnDimension
         // Convert from pixel width to column width
         $columnWidth = CellHelper::pixelsToCellDimension($columnWidth, $defaultStyle);
 
-        // Return
         return round($columnWidth, 6);
     }
 }

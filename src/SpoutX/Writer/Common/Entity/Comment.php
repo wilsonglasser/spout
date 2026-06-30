@@ -2,16 +2,15 @@
 
 namespace SpoutX\Writer\Common\Entity;
 
-
 use SpoutX\Common\Entity\Style\Style;
+
 /**
  * Class Cell
  */
 class Comment
 {
+    public const DEFAULT_BACKGROUND_COLOR = '#FFFFE1';
 
-    const DEFAULT_BACKGROUND_COLOR = '#FFFFE1';
-    
     /**
      * The comment cell
      * @var string
@@ -168,7 +167,8 @@ class Comment
     /**
      * @param $visible
      */
-    public function setVisible($visible) {
+    public function setVisible($visible)
+    {
         $this->visible = $visible;
     }
 
@@ -196,7 +196,8 @@ class Comment
     /**
      * @return bool
      */
-    public function getVisible() {
+    public function getVisible()
+    {
         return $this->visible;
     }
     /**

@@ -11,7 +11,7 @@ class XMLReader extends \XMLReader
 {
     use XMLInternalErrorsHelper;
 
-    const ZIP_WRAPPER = 'zip://';
+    public const ZIP_WRAPPER = 'zip://';
 
     /**
      * Opens the XML Reader to read a file located inside a ZIP file.
@@ -83,7 +83,7 @@ class XMLReader extends \XMLReader
      * @throws \SpoutX\Reader\Exception\XMLProcessingException If an error/warning occurred
      * @return bool TRUE on success or FALSE on failure
      */
-    public function read():bool
+    public function read(): bool
     {
         $this->useXMLInternalErrors();
 
@@ -120,7 +120,7 @@ class XMLReader extends \XMLReader
      * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
      */
     public function next(#[LanguageLevelTypeAware(['8.0' => 'string|null'], default: '')] $name = null): bool
-        {
+    {
         $this->useXMLInternalErrors();
 
         $wasNextSuccessful = parent::next($name);

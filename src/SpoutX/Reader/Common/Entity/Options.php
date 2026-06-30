@@ -9,10 +9,10 @@ namespace SpoutX\Reader\Common\Entity;
 abstract class Options
 {
     // Common options
-    const SHOULD_FORMAT_DATES = 'shouldFormatDates';
-    const SHOULD_PRESERVE_EMPTY_ROWS = 'shouldPreserveEmptyRows';
+    public const SHOULD_FORMAT_DATES = 'shouldFormatDates';
+    public const SHOULD_PRESERVE_EMPTY_ROWS = 'shouldPreserveEmptyRows';
 
     // XLSX specific options
-    const TEMP_FOLDER = 'tempFolder';
-    const SHOULD_USE_1904_DATES = 'shouldUse1904Dates';
+    public const TEMP_FOLDER = 'tempFolder';
+    public const SHOULD_USE_1904_DATES = 'shouldUse1904Dates';
 }

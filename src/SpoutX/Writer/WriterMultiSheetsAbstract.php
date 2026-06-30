@@ -3,7 +3,6 @@
 namespace SpoutX\Writer;
 
 use SpoutX\Common\Creator\HelperFactory;
-use SpoutX\Common\Entity\Row;
 use SpoutX\Common\Helper\GlobalFunctionsHelper;
 use SpoutX\Common\Manager\OptionsManagerInterface;
 use SpoutX\Writer\Common\Creator\ManagerFactoryInterface;

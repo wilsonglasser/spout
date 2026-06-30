@@ -9,10 +9,10 @@ namespace SpoutX\Writer\Common\Entity;
 abstract class Options
 {
     // Multisheets options
-    const TEMP_FOLDER = 'tempFolder';
-    const DEFAULT_ROW_STYLE = 'defaultRowStyle';
-    const SHOULD_CREATE_NEW_SHEETS_AUTOMATICALLY = 'shouldCreateNewSheetsAutomatically';
+    public const TEMP_FOLDER = 'tempFolder';
+    public const DEFAULT_ROW_STYLE = 'defaultRowStyle';
+    public const SHOULD_CREATE_NEW_SHEETS_AUTOMATICALLY = 'shouldCreateNewSheetsAutomatically';
 
     // XLSX specific options
-    const SHOULD_USE_INLINE_STRINGS = 'shouldUseInlineStrings';
+    public const SHOULD_USE_INLINE_STRINGS = 'shouldUseInlineStrings';
 }
