@@ -1,68 +1,68 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Writer\XLSX\Helper;
 
-use SpoutX\Common\Entity\Style\Border;
 use SpoutX\Common\Entity\Style\BorderPart;
 
 class BorderHelper
 {
-    public static $xlsxStyleMap = [
-        Border::STYLE_SOLID => [
-            Border::WIDTH_THIN   => 'thin',
-            Border::WIDTH_MEDIUM => 'medium',
-            Border::WIDTH_THICK  => 'thick',
+    /**
+     * Maps a border style + width (by their backing value) to the XLSX line style.
+     *
+     * @var array<string, array<string, string>>
+     */
+    public static array $xlsxStyleMap = [
+        'solid' => [
+            'thin' => 'thin',
+            'medium' => 'medium',
+            'thick' => 'thick',
         ],
-        Border::STYLE_DOTTED => [
-            Border::WIDTH_THIN   => 'dotted',
-            Border::WIDTH_MEDIUM => 'dotted',
-            Border::WIDTH_THICK  => 'dotted',
+        'dotted' => [
+            'thin' => 'dotted',
+            'medium' => 'dotted',
+            'thick' => 'dotted',
         ],
-        Border::STYLE_DASHED => [
-            Border::WIDTH_THIN   => 'dashed',
-            Border::WIDTH_MEDIUM => 'mediumDashed',
-            Border::WIDTH_THICK  => 'mediumDashed',
+        'dashed' => [
+            'thin' => 'dashed',
+            'medium' => 'mediumDashed',
+            'thick' => 'mediumDashed',
         ],
-        Border::STYLE_DOUBLE => [
-            Border::WIDTH_THIN   => 'double',
-            Border::WIDTH_MEDIUM => 'double',
-            Border::WIDTH_THICK  => 'double',
+        'double' => [
+            'thin' => 'double',
+            'medium' => 'double',
+            'thick' => 'double',
         ],
-        Border::STYLE_NONE => [
-            Border::WIDTH_THIN   => 'none',
-            Border::WIDTH_MEDIUM => 'none',
-            Border::WIDTH_THICK  => 'none',
+        'none' => [
+            'thin' => 'none',
+            'medium' => 'none',
+            'thick' => 'none',
         ],
     ];
 
-    /**
-     * @param BorderPart $borderPart
-     * @return string
-     */
-    public static function serializeBorderPart(BorderPart $borderPart)
+    public static function serializeBorderPart(BorderPart $borderPart): string
     {
         $borderStyle = self::getBorderStyle($borderPart);
+        $name = $borderPart->getName()->value;
 
         $colorEl = $borderPart->getColor() ? sprintf('<color rgb="%s"/>', $borderPart->getColor()) : '';
         $partEl = sprintf(
             '<%s style="%s">%s</%s>',
-            $borderPart->getName(),
+            $name,
             $borderStyle,
             $colorEl,
-            $borderPart->getName()
+            $name
         );
 
         return $partEl . PHP_EOL;
     }
 
     /**
-     * Get the style definition from the style map
-     *
-     * @param BorderPart $borderPart
-     * @return string
+     * Get the style definition from the style map.
      */
-    protected static function getBorderStyle(BorderPart $borderPart)
+    protected static function getBorderStyle(BorderPart $borderPart): string
     {
-        return self::$xlsxStyleMap[$borderPart->getStyle()][$borderPart->getWidth()];
+        return self::$xlsxStyleMap[$borderPart->getStyle()->value][$borderPart->getWidth()->value];
     }
 }

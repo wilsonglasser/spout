@@ -2,6 +2,7 @@
 
 namespace SpoutX\Writer\XLSX\Manager\Style;
 
+use SpoutX\Common\Entity\Style\BorderName;
 use SpoutX\Common\Entity\Style\Color;
 use SpoutX\Common\Entity\Style\Style;
 use SpoutX\Writer\XLSX\Helper\BorderHelper;
@@ -218,12 +219,11 @@ EOD;
             $content .= '<border>';
 
             // @link https://github.com/box/spout/issues/271
-            $sortOrder = ['left', 'right', 'top', 'bottom'];
+            $sortOrder = [BorderName::Left, BorderName::Right, BorderName::Top, BorderName::Bottom];
 
             foreach ($sortOrder as $partName) {
-                if ($border->hasPart($partName)) {
-                    /** @var $part \SpoutX\Common\Entity\Style\BorderPart */
-                    $part = $border->getPart($partName);
+                $part = $border->getPart($partName);
+                if ($part !== null) {
                     $content .= BorderHelper::serializeBorderPart($part);
                 }
             }

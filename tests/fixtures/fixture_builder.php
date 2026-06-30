@@ -8,13 +8,16 @@
  *   - tests/fixtures/dump_golden.php  (run at the oracle commit to capture golden XML)
  *   - tests/SpoutX/CharacterizationTest.php  (asserts HEAD produces identical XML)
  *
- * IMPORTANT: only use the public API that exists at BOTH the oracle commit and
- * HEAD, and keep every value deterministic (no timestamps, no randomness).
+ * The golden fixtures under tests/fixtures/golden/ are the locked oracle (first
+ * captured at commit f39c910). This builder tracks the CURRENT public API and
+ * must keep producing byte-identical XML (modulo line endings). Keep every value
+ * deterministic (no timestamps, no randomness).
  */
 
 use SpoutX\Common\Entity\Cell;
 use SpoutX\Common\Entity\ColumnDimension;
-use SpoutX\Common\Entity\Style\Border;
+use SpoutX\Common\Entity\Style\BorderStyle;
+use SpoutX\Common\Entity\Style\BorderWidth;
 use SpoutX\Common\Entity\Style\Color;
 use SpoutX\Common\Entity\Style\Style;
 use SpoutX\Common\Type;
@@ -26,8 +29,8 @@ use SpoutX\Writer\Common\Entity\Comment;
 function spoutx_build_fixture_xlsx(string $path): void
 {
     $border = (new BorderBuilder())
-        ->setBorderTop(Color::RED, Border::WIDTH_THIN, Border::STYLE_SOLID)
-        ->setBorderBottom(Color::BLACK, Border::WIDTH_MEDIUM, Border::STYLE_DASHED)
+        ->setBorderTop(Color::RED, BorderWidth::Thin, BorderStyle::Solid)
+        ->setBorderBottom(Color::BLACK, BorderWidth::Medium, BorderStyle::Dashed)
         ->build();
 
     $headerStyle = (new StyleBuilder())

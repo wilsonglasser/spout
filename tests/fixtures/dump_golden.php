@@ -48,4 +48,4 @@ foreach ($entries as $entry) {
 $zip->close();
 unlink($xlsxPath);
 
-echo "Wrote golden entries: " . implode(', ', $written) . "\n";
+echo 'Wrote golden entries: ' . implode(', ', $written) . "\n";

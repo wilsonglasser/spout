@@ -1,84 +1,58 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Common\Entity\Style;
 
-/**
- * Class Border
- */
 class Border
 {
-    public const LEFT = 'left';
-    public const RIGHT = 'right';
-    public const TOP = 'top';
-    public const BOTTOM = 'bottom';
-
-    public const STYLE_NONE = 'none';
-    public const STYLE_SOLID = 'solid';
-    public const STYLE_DASHED = 'dashed';
-    public const STYLE_DOTTED = 'dotted';
-    public const STYLE_DOUBLE = 'double';
-
-    public const WIDTH_THIN = 'thin';
-    public const WIDTH_MEDIUM = 'medium';
-    public const WIDTH_THICK = 'thick';
-
-    /** @var array A list of BorderPart objects for this border. */
-    private $parts = [];
+    /**
+     * The border parts, keyed by edge name.
+     *
+     * @var array<string, BorderPart>
+     */
+    private array $parts = [];
 
     /**
-     * @param array $borderParts
+     * @param BorderPart[] $borderParts
      */
     public function __construct(array $borderParts = [])
     {
         $this->setParts($borderParts);
     }
 
-    /**
-     * @param string $name The name of the border part
-     * @return BorderPart|null
-     */
-    public function getPart($name)
+    public function getPart(BorderName $name): ?BorderPart
     {
-        return $this->hasPart($name) ? $this->parts[$name] : null;
+        return $this->parts[$name->value] ?? null;
+    }
+
+    public function hasPart(BorderName $name): bool
+    {
+        return isset($this->parts[$name->value]);
     }
 
     /**
-     * @param string $name The name of the border part
-     * @return bool
+     * @return array<string, BorderPart>
      */
-    public function hasPart($name)
-    {
-        return isset($this->parts[$name]);
-    }
-
-    /**
-     * @return array
-     */
-    public function getParts()
+    public function getParts(): array
     {
         return $this->parts;
     }
 
     /**
-     * Set BorderParts
-     * @param array $parts
-     * @return void
+     * @param BorderPart[] $parts
      */
-    public function setParts($parts)
+    public function setParts(array $parts): void
     {
-        unset($this->parts);
+        $this->parts = [];
         foreach ($parts as $part) {
             $this->addPart($part);
         }
     }
 
-    /**
-     * @param BorderPart $borderPart
-     * @return Border
-     */
-    public function addPart(BorderPart $borderPart)
+    public function addPart(BorderPart $borderPart): self
     {
-        $this->parts[$borderPart->getName()] = $borderPart;
+        $this->parts[$borderPart->getName()->value] = $borderPart;
 
         return $this;
     }
