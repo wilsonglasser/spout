@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Common\Creator;
 
 use SpoutX\Common\Helper\EncodingHelper;

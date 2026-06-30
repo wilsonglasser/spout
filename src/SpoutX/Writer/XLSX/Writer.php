@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Writer\XLSX;
 
 use SpoutX\Writer\Common\Entity\Options;

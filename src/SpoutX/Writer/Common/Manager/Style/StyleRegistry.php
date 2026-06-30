@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Writer\Common\Manager\Style;
 
 use SpoutX\Common\Entity\Style\Style;

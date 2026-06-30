@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Reader\XLSX;
 
 use SpoutX\Reader\Exception\NoSheetsFoundException;

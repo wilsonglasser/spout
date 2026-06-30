@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Reader\Common\Manager;
 
 use SpoutX\Common\Entity\Row;

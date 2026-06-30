@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Writer\XLSX\Manager;
 
 use SpoutX\Common\Entity\Cell;
@@ -247,12 +249,10 @@ EOD;
 
     /**
      * Increment max length for column
-     * @param string $columnIndex
-     * @param string $text
-     * @return string
      */
-    protected function setColumnMaxCharacters($columnIndex, $text)
+    protected function setColumnMaxCharacters(string $columnIndex, int|float|string|bool $text): string
     {
+        $text = (string) $text;
 
         if (strpos($text, "\n") !== false) {
             $lineTexts = explode("\n", $text);

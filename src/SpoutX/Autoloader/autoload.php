@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Autoloader;
 
 require_once 'Psr4Autoloader.php';

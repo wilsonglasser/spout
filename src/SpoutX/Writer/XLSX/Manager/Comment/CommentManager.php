@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Writer\XLSX\Manager\Comment;
 
 use SpoutX\Common\Entity\Style\Style;
@@ -180,7 +182,7 @@ EOD;
         [$column, $row] = CellHelper::coordinateFromString($pComment->getCell());
         $column = CellHelper::getColumnToIndexFromCellIndex($column) + 1;
         $id = 1024 + $column + $row;
-        $id = substr($id, 0, 4);
+        $id = substr((string) $id, 0, 4);
 
         $bgColor = (!empty($pComment->getStyle()->getBackgroundColor()) ? $pComment->getStyle()->getBackgroundColor() : Comment::DEFAULT_BACKGROUND_COLOR);
 

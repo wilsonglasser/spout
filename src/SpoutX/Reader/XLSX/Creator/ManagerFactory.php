@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Reader\XLSX\Creator;
 
 use SpoutX\Reader\Common\Manager\RowManager;

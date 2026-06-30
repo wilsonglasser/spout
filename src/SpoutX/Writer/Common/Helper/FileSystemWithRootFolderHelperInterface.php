@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Writer\Common\Helper;
 
 use SpoutX\Common\Helper\FileSystemHelperInterface;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Writer\XLSX\Helper;
 
 use SpoutX\Writer\Common\Entity\Worksheet;
