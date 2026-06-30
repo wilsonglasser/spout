@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Reader\Exception;
 
 use SpoutX\Common\Exception\SpoutException;
