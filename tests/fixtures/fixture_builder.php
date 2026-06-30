@@ -18,8 +18,9 @@ use SpoutX\Common\Entity\Cell;
 use SpoutX\Common\Entity\ColumnDimension;
 use SpoutX\Common\Entity\Style\BorderStyle;
 use SpoutX\Common\Entity\Style\BorderWidth;
+use SpoutX\Common\Entity\Style\CellAlignment;
+use SpoutX\Common\Entity\Style\CellVerticalAlignment;
 use SpoutX\Common\Entity\Style\Color;
-use SpoutX\Common\Entity\Style\Style;
 use SpoutX\Common\Type;
 use SpoutX\Writer\Common\Creator\Style\BorderBuilder;
 use SpoutX\Writer\Common\Creator\Style\StyleBuilder;
@@ -40,14 +41,14 @@ function spoutx_build_fixture_xlsx(string $path): void
         ->setFontColor(Color::WHITE)
         ->setBackgroundColor(Color::DARK_RED)
         ->setBorder($border)
-        ->setHorizontalAlign(Style::ALIGN_MIDDLE)
-        ->setVerticalAlign(Style::ALIGN_MIDDLE)
+        ->setHorizontalAlign(CellAlignment::Center)
+        ->setVerticalAlign(CellVerticalAlignment::Center)
         ->setShouldWrapText()
         ->build();
 
     $moneyStyle = (new StyleBuilder())
         ->setFormat('#,##0.00')
-        ->setHorizontalAlign(Style::ALIGN_RIGHT)
+        ->setHorizontalAlign(CellAlignment::Right)
         ->build();
 
     $writer = WriterEntityFactory::createWriter(Type::XLSX);

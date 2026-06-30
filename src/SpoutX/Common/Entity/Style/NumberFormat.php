@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Common\Entity\Style;
 
 /**
@@ -8,33 +10,35 @@ namespace SpoutX\Common\Entity\Style;
  */
 class NumberFormat
 {
-    protected $formatCode;
-    protected $id;
+    protected string $formatCode = '';
+    protected ?int $id = null;
 
-    public function __construct($formatCode = '')
+    public function __construct(string $formatCode = '')
     {
         $this->setFormatCode($formatCode);
     }
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId($id)
+    public function setId(int $id): self
     {
         $this->id = $id;
+
         return $this;
     }
 
-    public function getFormatCode()
+    public function getFormatCode(): string
     {
         return $this->formatCode;
     }
 
-    public function setFormatCode($formatCode)
+    public function setFormatCode(string $formatCode): self
     {
         $this->formatCode = str_replace('"', '&quot;', $formatCode);
+
         return $this;
     }
 }

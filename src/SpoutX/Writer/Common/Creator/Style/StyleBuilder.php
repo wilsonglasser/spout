@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Writer\Common\Creator\Style;
 
 use SpoutX\Common\Entity\Style\Border;
+use SpoutX\Common\Entity\Style\CellAlignment;
+use SpoutX\Common\Entity\Style\CellVerticalAlignment;
 use SpoutX\Common\Entity\Style\NumberFormat;
 use SpoutX\Common\Entity\Style\Style;
 
@@ -12,12 +16,9 @@ use SpoutX\Common\Entity\Style\Style;
  */
 class StyleBuilder
 {
-    /** @var Style Style to be created */
-    protected $style;
+    /** Style to be created */
+    protected Style $style;
 
-    /**
-     *
-     */
     public function __construct()
     {
         $this->style = new Style();
@@ -25,10 +26,8 @@ class StyleBuilder
 
     /**
      * Makes the font bold.
-     *
-     * @return StyleBuilder
      */
-    public function setFontBold()
+    public function setFontBold(): self
     {
         $this->style->setFontBold();
 
@@ -37,10 +36,8 @@ class StyleBuilder
 
     /**
      * Makes the font italic.
-     *
-     * @return StyleBuilder
      */
-    public function setFontItalic()
+    public function setFontItalic(): self
     {
         $this->style->setFontItalic();
 
@@ -49,10 +46,8 @@ class StyleBuilder
 
     /**
      * Makes the font underlined.
-     *
-     * @return StyleBuilder
      */
-    public function setFontUnderline()
+    public function setFontUnderline(): self
     {
         $this->style->setFontUnderline();
 
@@ -61,10 +56,8 @@ class StyleBuilder
 
     /**
      * Makes the font struck through.
-     *
-     * @return StyleBuilder
      */
-    public function setFontStrikethrough()
+    public function setFontStrikethrough(): self
     {
         $this->style->setFontStrikethrough();
 
@@ -75,9 +68,8 @@ class StyleBuilder
      * Sets the font size.
      *
      * @param int $fontSize Font size, in pixels
-     * @return StyleBuilder
      */
-    public function setFontSize($fontSize)
+    public function setFontSize(int $fontSize): self
     {
         $this->style->setFontSize($fontSize);
 
@@ -88,9 +80,8 @@ class StyleBuilder
      * Sets the font color.
      *
      * @param string $fontColor ARGB color (@see Color)
-     * @return StyleBuilder
      */
-    public function setFontColor($fontColor)
+    public function setFontColor(string $fontColor): self
     {
         $this->style->setFontColor($fontColor);
 
@@ -101,9 +92,8 @@ class StyleBuilder
      * Sets the font name.
      *
      * @param string $fontName Name of the font to use
-     * @return StyleBuilder
      */
-    public function setFontName($fontName)
+    public function setFontName(string $fontName): self
     {
         $this->style->setFontName($fontName);
 
@@ -114,9 +104,8 @@ class StyleBuilder
      * Makes the text wrap in the cell if requested
      *
      * @param bool $shouldWrap Should the text be wrapped
-     * @return StyleBuilder
      */
-    public function setShouldWrapText($shouldWrap = true)
+    public function setShouldWrapText(bool $shouldWrap = true): self
     {
         $this->style->setShouldWrapText($shouldWrap);
 
@@ -126,10 +115,9 @@ class StyleBuilder
     /**
      * Makes the text shrink to fit in the cell if requested
      *
-     * @param bool $$shouldShrink Should the text be shrinked
-     * @return StyleBuilder
+     * @param bool $shouldShrink Should the text be shrunk
      */
-    public function setShrinkToFit($shouldShrink = false)
+    public function setShrinkToFit(bool $shouldShrink = false): self
     {
         $this->style->setShrinkToFit($shouldShrink);
 
@@ -138,11 +126,8 @@ class StyleBuilder
 
     /**
      * Set a border
-     *
-     * @param Border $border
-     * @return $this
      */
-    public function setBorder(Border $border)
+    public function setBorder(Border $border): self
     {
         $this->style->setBorder($border);
 
@@ -151,11 +136,8 @@ class StyleBuilder
 
     /**
      * Sets the number format.
-     *
-     * @param NumberFormat $numberFormat
-     * @return $this
      */
-    public function setNumberFormat($numberFormat)
+    public function setNumberFormat(NumberFormat $numberFormat): self
     {
         $this->style->setNumberFormat($numberFormat);
 
@@ -163,12 +145,11 @@ class StyleBuilder
     }
 
     /**
-     *  Sets a background color
+     * Sets a background color
      *
      * @param string $color ARGB color (@see Color)
-     * @return StyleBuilder
      */
-    public function setBackgroundColor($color)
+    public function setBackgroundColor(string $color): self
     {
         $this->style->setBackgroundColor($color);
 
@@ -176,12 +157,9 @@ class StyleBuilder
     }
 
     /**
-     *  Sets the horizontal align
-     *
-     * @param string $align
-     * @return StyleBuilder
+     * Sets the horizontal align
      */
-    public function setHorizontalAlign($align)
+    public function setHorizontalAlign(CellAlignment $align): self
     {
         $this->style->setHorizontalAlign($align);
 
@@ -189,12 +167,9 @@ class StyleBuilder
     }
 
     /**
-     *  Sets the vertical align
-     *
-     * @param string $align
-     * @return StyleBuilder
+     * Sets the vertical align
      */
-    public function setVerticalAlign($align)
+    public function setVerticalAlign(CellVerticalAlignment $align): self
     {
         $this->style->setVerticalAlign($align);
 
@@ -203,11 +178,8 @@ class StyleBuilder
 
     /**
      * Set row height
-     *
-     * @param float $height
-     * @return $this
      */
-    public function setRowHeight($height)
+    public function setRowHeight(float $height): self
     {
         $this->style->setHeight($height);
 
@@ -215,13 +187,11 @@ class StyleBuilder
     }
 
     /**
-     *  Sets a format
+     * Sets a format
      *
      * @param string $format Format
-     * @return StyleBuilder
-     * @api
      */
-    public function setFormat($format)
+    public function setFormat(string $format): self
     {
         $this->style->setFormat($format);
 
@@ -230,10 +200,8 @@ class StyleBuilder
 
     /**
      * Returns the configured style. The style is cached and can be reused.
-     *
-     * @return Style
      */
-    public function build()
+    public function build(): Style
     {
         return $this->style;
     }

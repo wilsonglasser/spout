@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpoutX\Common\Entity\Style;
 
 use SpoutX\Common\Exception\InvalidColorException;
@@ -27,12 +29,12 @@ class Color
     /**
      * Returns an RGB color from R, G and B values
      *
-     * @param int $red Red component, 0 - 255
+     * @param int $red   Red component, 0 - 255
      * @param int $green Green component, 0 - 255
-     * @param int $blue Blue component, 0 - 255
+     * @param int $blue  Blue component, 0 - 255
      * @return string RGB color
      */
-    public static function rgb($red, $green, $blue)
+    public static function rgb(int $red, int $green, int $blue): string
     {
         self::throwIfInvalidColorComponentValue($red);
         self::throwIfInvalidColorComponentValue($green);
@@ -48,13 +50,11 @@ class Color
     /**
      * Throws an exception is the color component value is outside of bounds (0 - 255)
      *
-     * @param int $colorComponent
      * @throws \SpoutX\Common\Exception\InvalidColorException
-     * @return void
      */
-    protected static function throwIfInvalidColorComponentValue($colorComponent)
+    protected static function throwIfInvalidColorComponentValue(int $colorComponent): void
     {
-        if (!is_int($colorComponent) || $colorComponent < 0 || $colorComponent > 255) {
+        if ($colorComponent < 0 || $colorComponent > 255) {
             throw new InvalidColorException("The RGB components must be between 0 and 255. Received: $colorComponent");
         }
     }
@@ -65,7 +65,7 @@ class Color
      * @param int $colorComponent Color component, 0 - 255
      * @return string Corresponding hexadecimal value, with a leading 0 if needed. E.g "0f", "2d"
      */
-    protected static function convertColorComponentToHex($colorComponent)
+    protected static function convertColorComponentToHex(int $colorComponent): string
     {
         return str_pad(dechex($colorComponent), 2, '0', STR_PAD_LEFT);
     }
@@ -77,7 +77,7 @@ class Color
      * @param string $rgbColor RGB color like "FF08B2"
      * @return string ARGB color
      */
-    public static function toARGB($rgbColor)
+    public static function toARGB(string $rgbColor): string
     {
         return 'FF' . $rgbColor;
     }

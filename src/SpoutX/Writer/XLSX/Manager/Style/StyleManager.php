@@ -284,13 +284,11 @@ EOD;
                 $alignment['wrapText'] = 1;
             }
 
-            if (!empty($style->getHorizontalAlign())) {
-                $alignment['horizontal'] = $style->getHorizontalAlign();
+            if ($style->getHorizontalAlign() !== null) {
+                $alignment['horizontal'] = $style->getHorizontalAlign()->value;
             }
 
-            if (!empty($style->getVerticalAlign())) {
-                $alignment['vertical'] = $style->getVerticalAlign();
-            }
+            $alignment['vertical'] = $style->getVerticalAlign()->value;
 
             if ($style->getShrinkToFit()) {
                 $alignment['shrinkToFit'] = $style->getShrinkToFit();
