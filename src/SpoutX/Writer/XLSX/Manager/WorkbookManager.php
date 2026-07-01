@@ -72,7 +72,7 @@ class WorkbookManager extends WorkbookManagerAbstract
 
         $this->fileSystemHelper
             ->createContentTypesFile($worksheets)
-            ->createWorkbookFile($worksheets)
+            ->createWorkbookFile($worksheets, $this->getWorkbook()->getProtection())
             ->createCommentsFile($this->getCommentManager(), $worksheets)
             ->createWorkbookRelsFile($this->getCommentManager(), $worksheets)
             ->createStylesFile($this->styleManager)

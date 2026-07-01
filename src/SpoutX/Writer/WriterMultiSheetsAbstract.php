@@ -117,6 +117,20 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
     }
 
     /**
+     * Sets workbook-level protection (lock structure / windows, optional password).
+     * Must be called after the writer has been opened.
+     *
+     * @throws WriterNotOpenedException If the writer has not been opened yet
+     */
+    public function setWorkbookProtection(?\SpoutX\Writer\XLSX\Entity\WorkbookProtection $protection): self
+    {
+        $this->throwIfWorkbookIsNotAvailable();
+        $this->workbookManager->getWorkbook()->setProtection($protection);
+
+        return $this;
+    }
+
+    /**
      * Returns the current sheet
      *
      * @throws WriterNotOpenedException If the writer has not been opened yet
