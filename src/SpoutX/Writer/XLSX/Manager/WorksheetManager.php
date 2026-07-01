@@ -355,62 +355,72 @@ EOD;
 
         $sheet = $worksheet->getExternalSheet();
 
+        $pageSetup = $sheet->getPageSetup();
+        $hasColumnDimensions = count($sheet->getColumnDimensions()) > 0;
+        $needsFitToPagePr = $pageSetup !== null && $pageSetup->isFitToPage();
 
-        if (count($sheet->getColumnDimensions())) {
+        // Content that must appear BEFORE <sheetData> (in CT_Worksheet order:
+        // <sheetPr> then <cols>) has to be spliced in ahead of the already-streamed
+        // sheet data. We buffer everything after the insertion point and rewrite it.
+        if ($hasColumnDimensions || $needsFitToPagePr) {
 
             // I didn't found a way to append a file in the middle without storing all content =/
             $afterContent =  stream_get_contents($worksheetFilePointer, -1, $this->beforeSheetDataPointer);
 
             fseek($worksheetFilePointer, $this->beforeSheetDataPointer);
 
-            fwrite($worksheetFilePointer, '<cols>'.PHP_EOL);
-            /**
-             * Autosize columns
-             */
-
-            $sheet->calculateColumnWidths($this->getColumnsMaxTextLength(), $defaultStyle);
-
-            foreach ($sheet->getColumnDimensions() as $columnDimension) {
-                $cellIndex = CellHelper::getColumnToIndexFromCellIndex($columnDimension->getColumnIndex()) + 1;
-                $attributes = [
-                    'min' => $cellIndex,
-                    'max' => $cellIndex,
-                    'width' => $columnDimension->getWidth() + ($sheet->getAutoFilter() !== null ? 2 : 0),
-                    'customWidth' => 'true',
-                ];
-
-                // Column visibility
-                if ($columnDimension->getVisible() == false) {
-                    $attributes['hidden'] = 'true';
-                }
-
-                // Auto size?
-                if ($columnDimension->getAutoSize()) {
-                    $attributes['bestFit'] = 'true';
-                }
-
-                // Collapsed
-                if ($columnDimension->getCollapsed() == true) {
-                    $attributes['collapsed'] = 'true';
-                }
-
-                // Outline level
-                if ($columnDimension->getOutlineLevel() > 0) {
-                    $attributes['outlineLevel'] = $columnDimension->getOutlineLevel();
-                }
-
-                $xml = '';
-                foreach ($attributes as $k => $v) {
-                    $xml .= $k.'="'.$v.'" ';
-                }
-
-                fwrite($worksheetFilePointer, "\t".'<col '.$xml.' />'.PHP_EOL);
-
-
-
+            // <sheetPr> precedes <cols> and <sheetData> in the schema
+            if ($needsFitToPagePr) {
+                fwrite($worksheetFilePointer, '<sheetPr><pageSetUpPr fitToPage="true"/></sheetPr>'.PHP_EOL);
             }
 
-            fwrite($worksheetFilePointer, '</cols>'.PHP_EOL);
+            if ($hasColumnDimensions) {
+                fwrite($worksheetFilePointer, '<cols>'.PHP_EOL);
+                /**
+                 * Autosize columns
+                 */
+
+                $sheet->calculateColumnWidths($this->getColumnsMaxTextLength(), $defaultStyle);
+
+                foreach ($sheet->getColumnDimensions() as $columnDimension) {
+                    $cellIndex = CellHelper::getColumnToIndexFromCellIndex($columnDimension->getColumnIndex()) + 1;
+                    $attributes = [
+                        'min' => $cellIndex,
+                        'max' => $cellIndex,
+                        'width' => $columnDimension->getWidth() + ($sheet->getAutoFilter() !== null ? 2 : 0),
+                        'customWidth' => 'true',
+                    ];
+
+                    // Column visibility
+                    if ($columnDimension->getVisible() == false) {
+                        $attributes['hidden'] = 'true';
+                    }
+
+                    // Auto size?
+                    if ($columnDimension->getAutoSize()) {
+                        $attributes['bestFit'] = 'true';
+                    }
+
+                    // Collapsed
+                    if ($columnDimension->getCollapsed() == true) {
+                        $attributes['collapsed'] = 'true';
+                    }
+
+                    // Outline level
+                    if ($columnDimension->getOutlineLevel() > 0) {
+                        $attributes['outlineLevel'] = $columnDimension->getOutlineLevel();
+                    }
+
+                    $xml = '';
+                    foreach ($attributes as $k => $v) {
+                        $xml .= $k.'="'.$v.'" ';
+                    }
+
+                    fwrite($worksheetFilePointer, "\t".'<col '.$xml.' />'.PHP_EOL);
+                }
+
+                fwrite($worksheetFilePointer, '</cols>'.PHP_EOL);
+            }
 
             fwrite($worksheetFilePointer, $afterContent);
             unset($afterContent);
@@ -425,6 +435,58 @@ EOD;
                 fwrite($worksheetFilePointer, "\t".' <mergeCell ref="' . $mergeCell . '"/>'.PHP_EOL);
             }
             fwrite($worksheetFilePointer, '</mergeCells>'.PHP_EOL);
+        }
+
+        // Print settings (pageMargins -> pageSetup -> headerFooter) must precede
+        // the legacy drawing (comments) in the CT_Worksheet element sequence.
+        $pageMargin = $sheet->getPageMargin();
+        if ($pageMargin !== null) {
+            fwrite($worksheetFilePointer, '<pageMargins top="' . $pageMargin->top . '" right="' . $pageMargin->right
+                . '" bottom="' . $pageMargin->bottom . '" left="' . $pageMargin->left
+                . '" header="' . $pageMargin->header . '" footer="' . $pageMargin->footer . '"/>'.PHP_EOL);
+        }
+
+        if ($pageSetup !== null) {
+            $pageSetupXml = '<pageSetup';
+            if ($pageSetup->pageOrientation !== null) {
+                $pageSetupXml .= ' orientation="' . $pageSetup->pageOrientation->value . '"';
+            }
+            if ($pageSetup->paperSize !== null) {
+                $pageSetupXml .= ' paperSize="' . $pageSetup->paperSize->value . '"';
+            }
+            if ($pageSetup->fitToHeight !== null) {
+                $pageSetupXml .= ' fitToHeight="' . $pageSetup->fitToHeight . '"';
+            }
+            if ($pageSetup->fitToWidth !== null) {
+                $pageSetupXml .= ' fitToWidth="' . $pageSetup->fitToWidth . '"';
+            }
+            $pageSetupXml .= '/>'.PHP_EOL;
+            fwrite($worksheetFilePointer, $pageSetupXml);
+        }
+
+        $headerFooter = $sheet->getHeaderFooter();
+        if ($headerFooter !== null) {
+            $hfXml = '<headerFooter';
+            if ($headerFooter->differentOddEven) {
+                $hfXml .= ' differentOddEven="1"';
+            }
+            $hfXml .= '>';
+            if ($headerFooter->oddHeader !== null) {
+                $hfXml .= '<oddHeader>' . $this->stringsEscaper->escape($headerFooter->oddHeader) . '</oddHeader>';
+            }
+            if ($headerFooter->oddFooter !== null) {
+                $hfXml .= '<oddFooter>' . $this->stringsEscaper->escape($headerFooter->oddFooter) . '</oddFooter>';
+            }
+            if ($headerFooter->differentOddEven) {
+                if ($headerFooter->evenHeader !== null) {
+                    $hfXml .= '<evenHeader>' . $this->stringsEscaper->escape($headerFooter->evenHeader) . '</evenHeader>';
+                }
+                if ($headerFooter->evenFooter !== null) {
+                    $hfXml .= '<evenFooter>' . $this->stringsEscaper->escape($headerFooter->evenFooter) . '</evenFooter>';
+                }
+            }
+            $hfXml .= '</headerFooter>'.PHP_EOL;
+            fwrite($worksheetFilePointer, $hfXml);
         }
 
         if (count($worksheet->getExternalSheet()->getComments())) {

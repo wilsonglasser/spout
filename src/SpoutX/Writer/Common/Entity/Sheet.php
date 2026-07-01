@@ -8,6 +8,9 @@ use SpoutX\Common\Entity\ColumnDimension;
 use SpoutX\Common\Entity\Style\Style;
 use SpoutX\Writer\Common\Manager\SheetManager;
 use SpoutX\Writer\Exception\InvalidSheetNameException ;
+use SpoutX\Writer\XLSX\Entity\HeaderFooter;
+use SpoutX\Writer\XLSX\Entity\PageMargin;
+use SpoutX\Writer\XLSX\Entity\PageSetup;
 
 /**
  * Class Sheet
@@ -43,6 +46,15 @@ class Sheet
 
     /** @var Comment[] Comments  */
     private array $comments = [];
+
+    /** @var PageSetup|null Print orientation / paper size / fit-to-page */
+    private ?PageSetup $pageSetup = null;
+
+    /** @var PageMargin|null Print margins */
+    private ?PageMargin $pageMargin = null;
+
+    /** @var HeaderFooter|null Print header/footer */
+    private ?HeaderFooter $headerFooter = null;
 
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
@@ -140,6 +152,42 @@ class Sheet
     public function addComment(Comment $comment): void
     {
         $this->comments[] = $comment;
+    }
+
+    public function getPageSetup(): ?PageSetup
+    {
+        return $this->pageSetup;
+    }
+
+    public function setPageSetup(?PageSetup $pageSetup): self
+    {
+        $this->pageSetup = $pageSetup;
+
+        return $this;
+    }
+
+    public function getPageMargin(): ?PageMargin
+    {
+        return $this->pageMargin;
+    }
+
+    public function setPageMargin(?PageMargin $pageMargin): self
+    {
+        $this->pageMargin = $pageMargin;
+
+        return $this;
+    }
+
+    public function getHeaderFooter(): ?HeaderFooter
+    {
+        return $this->headerFooter;
+    }
+
+    public function setHeaderFooter(?HeaderFooter $headerFooter): self
+    {
+        $this->headerFooter = $headerFooter;
+
+        return $this;
     }
 
     /**
