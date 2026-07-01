@@ -8,6 +8,7 @@ use SpoutX\Common\Entity\ColumnDimension;
 use SpoutX\Common\Entity\Style\Style;
 use SpoutX\Writer\Common\Manager\SheetManager;
 use SpoutX\Writer\Exception\InvalidSheetNameException ;
+use SpoutX\Writer\XLSX\Entity\DataValidation;
 use SpoutX\Writer\XLSX\Entity\HeaderFooter;
 use SpoutX\Writer\XLSX\Entity\PageMargin;
 use SpoutX\Writer\XLSX\Entity\PageSetup;
@@ -62,6 +63,9 @@ class Sheet
 
     /** @var array<string, string> External hyperlinks, keyed by cell reference ([cellRef => url]) */
     private array $hyperlinks = [];
+
+    /** @var DataValidation[] Data validations (dropdowns, numeric/date constraints) */
+    private array $dataValidations = [];
 
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
@@ -226,6 +230,21 @@ class Sheet
     public function addHyperlink(string $cellRef, string $url): self
     {
         $this->hyperlinks[$cellRef] = $url;
+
+        return $this;
+    }
+
+    /**
+     * @return DataValidation[]
+     */
+    public function getDataValidations(): array
+    {
+        return $this->dataValidations;
+    }
+
+    public function addDataValidation(DataValidation $dataValidation): self
+    {
+        $this->dataValidations[] = $dataValidation;
 
         return $this;
     }

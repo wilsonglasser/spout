@@ -444,6 +444,42 @@ EOD;
             fwrite($worksheetFilePointer, '</mergeCells>'.PHP_EOL);
         }
 
+        // <dataValidations> precedes <hyperlinks> in the CT_Worksheet sequence.
+        $dataValidations = $sheet->getDataValidations();
+        if (count($dataValidations) > 0) {
+            $validationXml = '<dataValidations count="' . count($dataValidations) . '">';
+            foreach ($dataValidations as $validation) {
+                $validationXml .= '<dataValidation type="' . $validation->type->value . '"';
+                if ($validation->operator !== null) {
+                    $validationXml .= ' operator="' . $validation->operator->value . '"';
+                }
+                $validationXml .= ' allowBlank="' . (int) $validation->allowBlank . '"';
+                $validationXml .= ' showInputMessage="' . (int) $validation->showInputMessage . '"';
+                $validationXml .= ' showErrorMessage="' . (int) $validation->showErrorMessage . '"';
+                $validationXml .= ' errorStyle="' . $validation->errorStyle->value . '"';
+                if ($validation->promptTitle !== null) {
+                    $validationXml .= ' promptTitle="' . htmlspecialchars($validation->promptTitle, ENT_XML1) . '"';
+                }
+                if ($validation->prompt !== null) {
+                    $validationXml .= ' prompt="' . htmlspecialchars($validation->prompt, ENT_XML1) . '"';
+                }
+                if ($validation->errorTitle !== null) {
+                    $validationXml .= ' errorTitle="' . htmlspecialchars($validation->errorTitle, ENT_XML1) . '"';
+                }
+                if ($validation->error !== null) {
+                    $validationXml .= ' error="' . htmlspecialchars($validation->error, ENT_XML1) . '"';
+                }
+                $validationXml .= ' sqref="' . htmlspecialchars($validation->sqref, ENT_XML1) . '">';
+                $validationXml .= '<formula1>' . $validation->formula1 . '</formula1>';
+                if ($validation->formula2 !== null) {
+                    $validationXml .= '<formula2>' . $validation->formula2 . '</formula2>';
+                }
+                $validationXml .= '</dataValidation>';
+            }
+            $validationXml .= '</dataValidations>'.PHP_EOL;
+            fwrite($worksheetFilePointer, $validationXml);
+        }
+
         // <hyperlinks> precedes the print settings in the CT_Worksheet sequence.
         // Relationship IDs (rId_hyperlink{N}) are assigned by 1-based insertion order
         // and must match the worksheet .rels file (see FileSystemHelper).
