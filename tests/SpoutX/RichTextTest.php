@@ -10,6 +10,7 @@ use SpoutX\Common\Entity\CellType;
 use SpoutX\Common\Entity\RichText;
 use SpoutX\Common\Entity\Style\Color;
 use SpoutX\Common\Entity\TextRun;
+use SpoutX\Common\Entity\TextRunVerticalAlignment;
 use SpoutX\Common\Type;
 use SpoutX\Reader\Common\Creator\ReaderEntityFactory;
 use SpoutX\Writer\Common\Creator\WriterEntityFactory;
@@ -58,6 +59,27 @@ final class RichTextTest extends TestCase
         self::assertStringContainsString('t="inlineStr"><is>', $xml);
         self::assertStringContainsString('<r><rPr><b/><color rgb="FFFF0000"/></rPr><t xml:space="preserve">Hello </t></r>', $xml);
         self::assertStringContainsString('<r><rPr><i/><sz val="14"/><rFont val="Calibri"/></rPr><t xml:space="preserve">world</t></r>', $xml);
+    }
+
+    public function testSuperscriptAndSubscriptRuns(): void
+    {
+        $rich = new RichText(
+            new TextRun('E=mc', ),
+            new TextRun('2', verticalAlignment: TextRunVerticalAlignment::Superscript),
+            new TextRun(' and H'),
+            new TextRun('2', verticalAlignment: TextRunVerticalAlignment::Subscript),
+            new TextRun('O'),
+        );
+
+        $writer = WriterEntityFactory::createWriter(Type::XLSX);
+        $writer->openToFile($this->tmpFile);
+        $writer->addRow(WriterEntityFactory::createRow([new Cell($rich)]));
+        $writer->close();
+
+        $xml = $this->read('xl/worksheets/sheet1.xml');
+        self::assertTrue((new \DOMDocument())->loadXML($xml), 'sheet XML not well-formed');
+        self::assertStringContainsString('<rPr><vertAlign val="superscript"/></rPr><t xml:space="preserve">2</t>', $xml);
+        self::assertStringContainsString('<rPr><vertAlign val="subscript"/></rPr><t xml:space="preserve">2</t>', $xml);
     }
 
     public function testRichTextRoundTripsAsConcatenatedText(): void

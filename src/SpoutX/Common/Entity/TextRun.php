@@ -19,6 +19,7 @@ class TextRun
         public bool $italic = false,
         public bool $underline = false,
         public bool $strikethrough = false,
+        public ?TextRunVerticalAlignment $verticalAlignment = null,
     ) {
     }
 }

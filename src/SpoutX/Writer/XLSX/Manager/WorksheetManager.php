@@ -346,6 +346,9 @@ EOD;
         if ($run->italic) {
             $rPr .= '<i/>';
         }
+        if ($run->verticalAlignment !== null) {
+            $rPr .= '<vertAlign val="' . $run->verticalAlignment->value . '"/>';
+        }
         if ($run->underline) {
             $rPr .= '<u/>';
         }
