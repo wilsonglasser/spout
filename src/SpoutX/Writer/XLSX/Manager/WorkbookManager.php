@@ -71,6 +71,7 @@ class WorkbookManager extends WorkbookManagerAbstract
         $worksheets = $this->getWorksheets();
 
         $this->fileSystemHelper
+            ->createDocPropsFiles($this->getWorkbook()->getDocumentProperties())
             ->createContentTypesFile($worksheets)
             ->createWorkbookFile($worksheets, $this->getWorkbook()->getProtection())
             ->createCommentsFile($this->getCommentManager(), $worksheets)

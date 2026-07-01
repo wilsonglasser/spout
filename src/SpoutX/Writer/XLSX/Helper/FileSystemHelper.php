@@ -165,10 +165,22 @@ EOD;
      */
     private function createDocPropsFolderAndFiles(): self
     {
+        // Only create the folder here (at open time). The app.xml/core.xml files are
+        // written at close (see createDocPropsFiles) so that document properties set
+        // after openToFile() are picked up.
         $this->docPropsFolder = $this->createFolder($this->rootFolder, self::DOC_PROPS_FOLDER_NAME);
 
-        $this->createAppXmlFile();
-        $this->createCoreXmlFile();
+        return $this;
+    }
+
+    /**
+     * Writes docProps/app.xml and docProps/core.xml at finalization, honouring the
+     * (optionally) user-provided document properties.
+     */
+    public function createDocPropsFiles(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
+    {
+        $this->createAppXmlFile($properties);
+        $this->createCoreXmlFile($properties);
 
         return $this;
     }
@@ -179,9 +191,9 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
-    private function createAppXmlFile(): self
+    private function createAppXmlFile(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
     {
-        $appName = self::APP_NAME;
+        $appName = $this->escaper->escape($properties?->application ?? self::APP_NAME);
         $appXmlFileContents = <<<EOD
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
@@ -220,13 +232,32 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
-    private function createCoreXmlFile(): self
+    private function createCoreXmlFile(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
     {
         $createdDate = (new \DateTime())->format(\DateTime::W3C);
+
+        // Emit only the metadata fields that were set (element => value).
+        $elements = [
+            'dc:title' => $properties?->title,
+            'dc:subject' => $properties?->subject,
+            'dc:creator' => $properties?->creator,
+            'cp:lastModifiedBy' => $properties?->lastModifiedBy,
+            'cp:keywords' => $properties?->keywords,
+            'dc:description' => $properties?->description,
+            'cp:category' => $properties?->category,
+            'dc:language' => $properties?->language,
+        ];
+        $metadataXml = '';
+        foreach ($elements as $tag => $value) {
+            if ($value !== null) {
+                $metadataXml .= '<' . $tag . '>' . $this->escaper->escape($value) . '</' . $tag . '>';
+            }
+        }
+
         $coreXmlFileContents = <<<EOD
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <dcterms:created xsi:type="dcterms:W3CDTF">$createdDate</dcterms:created>
+    $metadataXml<dcterms:created xsi:type="dcterms:W3CDTF">$createdDate</dcterms:created>
     <dcterms:modified xsi:type="dcterms:W3CDTF">$createdDate</dcterms:modified>
     <cp:revision>0</cp:revision>
 </cp:coreProperties>

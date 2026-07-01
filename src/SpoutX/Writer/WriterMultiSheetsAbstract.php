@@ -131,6 +131,20 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
     }
 
     /**
+     * Sets document metadata (title, author, keywords, ...).
+     * Must be called after the writer has been opened.
+     *
+     * @throws WriterNotOpenedException If the writer has not been opened yet
+     */
+    public function setDocumentProperties(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties): self
+    {
+        $this->throwIfWorkbookIsNotAvailable();
+        $this->workbookManager->getWorkbook()->setDocumentProperties($properties);
+
+        return $this;
+    }
+
+    /**
      * Returns the current sheet
      *
      * @throws WriterNotOpenedException If the writer has not been opened yet
