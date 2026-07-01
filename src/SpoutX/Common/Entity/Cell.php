@@ -85,6 +85,9 @@ class Cell
      */
     public static function detectType(mixed $value): CellType
     {
+        if ($value instanceof RichText) {
+            return CellType::RichText;
+        }
         if (CellTypeHelper::isBoolean($value)) {
             return CellType::Boolean;
         }
@@ -140,6 +143,11 @@ class Cell
     public function isError(): bool
     {
         return $this->type === CellType::Error;
+    }
+
+    public function isRichText(): bool
+    {
+        return $this->type === CellType::RichText;
     }
 
     public function __toString(): string

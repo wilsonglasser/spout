@@ -132,10 +132,15 @@ class CellValueFormatter
      */
     protected function formatInlineStringCellValue(\DOMNode $node): string
     {
-        // inline strings are formatted this way:
-        // <c r="A1" t="inlineStr"><is><t>[INLINE_STRING]</t></is></c>
-        $tNode = $node->getElementsByTagName(self::XML_NODE_INLINE_STRING_VALUE)->item(0);
-        $cellValue = $this->escaper->unescape($tNode->nodeValue);
+        // Plain inline strings:
+        //   <c r="A1" t="inlineStr"><is><t>[INLINE_STRING]</t></is></c>
+        // Rich text carries one <t> per run:
+        //   <c ...><is><r><rPr/><t>Hello </t></r><r><rPr/><t>world</t></r></is></c>
+        // Concatenate every <t> so rich text reads back as its plain text.
+        $cellValue = '';
+        foreach ($node->getElementsByTagName(self::XML_NODE_INLINE_STRING_VALUE) as $tNode) {
+            $cellValue .= $this->escaper->unescape($tNode->nodeValue);
+        }
 
         return $cellValue;
     }

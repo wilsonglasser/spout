@@ -26,4 +26,6 @@ enum CellType: int
     case Date = 5;
     /** Cell holding an error */
     case Error = 6;
+    /** Rich text: a {@see RichText} value with multiple formatted runs */
+    case RichText = 7;
 }

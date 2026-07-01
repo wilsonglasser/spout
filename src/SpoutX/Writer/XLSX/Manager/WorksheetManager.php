@@ -6,8 +6,11 @@ namespace SpoutX\Writer\XLSX\Manager;
 
 use SpoutX\Common\Entity\Cell;
 use SpoutX\Common\Entity\CellType;
+use SpoutX\Common\Entity\RichText;
 use SpoutX\Common\Entity\Row;
+use SpoutX\Common\Entity\Style\Color;
 use SpoutX\Common\Entity\Style\Style;
+use SpoutX\Common\Entity\TextRun;
 use SpoutX\Common\Exception\InvalidArgumentException;
 use SpoutX\Common\Exception\IOException;
 use SpoutX\Common\Helper\Escaper\XLSX as XLSXEscaper;
@@ -282,7 +285,15 @@ EOD;
             $value = '';
         }
 
-        if ($type === CellType::String && preg_match('/[^-.0-9]/', $value)) {
+        if ($type === CellType::RichText) {
+            /** @var RichText $value */
+            $this->setColumnMaxCharacters($columnIndex, $value->getPlainText());
+            $cellXML .= ' t="inlineStr"><is>';
+            foreach ($value->getRuns() as $run) {
+                $cellXML .= $this->getRichTextRunXml($run);
+            }
+            $cellXML .= '</is></c>';
+        } elseif ($type === CellType::String && preg_match('/[^-.0-9]/', $value)) {
             $cellXML .= $this->getCellXMLFragmentForNonEmptyString($this->setColumnMaxCharacters($columnIndex, $value));
         } elseif ($type === CellType::Formula) {
             $formulaType = '';
@@ -323,6 +334,39 @@ EOD;
      * @return string The XML fragment representing the cell
      * @throws InvalidArgumentException If the string exceeds the maximum number of characters allowed per cell
      */
+    /**
+     * Builds the <r> run XML for one piece of a rich-text (inline) string.
+     */
+    private function getRichTextRunXml(TextRun $run): string
+    {
+        $rPr = '';
+        if ($run->bold) {
+            $rPr .= '<b/>';
+        }
+        if ($run->italic) {
+            $rPr .= '<i/>';
+        }
+        if ($run->underline) {
+            $rPr .= '<u/>';
+        }
+        if ($run->strikethrough) {
+            $rPr .= '<strike/>';
+        }
+        if ($run->fontSize !== null) {
+            $rPr .= '<sz val="' . $run->fontSize . '"/>';
+        }
+        if ($run->fontColor !== null) {
+            $rPr .= '<color rgb="' . Color::toARGB($run->fontColor) . '"/>';
+        }
+        if ($run->fontName !== null) {
+            $rPr .= '<rFont val="' . $this->stringsEscaper->escape($run->fontName) . '"/>';
+        }
+
+        $rPrXml = $rPr !== '' ? '<rPr>' . $rPr . '</rPr>' : '';
+
+        return '<r>' . $rPrXml . '<t xml:space="preserve">' . $this->stringsEscaper->escape($run->text) . '</t></r>';
+    }
+
     private function getCellXMLFragmentForNonEmptyString(int|float|string|bool $cellValue): string
     {
         if (StringHelper::getStringLength($cellValue) > self::MAX_CHARACTERS_PER_CELL) {
