@@ -11,6 +11,7 @@ use SpoutX\Writer\Exception\InvalidSheetNameException ;
 use SpoutX\Writer\XLSX\Entity\HeaderFooter;
 use SpoutX\Writer\XLSX\Entity\PageMargin;
 use SpoutX\Writer\XLSX\Entity\PageSetup;
+use SpoutX\Writer\XLSX\Entity\SheetView;
 
 /**
  * Class Sheet
@@ -55,6 +56,9 @@ class Sheet
 
     /** @var HeaderFooter|null Print header/footer */
     private ?HeaderFooter $headerFooter = null;
+
+    /** @var SheetView|null Sheet view (freeze panes, zoom, gridlines, RTL) */
+    private ?SheetView $sheetView = null;
 
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
@@ -186,6 +190,18 @@ class Sheet
     public function setHeaderFooter(?HeaderFooter $headerFooter): self
     {
         $this->headerFooter = $headerFooter;
+
+        return $this;
+    }
+
+    public function getSheetView(): ?SheetView
+    {
+        return $this->sheetView;
+    }
+
+    public function setSheetView(?SheetView $sheetView): self
+    {
+        $this->sheetView = $sheetView;
 
         return $this;
     }
