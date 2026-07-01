@@ -18,10 +18,10 @@ class SheetManager
     public const MAX_LENGTH_SHEET_NAME = 31;
 
     /** @var array Invalid characters that cannot be contained in the sheet name */
-    private static $INVALID_CHARACTERS_IN_SHEET_NAME = ['\\', '/', '?', '*', ':', '[', ']'];
+    private static array $INVALID_CHARACTERS_IN_SHEET_NAME = ['\\', '/', '?', '*', ':', '[', ']'];
 
     /** @var array Associative array [WORKBOOK_ID] => [[SHEET_INDEX] => [SHEET_NAME]] keeping track of sheets' name to enforce uniqueness per workbook */
-    private static $SHEETS_NAME_USED = [];
+    private static array $SHEETS_NAME_USED = [];
 
     /**
      * Throws an exception if the given sheet's name is not valid.
@@ -30,9 +30,8 @@ class SheetManager
      * @param string $name
      * @param Sheet $sheet The sheet whose future name is checked
      * @throws \SpoutX\Writer\Exception\InvalidSheetNameException If the sheet's name is invalid.
-     * @return void
      */
-    public function throwIfNameIsInvalid($name, Sheet $sheet)
+    public function throwIfNameIsInvalid($name, Sheet $sheet): void
     {
         if (!is_string($name)) {
             $actualType = gettype($name);
@@ -74,10 +73,9 @@ class SheetManager
      * Returns whether the given name contains at least one invalid character.
      * @see Sheet::$INVALID_CHARACTERS_IN_SHEET_NAME for the full list.
      *
-     * @param string $name
      * @return bool TRUE if the name contains invalid characters, FALSE otherwise.
      */
-    private function doesContainInvalidCharacters($name)
+    private function doesContainInvalidCharacters(string $name): bool
     {
         return (str_replace(self::$INVALID_CHARACTERS_IN_SHEET_NAME, '', $name) !== $name);
     }
@@ -85,10 +83,9 @@ class SheetManager
     /**
      * Returns whether the given name starts or ends with a single quote
      *
-     * @param string $name
      * @return bool TRUE if the name starts or ends with a single quote, FALSE otherwise.
      */
-    private function doesStartOrEndWithSingleQuote($name)
+    private function doesStartOrEndWithSingleQuote(string $name): bool
     {
         $startsWithSingleQuote = (StringHelper::getCharFirstOccurrencePosition('\'', $name) === 0);
         $endsWithSingleQuote = (StringHelper::getCharLastOccurrencePosition('\'', $name) === (StringHelper::getStringLength($name) - 1));
@@ -99,11 +96,10 @@ class SheetManager
     /**
      * Returns whether the given name is unique.
      *
-     * @param string $name
      * @param Sheet $sheet The sheet whose future name is checked
      * @return bool TRUE if the name is unique, FALSE otherwise.
      */
-    private function isNameUnique($name, Sheet $sheet)
+    private function isNameUnique(string $name, Sheet $sheet): bool
     {
         foreach (self::$SHEETS_NAME_USED[$sheet->getAssociatedWorkbookId()] as $sheetIndex => $sheetName) {
             if ($sheetIndex !== $sheet->getIndex() && $sheetName === $name) {
@@ -116,20 +112,15 @@ class SheetManager
 
     /**
      * @param int $workbookId Workbook ID associated to a Sheet
-     * @return void
      */
-    public function markWorkbookIdAsUsed($workbookId)
+    public function markWorkbookIdAsUsed($workbookId): void
     {
         if (!isset(self::$SHEETS_NAME_USED[$workbookId])) {
             self::$SHEETS_NAME_USED[$workbookId] = [];
         }
     }
 
-    /**
-     * @param Sheet $sheet
-     * @return void
-     */
-    public function markSheetNameAsUsed(Sheet $sheet)
+    public function markSheetNameAsUsed(Sheet $sheet): void
     {
         self::$SHEETS_NAME_USED[$sheet->getAssociatedWorkbookId()][$sheet->getIndex()] = $sheet->getName();
     }

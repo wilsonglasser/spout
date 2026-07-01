@@ -17,24 +17,22 @@ use SpoutX\Writer\Common\Helper\CellHelper;
 class CommentManager
 {
     /** @var Escaper\XLSX Strings escaper */
-    protected $stringsEscaper;
+    protected Escaper\XLSX $stringsEscaper;
 
-    private $tmpAuthors = [];
+    private array $tmpAuthors = [];
 
     /**
      * @param Escaper\XLSX $stringsEscaper Strings escaper
      */
-    public function __construct($stringsEscaper)
+    public function __construct(Escaper\XLSX $stringsEscaper)
     {
         $this->stringsEscaper = $stringsEscaper;
     }
 
     /**
      * Returns the content of the "comments{x}.xml" file, given a list of comments.
-     * @param Worksheet $worksheet
-     * @return string
      */
-    public function getCommentsXMLFileContent($worksheet)
+    public function getCommentsXMLFileContent(Worksheet $worksheet): string
     {
         $content = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -54,11 +52,7 @@ EOD;
     }
 
 
-    /**
-     * @param Worksheet $worksheet
-     * @return string
-     */
-    public function getAuthorsSectionContent($worksheet)
+    public function getAuthorsSectionContent(Worksheet $worksheet): string
     {
         $content = '';
 
@@ -86,11 +80,7 @@ EOD;
         return $content;
     }
 
-    /**
-     * @param Worksheet $worksheet
-     * @return string
-     */
-    public function getCommentsListSectionContent($worksheet)
+    public function getCommentsListSectionContent(Worksheet $worksheet): string
     {
         $registeredComments = $worksheet->getExternalSheet()->getComments();
 
@@ -134,13 +124,11 @@ EOD;
     /**
      * get VML comments to XML format.
      *
-     * @param Worksheet $pWorksheet
-     *
      * @return string XML Output
      * @throws \Exception
      *
      */
-    public function getVMLCommentsFileContent(Worksheet $pWorksheet)
+    public function getVMLCommentsFileContent(Worksheet $pWorksheet): string
     {
         // Create XML writer
         $content = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -176,7 +164,7 @@ EOD;
      *
      * @param Comment $pComment Comment
      */
-    private function writeVMLComment(Comment $pComment)
+    private function writeVMLComment(Comment $pComment): string
     {
         // Metadata
         [$column, $row] = CellHelper::coordinateFromString($pComment->getCell());

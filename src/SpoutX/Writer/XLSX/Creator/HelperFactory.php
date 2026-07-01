@@ -17,12 +17,7 @@ use SpoutX\Writer\XLSX\Helper\FileSystemHelper;
  */
 class HelperFactory extends \SpoutX\Common\Creator\HelperFactory
 {
-    /**
-     * @param OptionsManagerInterface $optionsManager
-     * @param InternalEntityFactory $entityFactory
-     * @return FileSystemHelper
-     */
-    public function createSpecificFileSystemHelper(OptionsManagerInterface $optionsManager, InternalEntityFactory $entityFactory)
+    public function createSpecificFileSystemHelper(OptionsManagerInterface $optionsManager, InternalEntityFactory $entityFactory): FileSystemHelper
     {
         $tempFolder = $optionsManager->getOption(Options::TEMP_FOLDER);
         $zipHelper = $this->createZipHelper($entityFactory);
@@ -31,19 +26,12 @@ class HelperFactory extends \SpoutX\Common\Creator\HelperFactory
         return new FileSystemHelper($tempFolder, $zipHelper, $escaper);
     }
 
-    /**
-     * @param InternalEntityFactory $entityFactory
-     * @return ZipHelper
-     */
-    private function createZipHelper(InternalEntityFactory $entityFactory)
+    private function createZipHelper(InternalEntityFactory $entityFactory): ZipHelper
     {
         return new ZipHelper($entityFactory);
     }
 
-    /**
-     * @return Escaper\XLSX
-     */
-    public function createStringsEscaper()
+    public function createStringsEscaper(): Escaper\XLSX
     {
         return new Escaper\XLSX();
     }

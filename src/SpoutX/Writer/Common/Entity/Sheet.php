@@ -18,31 +18,31 @@ class Sheet
     public const DEFAULT_SHEET_NAME_PREFIX = 'Sheet';
 
     /** @var int Index of the sheet, based on order in the workbook (zero-based) */
-    private $index;
+    private int $index;
 
     /** @var string ID of the sheet's associated workbook. Used to restrict sheet name uniqueness enforcement to a single workbook */
-    private $associatedWorkbookId;
+    private string $associatedWorkbookId;
 
     /** @var string Name of the sheet */
-    private $name;
+    private string $name;
 
     /** @var bool Visibility of the sheet */
-    private $isVisible;
+    private bool $isVisible;
 
     /** @var SheetManager Sheet manager */
-    private $sheetManager;
+    private SheetManager $sheetManager;
 
     /** @var string Range for auto Filter */
-    private $autoFilter;
+    private ?string $autoFilter = null;
 
     /** @var ColumnDimension[] Columns widths */
-    private $columnsDimensions = [];
+    private array $columnsDimensions = [];
 
     /** @var array Cell merges */
-    private $mergeCells = [];
+    private array $mergeCells = [];
 
     /** @var Comment[] Comments  */
-    private $comments = [];
+    private array $comments = [];
 
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
@@ -50,7 +50,7 @@ class Sheet
      * @param SheetManager $sheetManager To manage sheets
      * @throws
      */
-    public function __construct($sheetIndex, $associatedWorkbookId, SheetManager $sheetManager)
+    public function __construct(int $sheetIndex, string $associatedWorkbookId, SheetManager $sheetManager)
     {
         $this->index = $sheetIndex;
         $this->associatedWorkbookId = $associatedWorkbookId;
@@ -65,15 +65,12 @@ class Sheet
     /**
      * @return int Index of the sheet, based on order in the workbook (zero-based)
      */
-    public function getIndex()
+    public function getIndex(): int
     {
         return $this->index;
     }
 
-    /**
-     * @return string
-     */
-    public function getAssociatedWorkbookId()
+    public function getAssociatedWorkbookId(): string
     {
         return $this->associatedWorkbookId;
     }
@@ -81,7 +78,7 @@ class Sheet
     /**
      * @return string Name of the sheet
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -97,7 +94,7 @@ class Sheet
      * @throws InvalidSheetNameException If the sheet's name is invalid.
      * @return Sheet
      */
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->sheetManager->throwIfNameIsInvalid($name, $this);
 
@@ -108,26 +105,17 @@ class Sheet
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getAutoFilter()
+    public function getAutoFilter(): ?string
     {
         return $this->autoFilter;
     }
 
-    /**
-     * @param string $range
-     */
-    public function setAutoFilter($range)
+    public function setAutoFilter(string $range): void
     {
         $this->autoFilter = $range;
     }
 
-    /**
-     * @return mixed|null
-     */
-    public function getMergeCells()
+    public function getMergeCells(): array
     {
         return $this->mergeCells;
     }
@@ -135,7 +123,7 @@ class Sheet
     /**
      * @param string $range Cells range
      */
-    public function mergeCells($range)
+    public function mergeCells(string $range): void
     {
         $this->mergeCells[] = $range;
     }
@@ -144,31 +132,25 @@ class Sheet
     /**
      * @return Comment[]
      */
-    public function getComments()
+    public function getComments(): array
     {
         return $this->comments;
     }
 
-    /**
-     * @param Comment $comment
-     */
-    public function addComment($comment)
+    public function addComment(Comment $comment): void
     {
         $this->comments[] = $comment;
     }
 
     /**
-     * @return ColumnDimension[]|null
+     * @return ColumnDimension[]
      */
-    public function getColumnDimensions()
+    public function getColumnDimensions(): array
     {
         return $this->columnsDimensions;
     }
 
-    /**
-     * @param ColumnDimension $columnDimension
-     */
-    public function addColumnDimension(ColumnDimension $columnDimension)
+    public function addColumnDimension(ColumnDimension $columnDimension): void
     {
         $this->columnsDimensions[] = $columnDimension;
     }
@@ -176,7 +158,7 @@ class Sheet
     /**
      * @param ColumnDimension[] $dimensions
      */
-    public function setColumnDimensions($dimensions)
+    public function setColumnDimensions(array $dimensions): void
     {
         $this->columnsDimensions = $dimensions;
     }
@@ -184,7 +166,7 @@ class Sheet
     /**
      * @return bool isVisible Visibility of the sheet
      */
-    public function isVisible()
+    public function isVisible(): bool
     {
         return $this->isVisible;
     }
@@ -193,7 +175,7 @@ class Sheet
      * @param bool $isVisible Visibility of the sheet
      * @return Sheet
      */
-    public function setIsVisible($isVisible)
+    public function setIsVisible(bool $isVisible): self
     {
         $this->isVisible = $isVisible;
 
@@ -204,10 +186,9 @@ class Sheet
      * Calculate widths for auto-size columns
      *
      * @param int[] $columnMaxLengths
-     * @param Style $defaultStyle
-     * @return Sheet;
+     * @return Sheet
      */
-    public function calculateColumnWidths($columnMaxLengths, ?Style $defaultStyle = null)
+    public function calculateColumnWidths(array $columnMaxLengths, ?Style $defaultStyle = null): self
     {
 
         foreach ($this->getColumnDimensions() as $colDimension) {

@@ -15,20 +15,12 @@ use SpoutX\Writer\Common\Manager\SheetManager;
  */
 class InternalEntityFactory
 {
-    /**
-     * @return Workbook
-     */
-    public function createWorkbook()
+    public function createWorkbook(): Workbook
     {
         return new Workbook();
     }
 
-    /**
-     * @param string $worksheetFilePath
-     * @param Sheet $externalSheet
-     * @return Worksheet
-     */
-    public function createWorksheet($worksheetFilePath, Sheet $externalSheet)
+    public function createWorksheet(string $worksheetFilePath, Sheet $externalSheet): Worksheet
     {
         return new Worksheet($worksheetFilePath, $externalSheet);
     }
@@ -37,17 +29,13 @@ class InternalEntityFactory
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
      * @param string $associatedWorkbookId ID of the sheet's associated workbook
      * @param SheetManager $sheetManager To manage sheets
-     * @return Sheet
      */
-    public function createSheet($sheetIndex, $associatedWorkbookId, $sheetManager)
+    public function createSheet(int $sheetIndex, string $associatedWorkbookId, SheetManager $sheetManager): Sheet
     {
         return new Sheet($sheetIndex, $associatedWorkbookId, $sheetManager);
     }
 
-    /**
-     * @return \ZipArchive
-     */
-    public function createZipArchive()
+    public function createZipArchive(): \ZipArchive
     {
         return new \ZipArchive();
     }

@@ -16,10 +16,8 @@ class CellHelper
      * How wide is a default column for a given default font and size?
      * Empirical data found by inspecting real Excel files and reading off the pixel width
      * in Microsoft Office Excel 2007.
-     *
-     * @var array
      */
-    public static $defaultColumnWidths = [
+    public static array $defaultColumnWidths = [
         'Arial' => [
             1 => ['px' => 24, 'width' => 12.00000000],
             2 => ['px' => 24, 'width' => 12.00000000],
@@ -60,7 +58,7 @@ class CellHelper
     ];
 
     /** @var array Cache containing the mapping column index => cell index */
-    private static $columnIndexToCellIndexCache = [];
+    private static array $columnIndexToCellIndexCache = [];
 
     /**
      * Returns the cell index (base 26) associated to the base 10 column index.
@@ -71,7 +69,7 @@ class CellHelper
      * @param int $columnIndex The Excel column index (0, 42, ...)
      * @return string The associated cell index ('A', 'BC', ...)
      */
-    public static function getCellIndexFromColumnIndex($columnIndex)
+    public static function getCellIndexFromColumnIndex(int $columnIndex): string
     {
         $originalColumnIndex = $columnIndex;
 
@@ -101,10 +99,10 @@ class CellHelper
      * Z is the 26th and AA is the 27th.
      * The mapping is zero based, so that 0 maps to A, B maps to 1, Z to 25 and AA to 26.
      *
-     * @param string $columnIndex  The associated cell index ('A', 'BC', ...)
+     * @param string|int $columnIndex  The associated cell index ('A', 'BC', ...)
      * @return int The Excel column index (0, 42, ...)
      */
-    public static function getColumnToIndexFromCellIndex($columnIndex)
+    public static function getColumnToIndexFromCellIndex(string|int $columnIndex): int
     {
         $originalColumnIndex =  preg_replace('/[0-9]+/', '', strtoupper($columnIndex));
 
@@ -128,9 +126,9 @@ class CellHelper
      *
      * @param     int $pValue    Value in pixels
      * @param     Style $pDefaultStyle    Default style
-     * @return     int            Value in cell dimension
+     * @return     float          Value in cell dimension
      */
-    public static function pixelsToCellDimension($pValue, Style $pDefaultStyle)
+    public static function pixelsToCellDimension(int $pValue, Style $pDefaultStyle): float
     {
         // Font name and size
         $name = $pDefaultStyle->getFontName();
@@ -155,7 +153,7 @@ class CellHelper
      *
      * @return bool Whether the coordinate represents a range of cells
      */
-    public static function coordinateIsRange($coord)
+    public static function coordinateIsRange(string $coord): bool
     {
         return (strpos($coord, ':') !== false) || (strpos($coord, ',') !== false);
     }
@@ -169,7 +167,7 @@ class CellHelper
      *
      * @return string[] Array containing column and row (indexes 0 and 1)
      */
-    public static function coordinateFromString($pCoordinateString)
+    public static function coordinateFromString(string $pCoordinateString): array
     {
         if (preg_match('/^([$]?[A-Z]{1,3})([$]?\\d{1,7})$/', $pCoordinateString, $matches)) {
             return [$matches[1], $matches[2]];

@@ -18,9 +18,8 @@ interface WriterInterface
      *
      * @param  string $outputFilePath Path of the output file that will contain the data
      * @throws \SpoutX\Common\Exception\IOException If the writer cannot be opened or if the given path is not writable
-     * @return WriterInterface
      */
-    public function openToFile($outputFilePath);
+    public function openToFile(string $outputFilePath): self;
 
     /**
      * Initializes the writer and opens it to accept data.
@@ -28,19 +27,15 @@ interface WriterInterface
      *
      * @param  string $outputFileName Name of the output file that will contain the data. If a path is passed in, only the file name will be kept
      * @throws \SpoutX\Common\Exception\IOException If the writer cannot be opened
-     * @return WriterInterface
      */
-    public function openToBrowser($outputFileName);
+    public function openToBrowser(string $outputFileName): self;
 
     /**
      * Sets the default styles for all rows added with "addRow".
      * Overriding the default style instead of using "addRowWithStyle" improves performance by 20%.
      * @see https://github.com/box/spout/issues/272
-     *
-     * @param Style $defaultStyle
-     * @return WriterInterface
      */
-    public function setDefaultRowStyle(Style $defaultStyle);
+    public function setDefaultRowStyle(Style $defaultStyle): self;
 
 
     /**
@@ -49,9 +44,8 @@ interface WriterInterface
      * @param Row|array $row The row to be appended to the stream
      * @throws \SpoutX\Writer\Exception\WriterNotOpenedException If the writer has not been opened yetthe writer
      * @throws \SpoutX\Common\Exception\IOException If unable to write data
-     * @return WriterInterface
      */
-    public function addRow($row);
+    public function addRow(Row|array $row): self;
 
     /**
      * Appends the rows to the end of the stream.
@@ -60,15 +54,12 @@ interface WriterInterface
      * @throws \SpoutX\Common\Exception\InvalidArgumentException If the input param is not valid
      * @throws \SpoutX\Writer\Exception\WriterNotOpenedException If the writer has not been opened yet
      * @throws \SpoutX\Common\Exception\IOException If unable to write data
-     * @return WriterInterface
      */
-    public function addRows(array $rows);
+    public function addRows(array $rows): self;
 
     /**
      * Closes the writer. This will close the streamer as well, preventing new data
      * to be written to the file.
-     *
-     * @return void
      */
-    public function close();
+    public function close(): void;
 }

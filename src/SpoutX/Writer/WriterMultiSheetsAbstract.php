@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SpoutX\Writer;
 
 use SpoutX\Common\Creator\HelperFactory;
+use SpoutX\Common\Entity\Row;
 use SpoutX\Common\Helper\GlobalFunctionsHelper;
 use SpoutX\Common\Manager\OptionsManagerInterface;
 use SpoutX\Writer\Common\Creator\ManagerFactoryInterface;
@@ -24,18 +25,12 @@ use SpoutX\Writer\Exception\WriterNotOpenedException;
 abstract class WriterMultiSheetsAbstract extends WriterAbstract
 {
     /** @var ManagerFactoryInterface */
-    private $managerFactory;
+    private ManagerFactoryInterface $managerFactory;
 
     /** @var WorkbookManagerInterface */
-    private $workbookManager;
+    private ?WorkbookManagerInterface $workbookManager = null;
 
 
-    /**
-     * @param OptionsManagerInterface $optionsManager
-     * @param GlobalFunctionsHelper $globalFunctionsHelper
-     * @param HelperFactory $helperFactory
-     * @param ManagerFactoryInterface $managerFactory
-     */
     public function __construct(
         OptionsManagerInterface $optionsManager,
         GlobalFunctionsHelper $globalFunctionsHelper,
@@ -52,9 +47,8 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
      *
      * @param bool $shouldCreateNewSheetsAutomatically Whether new sheets should be automatically created when the max rows limit per sheet is reached
      * @throws WriterAlreadyOpenedException If the writer was already opened
-     * @return WriterMultiSheetsAbstract
      */
-    public function setShouldCreateNewSheetsAutomatically($shouldCreateNewSheetsAutomatically)
+    public function setShouldCreateNewSheetsAutomatically(bool $shouldCreateNewSheetsAutomatically): self
     {
         $this->throwIfWriterAlreadyOpened('Writer must be configured before opening it.');
 
@@ -66,7 +60,7 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
     /**
      * {@inheritdoc}
      */
-    protected function openWriter()
+    protected function openWriter(): void
     {
         if (!$this->workbookManager) {
             $this->workbookManager = $this->managerFactory->createWorkbookManager($this->optionsManager);
@@ -80,7 +74,7 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
      * @throws WriterNotOpenedException If the writer has not been opened yet
      * @return Sheet[] All the workbook's sheets
      */
-    public function getSheets()
+    public function getSheets(): array
     {
         $this->throwIfWorkbookIsNotAvailable();
 
@@ -101,7 +95,7 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
      * @throws WriterNotOpenedException If the writer has not been opened yet
      * @return Sheet The created sheet
      */
-    public function addNewSheetAndMakeItCurrent()
+    public function addNewSheetAndMakeItCurrent(): Sheet
     {
         $this->throwIfWorkbookIsNotAvailable();
         $worksheet = $this->workbookManager->addNewSheetAndMakeItCurrent();
@@ -115,7 +109,7 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
      * @throws WriterNotOpenedException If the writer has not been opened yet
      * @return Sheet The current sheet
      */
-    public function getCurrentSheet()
+    public function getCurrentSheet(): Sheet
     {
         $this->throwIfWorkbookIsNotAvailable();
 
@@ -128,7 +122,7 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
      * @throws WriterNotOpenedException If the writer has not been opened yet
      * @return Worksheet The current sheet
      */
-    public function getCurrentWorksheet()
+    public function getCurrentWorksheet(): Worksheet
     {
         $this->throwIfWorkbookIsNotAvailable();
 
@@ -142,9 +136,8 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
      * @param Sheet $sheet The sheet to set as current
      * @throws WriterNotOpenedException If the writer has not been opened yet
      * @throws SheetNotFoundException If the given sheet does not exist in the workbook
-     * @return void
      */
-    public function setCurrentSheet($sheet)
+    public function setCurrentSheet(Sheet $sheet): void
     {
         $this->throwIfWorkbookIsNotAvailable();
         $this->workbookManager->setCurrentSheet($sheet);
@@ -154,9 +147,8 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
      * Checks if the workbook has been created. Throws an exception if not created yet.
      *
      * @throws WriterNotOpenedException If the workbook is not created yet
-     * @return void
      */
-    protected function throwIfWorkbookIsNotAvailable()
+    protected function throwIfWorkbookIsNotAvailable(): void
     {
         if (!$this->workbookManager->getWorkbook()) {
             throw new WriterNotOpenedException('The writer must be opened before performing this action.');
@@ -166,7 +158,7 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
     /**
      * {@inheritdoc}
      */
-    protected function addRowToWriter($row)
+    protected function addRowToWriter(Row|array $row): void
     {
         $this->throwIfWorkbookIsNotAvailable();
         $this->workbookManager->addRowToCurrentWorksheet($row);
@@ -175,7 +167,7 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
     /**
      * {@inheritdoc}
      */
-    protected function closeWriter()
+    protected function closeWriter(): void
     {
         if ($this->workbookManager) {
             $this->workbookManager->close($this->filePointer);

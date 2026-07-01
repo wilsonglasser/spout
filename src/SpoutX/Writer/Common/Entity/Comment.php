@@ -13,75 +13,37 @@ class Comment
 {
     public const DEFAULT_BACKGROUND_COLOR = '#FFFFE1';
 
-    /**
-     * The comment cell
-     * @var string
-     */
-    protected $cell;
+    /** The comment cell */
+    protected string $cell;
 
-    /**
-     * The comment
-     * @var string
-     */
-    protected $text;
+    /** The comment */
+    protected ?string $text;
 
-    /**
-     * Comment authors
-     * @var string
-     */
-    protected $author;
-    /**
-     * Comment author id
-     * @var int
-     */
+    /** Comment authors */
+    protected ?string $author;
+
+    /** Comment author id */
     protected $authorId;
 
-    /**
-     * The cell style
-     * @var Style
-     */
-    protected $style;
+    /** The cell style */
+    protected Style $style;
 
-    /**
-     * Comment width (CSS style, i.e. XXpx or YYpt).
-     *
-     * @var string
-     */
-    private $width = '96pt';
+    /** Comment width (CSS style, i.e. XXpx or YYpt). */
+    private string $width = '96pt';
 
-    /**
-     * Left margin (CSS style, i.e. XXpx or YYpt).
-     *
-     * @var string
-     */
-    private $marginLeft = '59.25pt';
+    /** Left margin (CSS style, i.e. XXpx or YYpt). */
+    private string $marginLeft = '59.25pt';
 
-    /**
-     * Top margin (CSS style, i.e. XXpx or YYpt).
-     *
-     * @var string
-     */
-    private $marginTop = '1.5pt';
+    /** Top margin (CSS style, i.e. XXpx or YYpt). */
+    private string $marginTop = '1.5pt';
 
-    /**
-     * Visible.
-     *
-     * @var bool
-     */
-    private $visible = false;
+    /** Visible. */
+    private bool $visible = false;
 
-    /**
-     * Comment height (CSS style, i.e. XXpx or YYpt).
-     *
-     * @var string
-     */
-    private $height = '55.5pt';
+    /** Comment height (CSS style, i.e. XXpx or YYpt). */
+    private string $height = '55.5pt';
 
-    /**
-     * @param $value mixed
-     * @param Style|null $style
-     */
-    public function __construct($cell, $text, $author = null, ?Style $style = null)
+    public function __construct(string $cell, ?string $text, ?string $author = null, ?Style $style = null)
     {
         $this->setCell($cell);
         $this->setText($text);
@@ -89,87 +51,57 @@ class Comment
         $this->setStyle($style);
     }
 
-    /**
-     * @param string
-     */
-    public function setText($text)
+    public function setText(?string $text): void
     {
         $this->text = $text;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getText()
+    public function getText(): ?string
     {
         return $this->text;
     }
 
-    /**
-     * @param string
-     */
-    public function setAuthor($author)
+    public function setAuthor(?string $author): void
     {
         $this->author = $author;
     }
-    /**
-     * @return string|null
-     */
-    public function getAuthor()
+
+    public function getAuthor(): ?string
     {
         return $this->author;
     }
 
-    /**
-     * @param string
-     */
     public function setAuthorId($authorId)
     {
         $this->authorId = $authorId;
     }
-    /**
-     * @return string|null
-     */
+
     public function getAuthorId()
     {
         return $this->authorId;
     }
 
-    /**
-     * @param string
-     */
-    public function setCell($cell)
+    public function setCell(string $cell): void
     {
         $this->cell = $cell;
     }
-    /**
-     * @return string|null
-     */
-    public function getCell()
+
+    public function getCell(): string
     {
         return $this->cell;
     }
 
-    /**
-     * @param Style|null $style
-     */
-    public function setStyle($style)
+    public function setStyle(?Style $style): void
     {
         $this->style = $style ?: new Style();
     }
 
-    /**
-     * @return Style
-     */
-    public function getStyle()
+    public function getStyle(): Style
     {
         return $this->style;
     }
 
-    /**
-     * @param $visible
-     */
-    public function setVisible($visible)
+    public function setVisible(bool $visible): void
     {
         $this->visible = $visible;
     }
@@ -179,7 +111,7 @@ class Comment
      *
      * @return string Hash code
      */
-    public function getHashCode()
+    public function getHashCode(): string
     {
         return md5(
             $this->author .
@@ -195,19 +127,15 @@ class Comment
     }
 
 
-    /**
-     * @return bool
-     */
-    public function getVisible()
+    public function getVisible(): bool
     {
         return $this->visible;
     }
+
     /**
      * Get comment width (CSS style, i.e. XXpx or YYpt).
-     *
-     * @return string
      */
-    public function getWidth()
+    public function getWidth(): string
     {
         return $this->width;
     }
@@ -215,11 +143,9 @@ class Comment
     /**
      * Set comment width (CSS style, i.e. XXpx or YYpt).
      *
-     * @param string $width
-     *
      * @return $this
      */
-    public function setWidth($width)
+    public function setWidth(string $width): self
     {
         $this->width = $width;
 
@@ -228,10 +154,8 @@ class Comment
 
     /**
      * Get comment height (CSS style, i.e. XXpx or YYpt).
-     *
-     * @return string
      */
-    public function getHeight()
+    public function getHeight(): string
     {
         return $this->height;
     }
@@ -239,11 +163,9 @@ class Comment
     /**
      * Set comment height (CSS style, i.e. XXpx or YYpt).
      *
-     * @param string $value
-     *
      * @return $this
      */
-    public function setHeight($value)
+    public function setHeight(string $value): self
     {
         $this->height = $value;
 
@@ -252,10 +174,8 @@ class Comment
 
     /**
      * Get left margin (CSS style, i.e. XXpx or YYpt).
-     *
-     * @return string
      */
-    public function getMarginLeft()
+    public function getMarginLeft(): string
     {
         return $this->marginLeft;
     }
@@ -263,11 +183,9 @@ class Comment
     /**
      * Set left margin (CSS style, i.e. XXpx or YYpt).
      *
-     * @param string $value
-     *
      * @return $this
      */
-    public function setMarginLeft($value)
+    public function setMarginLeft(string $value): self
     {
         $this->marginLeft = $value;
 
@@ -276,10 +194,8 @@ class Comment
 
     /**
      * Get top margin (CSS style, i.e. XXpx or YYpt).
-     *
-     * @return string
      */
-    public function getMarginTop()
+    public function getMarginTop(): string
     {
         return $this->marginTop;
     }
@@ -287,11 +203,9 @@ class Comment
     /**
      * Set top margin (CSS style, i.e. XXpx or YYpt).
      *
-     * @param string $value
-     *
      * @return $this
      */
-    public function setMarginTop($value)
+    public function setMarginTop(string $value): self
     {
         $this->marginTop = $value;
 

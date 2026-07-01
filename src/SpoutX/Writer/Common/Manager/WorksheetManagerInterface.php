@@ -21,25 +21,19 @@ interface WorksheetManagerInterface
      * @param Row|array $row The row to be added
      * @throws \SpoutX\Common\Exception\IOException If the data cannot be written
      * @throws \SpoutX\Common\Exception\InvalidArgumentException If a cell value's type is not supported
-     * @return void
      */
-    public function addRow(Worksheet $worksheet, $row);
+    public function addRow(Worksheet $worksheet, Row|array $row): void;
 
     /**
      * Prepares the worksheet to accept data
      *
      * @param Worksheet $worksheet The worksheet to start
      * @throws \SpoutX\Common\Exception\IOException If the sheet data file cannot be opened for writing
-     * @return void
      */
-    public function startSheet(Worksheet $worksheet);
+    public function startSheet(Worksheet $worksheet): void;
 
     /**
      * Closes the worksheet
-     *
-     * @param Worksheet $worksheet
-     * @param Style $defaultStyle
-     * @return void
      */
-    public function close(Worksheet $worksheet, ?Style $defaultStyle = null);
+    public function close(Worksheet $worksheet, ?Style $defaultStyle = null): void;
 }

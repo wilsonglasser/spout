@@ -22,27 +22,20 @@ class WriterEntityFactory
      * @throws \SpoutX\Common\Exception\UnsupportedTypeException
      * @return WriterInterface
      */
-    public static function createWriter($writerType)
+    public static function createWriter(string $writerType): WriterInterface
     {
         return (new WriterFactory())->create($writerType);
     }
 
     /**
      * @param Cell[] $cells
-     * @param Style|null $rowStyle
-     * @return Row
      */
-    public static function createRow(array $cells = [], ?Style $rowStyle = null)
+    public static function createRow(array $cells = [], ?Style $rowStyle = null): Row
     {
         return new Row($cells, $rowStyle);
     }
 
-    /**
-     * @param array $cellValues
-     * @param Style|null $rowStyle
-     * @return Row
-     */
-    public static function createRowFromArray(array $cellValues = [], ?Style $rowStyle = null)
+    public static function createRowFromArray(array $cellValues = [], ?Style $rowStyle = null): Row
     {
         $cells = array_map(function ($cellValue) {
             return new Cell($cellValue);
@@ -51,12 +44,7 @@ class WriterEntityFactory
         return new Row($cells, $rowStyle);
     }
 
-    /**
-     * @param mixed $cellValue
-     * @param Style|null $cellStyle
-     * @return Cell
-     */
-    public static function createCell($cellValue, ?Style $cellStyle = null)
+    public static function createCell(mixed $cellValue, ?Style $cellStyle = null): Cell
     {
         return new Cell($cellValue, $cellStyle);
     }

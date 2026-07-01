@@ -11,10 +11,10 @@ namespace SpoutX\Writer\Common\Entity;
 class Workbook
 {
     /** @var Worksheet[] List of the workbook's sheets */
-    private $worksheets = [];
+    private array $worksheets = [];
 
     /** @var string Timestamp based unique ID identifying the workbook */
-    private $internalId;
+    private string $internalId;
 
     /**
      * Workbook constructor.
@@ -27,7 +27,7 @@ class Workbook
     /**
      * @return Worksheet[]
      */
-    public function getWorksheets()
+    public function getWorksheets(): array
     {
         return $this->worksheets;
     }
@@ -35,15 +35,12 @@ class Workbook
     /**
      * @param Worksheet[] $worksheets
      */
-    public function setWorksheets($worksheets)
+    public function setWorksheets(array $worksheets): void
     {
         $this->worksheets = $worksheets;
     }
 
-    /**
-     * @return string
-     */
-    public function getInternalId()
+    public function getInternalId(): string
     {
         return $this->internalId;
     }

@@ -48,43 +48,35 @@ class WorksheetManager implements WorksheetManagerInterface
 EOD;
 
     /** @var bool Whether inline or shared strings should be used */
-    protected $shouldUseInlineStrings;
+    protected bool $shouldUseInlineStrings;
 
     /** @var RowManager Manages rows */
-    private $rowManager;
+    private RowManager $rowManager;
 
     /** @var StyleManager Manages styles */
-    private $styleManager;
+    private StyleManager $styleManager;
 
     /** @var StyleMerger Helper to merge styles together */
-    private $styleMerger;
+    private StyleMerger $styleMerger;
 
     /** @var SharedStringsManager Helper to write shared strings */
-    private $sharedStringsManager;
+    private SharedStringsManager $sharedStringsManager;
 
     /** @var XLSXEscaper Strings escaper */
-    private $stringsEscaper;
+    private XLSXEscaper $stringsEscaper;
 
     /** @var InternalEntityFactory Factory to create entities */
-    private $entityFactory;
+    private InternalEntityFactory $entityFactory;
 
     private $beforeSheetDataPointer;
 
     /**
      * @var int[] Max length by column, used for auto size
      */
-    private $columnsMaxTextLength = [];
+    private array $columnsMaxTextLength = [];
 
     /**
      * WorksheetManager constructor.
-     *
-     * @param OptionsManagerInterface $optionsManager
-     * @param RowManager $rowManager
-     * @param StyleManager $styleManager
-     * @param StyleMerger $styleMerger
-     * @param SharedStringsManager $sharedStringsManager
-     * @param XLSXEscaper $stringsEscaper
-     * @param InternalEntityFactory $entityFactory
      */
     public function __construct(
         OptionsManagerInterface $optionsManager,
@@ -104,10 +96,7 @@ EOD;
         $this->entityFactory = $entityFactory;
     }
 
-    /**
-     * @return SharedStringsManager
-     */
-    public function getSharedStringsManager()
+    public function getSharedStringsManager(): SharedStringsManager
     {
         return $this->sharedStringsManager;
     }
@@ -115,7 +104,7 @@ EOD;
     /**
      * {@inheritdoc}
      */
-    public function startSheet(Worksheet $worksheet)
+    public function startSheet(Worksheet $worksheet): void
     {
         $sheetFilePointer = fopen($worksheet->getFilePath(), 'w+');
         $this->throwIfSheetFilePointerIsNotAvailable($sheetFilePointer);
@@ -133,10 +122,9 @@ EOD;
      * Checks if the sheet has been sucessfully created. Throws an exception if not.
      *
      * @param bool|resource $sheetFilePointer Pointer to the sheet data file or FALSE if unable to open the file
-     * @return void
      * @throws IOException If the sheet data file cannot be opened for writing
      */
-    private function throwIfSheetFilePointerIsNotAvailable($sheetFilePointer)
+    private function throwIfSheetFilePointerIsNotAvailable($sheetFilePointer): void
     {
         if (!$sheetFilePointer) {
             throw new IOException('Unable to open sheet for writing.');
@@ -146,7 +134,7 @@ EOD;
     /**
      * {@inheritdoc}
      */
-    public function addRow(Worksheet $worksheet, $row)
+    public function addRow(Worksheet $worksheet, Row|array $row): void
     {
         if (is_array($row)) {
             if (isset($row[0]) && count($row[0]) > 0) {
@@ -164,11 +152,10 @@ EOD;
      *
      * @param Worksheet $worksheet The worksheet to add the row to
      * @param Row|array $row The row to be written
-     * @return void
      * @throws InvalidArgumentException If a cell value's type is not supported
      * @throws IOException If the data cannot be written
      */
-    private function addNonEmptyRow(Worksheet $worksheet, $row)
+    private function addNonEmptyRow(Worksheet $worksheet, Row|array $row): void
     {
         $cellIndex = 0;
 
@@ -208,14 +195,9 @@ EOD;
      * Applies styles to the given style, merging the cell's style with its row's style
      * Then builds and returns xml for the cell.
      *
-     * @param Cell|array $cell
-     * @param Style $rowStyle
-     * @param int $rowIndex
-     * @param int $cellIndex
-     * @return string
      * @throws InvalidArgumentException If the given value cannot be processed
      */
-    private function applyStyleAndGetCellXML($cell, Style $rowStyle, $rowIndex, $cellIndex)
+    private function applyStyleAndGetCellXML(Cell|array $cell, Style $rowStyle, int $rowIndex, int $cellIndex): string
     {
         $isObject = $cell instanceof Cell;
         // Apply row and extra styles
@@ -242,7 +224,7 @@ EOD;
      * @return int[]
      *
      */
-    public function getColumnsMaxTextLength()
+    public function getColumnsMaxTextLength(): array
     {
         return $this->columnsMaxTextLength;
     }
@@ -276,14 +258,9 @@ EOD;
     /**
      * Builds and returns xml for a single cell.
      *
-     * @param int $rowIndex
-     * @param int $cellNumber
-     * @param Cell|array $cell
-     * @param int $styleId
-     * @return string
      * @throws InvalidArgumentException If the given value cannot be processed
      */
-    private function getCellXML($rowIndex, $cellNumber, $cell, $styleId)
+    private function getCellXML(int $rowIndex, int $cellNumber, Cell|array $cell, int $styleId): string
     {
         $columnIndex = CellHelper::getCellIndexFromColumnIndex($cellNumber);
         $cellXML = '<c r="' . $columnIndex . $rowIndex . '"';
@@ -342,11 +319,11 @@ EOD;
     /**
      * Returns the XML fragment for a cell containing a non empty string
      *
-     * @param string $cellValue The cell value
+     * @param int|float|string|bool $cellValue The cell value
      * @return string The XML fragment representing the cell
      * @throws InvalidArgumentException If the string exceeds the maximum number of characters allowed per cell
      */
-    private function getCellXMLFragmentForNonEmptyString($cellValue)
+    private function getCellXMLFragmentForNonEmptyString(int|float|string|bool $cellValue): string
     {
         if (StringHelper::getStringLength($cellValue) > self::MAX_CHARACTERS_PER_CELL) {
             throw new InvalidArgumentException('Trying to add a value that exceeds the maximum number of characters allowed in a cell (32,767)');
@@ -365,7 +342,7 @@ EOD;
     /**
      * {@inheritdoc}
      */
-    public function close(Worksheet $worksheet, ?Style $defaultStyle = null)
+    public function close(Worksheet $worksheet, ?Style $defaultStyle = null): void
     {
         $worksheetFilePointer = $worksheet->getFilePointer();
 

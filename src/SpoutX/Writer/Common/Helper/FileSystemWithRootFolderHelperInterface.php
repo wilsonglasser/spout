@@ -19,10 +19,7 @@ interface FileSystemWithRootFolderHelperInterface extends FileSystemHelperInterf
      * @throws \SpoutX\Common\Exception\IOException If unable to create at least one of the base folders
      * @return void
      */
-    public function createBaseFilesAndFolders();
+    public function createBaseFilesAndFolders(): void;
 
-    /**
-     * @return string
-     */
-    public function getRootFolder();
+    public function getRootFolder(): string;
 }

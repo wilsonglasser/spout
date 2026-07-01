@@ -17,9 +17,6 @@ class StyleManager implements StyleManagerInterface
     /** @var StyleRegistry Registry for all used styles */
     protected $styleRegistry;
 
-    /**
-     * @param StyleRegistry $styleRegistry
-     */
     public function __construct(StyleRegistry $styleRegistry)
     {
         $this->styleRegistry = $styleRegistry;
@@ -30,7 +27,7 @@ class StyleManager implements StyleManagerInterface
      *
      * @return Style Default style
      */
-    protected function getDefaultStyle()
+    protected function getDefaultStyle(): Style
     {
         // By construction, the default style has ID 0
         return $this->styleRegistry->getRegisteredStyles()[0];
@@ -43,7 +40,7 @@ class StyleManager implements StyleManagerInterface
      * @param Style $style The style to be registered
      * @return Style The registered style, updated with an internal ID.
      */
-    public function registerStyle($style)
+    public function registerStyle(Style $style): Style
     {
         return $this->styleRegistry->registerStyle($style);
     }
@@ -52,10 +49,9 @@ class StyleManager implements StyleManagerInterface
      * Apply additional styles if the given row needs it.
      * Typically, set "wrap text" if a cell contains a new line.
      *
-     * @param Cell|array $cell
      * @return Style
      */
-    public function applyExtraStylesIfNeeded($cell)
+    public function applyExtraStylesIfNeeded(Cell|array $cell)
     {
         $updatedStyle = $this->applyWrapTextIfCellContainsNewLine($cell);
 
@@ -74,7 +70,7 @@ class StyleManager implements StyleManagerInterface
      * @param Cell|array $cell The cell the style should be applied to
      * @return \SpoutX\Common\Entity\Style\Style The eventually updated style
      */
-    protected function applyWrapTextIfCellContainsNewLine($cell)
+    protected function applyWrapTextIfCellContainsNewLine(Cell|array $cell)
     {
         if ($cell instanceof Cell) {
             $cellStyle = $cell->getStyle();

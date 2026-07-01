@@ -13,14 +13,7 @@ use SpoutX\Writer\Common\Manager\WorkbookManagerInterface;
  */
 interface ManagerFactoryInterface
 {
-    /**
-     * @param OptionsManagerInterface $optionsManager
-     * @return WorkbookManagerInterface
-     */
-    public function createWorkbookManager(OptionsManagerInterface $optionsManager);
+    public function createWorkbookManager(OptionsManagerInterface $optionsManager): WorkbookManagerInterface;
 
-    /**
-     * @return SheetManager
-     */
-    public function createSheetManager();
+    public function createSheetManager(): SheetManager;
 }

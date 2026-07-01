@@ -11,6 +11,7 @@ use SpoutX\Writer\Common\Entity\Options;
 use SpoutX\Writer\Common\Manager\RowManager;
 use SpoutX\Writer\Common\Manager\SheetManager;
 use SpoutX\Writer\Common\Manager\Style\StyleMerger;
+use SpoutX\Writer\Common\Manager\WorkbookManagerInterface;
 use SpoutX\Writer\XLSX\Manager\Comment\CommentManager;
 use SpoutX\Writer\XLSX\Manager\SharedStringsManager;
 use SpoutX\Writer\XLSX\Manager\Style\StyleManager;
@@ -25,15 +26,11 @@ use SpoutX\Writer\XLSX\Manager\WorksheetManager;
 class ManagerFactory implements ManagerFactoryInterface
 {
     /** @var InternalEntityFactory */
-    protected $entityFactory;
+    protected InternalEntityFactory $entityFactory;
 
     /** @var HelperFactory $helperFactory */
-    protected $helperFactory;
+    protected HelperFactory $helperFactory;
 
-    /**
-     * @param InternalEntityFactory $entityFactory
-     * @param HelperFactory $helperFactory
-     */
     public function __construct(InternalEntityFactory $entityFactory, HelperFactory $helperFactory)
     {
         $this->entityFactory = $entityFactory;
@@ -41,10 +38,9 @@ class ManagerFactory implements ManagerFactoryInterface
     }
 
     /**
-     * @param OptionsManagerInterface $optionsManager
      * @return WorkbookManager
      */
-    public function createWorkbookManager(OptionsManagerInterface $optionsManager)
+    public function createWorkbookManager(OptionsManagerInterface $optionsManager): WorkbookManagerInterface
     {
         $workbook = $this->entityFactory->createWorkbook();
 
@@ -74,19 +70,12 @@ class ManagerFactory implements ManagerFactoryInterface
         );
     }
 
-    /**
-     * @param OptionsManagerInterface $optionsManager
-     * @param Stylemanager $styleManager
-     * @param StyleMerger $styleMerger
-     * @param SharedStringsManager $sharedStringsManager
-     * @return WorksheetManager
-     */
     private function createWorksheetManager(
         OptionsManagerInterface $optionsManager,
         StyleManager $styleManager,
         StyleMerger $styleMerger,
         SharedStringsManager $sharedStringsManager
-    ) {
+    ): WorksheetManager {
         $rowManager = $this->createRowManager();
         $stringsEscaper = $this->helperFactory->createStringsEscaper();
 
@@ -101,66 +90,45 @@ class ManagerFactory implements ManagerFactoryInterface
         );
     }
 
-    /**
-     * @return SheetManager
-     */
-    public function createSheetManager()
+    public function createSheetManager(): SheetManager
     {
         return new SheetManager();
     }
 
 
-    /**
-     * @return CommentManager
-     */
-    public function createCommentsManager($stringsEscaper)
+    public function createCommentsManager($stringsEscaper): CommentManager
     {
         return new CommentManager($stringsEscaper);
     }
 
-    /**
-     * @return RowManager
-     */
-    public function createRowManager()
+    public function createRowManager(): RowManager
     {
         return new RowManager();
     }
 
-    /**
-     * @param OptionsManagerInterface $optionsManager
-     * @return StyleManager
-     */
-    private function createStyleManager(OptionsManagerInterface $optionsManager)
+    private function createStyleManager(OptionsManagerInterface $optionsManager): StyleManager
     {
         $styleRegistry = $this->createStyleRegistry($optionsManager);
 
         return new StyleManager($styleRegistry);
     }
 
-    /**
-     * @param OptionsManagerInterface $optionsManager
-     * @return StyleRegistry
-     */
-    private function createStyleRegistry(OptionsManagerInterface $optionsManager)
+    private function createStyleRegistry(OptionsManagerInterface $optionsManager): StyleRegistry
     {
         $defaultRowStyle = $optionsManager->getOption(Options::DEFAULT_ROW_STYLE);
 
         return new StyleRegistry($defaultRowStyle);
     }
 
-    /**
-     * @return StyleMerger
-     */
-    private function createStyleMerger()
+    private function createStyleMerger(): StyleMerger
     {
         return new StyleMerger();
     }
 
     /**
      * @param string $xlFolder Path to the "xl" folder
-     * @return SharedStringsManager
      */
-    private function createSharedStringsManager($xlFolder)
+    private function createSharedStringsManager(string $xlFolder): SharedStringsManager
     {
         $stringEscaper = $this->helperFactory->createStringsEscaper();
 

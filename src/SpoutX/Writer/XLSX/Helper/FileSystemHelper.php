@@ -33,73 +33,61 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
     public const STYLES_XML_FILE_NAME = 'styles.xml';
 
     /** @var ZipHelper Helper to perform tasks with Zip archive */
-    private $zipHelper;
+    private ZipHelper $zipHelper;
 
     /** @var \SpoutX\Common\Helper\Escaper\XLSX Used to escape XML data */
-    private $escaper;
+    private \SpoutX\Common\Helper\Escaper\XLSX $escaper;
 
     /** @var string Path to the root folder inside the temp folder where the files to create the XLSX will be stored */
-    private $rootFolder;
+    private string $rootFolder;
 
     /** @var string Path to the "_rels" folder inside the root folder */
-    private $relsFolder;
+    private string $relsFolder;
 
     /** @var string Path to the "docProps" folder inside the root folder */
-    private $docPropsFolder;
+    private string $docPropsFolder;
 
     /** @var string Path to the "xl" folder inside the root folder */
-    private $xlFolder;
+    private string $xlFolder;
 
     /** @var string Path to the "_rels" folder inside the "xl" folder */
-    private $xlRelsFolder;
+    private string $xlRelsFolder;
 
     /** @var string Path to the "worksheets" folder inside the "xl" folder */
-    private $xlWorksheetsFolder;
+    private string $xlWorksheetsFolder;
 
     /** @var string Path to the "worksheets/_rels" folder inside the "xl" folder */
-    private $xlWorksheetsRelsFolder;
+    private string $xlWorksheetsRelsFolder;
 
     /**
      * @param string $baseFolderPath The path of the base folder where all the I/O can occur
      * @param ZipHelper $zipHelper Helper to perform tasks with Zip archive
      * @param \SpoutX\Common\Helper\Escaper\XLSX $escaper Used to escape XML data
      */
-    public function __construct($baseFolderPath, $zipHelper, $escaper)
+    public function __construct(string $baseFolderPath, ZipHelper $zipHelper, \SpoutX\Common\Helper\Escaper\XLSX $escaper)
     {
         parent::__construct($baseFolderPath);
         $this->zipHelper = $zipHelper;
         $this->escaper = $escaper;
     }
 
-    /**
-     * @return string
-     */
-    public function getRootFolder()
+    public function getRootFolder(): string
     {
         return $this->rootFolder;
     }
 
-    /**
-     * @return string
-     */
-    public function getXlFolder()
+    public function getXlFolder(): string
     {
         return $this->xlFolder;
     }
 
-    /**
-     * @return string
-     */
-    public function getXlWorksheetsFolder()
+    public function getXlWorksheetsFolder(): string
     {
         return $this->xlWorksheetsFolder;
     }
 
 
-    /**
-     * @return string
-     */
-    public function getXlWorksheetsRelsFolder()
+    public function getXlWorksheetsRelsFolder(): string
     {
         return $this->xlWorksheetsRelsFolder;
     }
@@ -110,7 +98,7 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
      * @throws \SpoutX\Common\Exception\IOException If unable to create at least one of the base folders
      * @return void
      */
-    public function createBaseFilesAndFolders()
+    public function createBaseFilesAndFolders(): void
     {
         $this
             ->createRootFolder()
@@ -125,7 +113,7 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
      * @throws \SpoutX\Common\Exception\IOException If unable to create the folder
      * @return FileSystemHelper
      */
-    private function createRootFolder()
+    private function createRootFolder(): self
     {
         $this->rootFolder = $this->createFolder($this->baseFolderRealPath, uniqid('xlsx', true));
 
@@ -138,7 +126,7 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
      * @throws \SpoutX\Common\Exception\IOException If unable to create the folder or the ".rels" file
      * @return FileSystemHelper
      */
-    private function createRelsFolderAndFile()
+    private function createRelsFolderAndFile(): self
     {
         $this->relsFolder = $this->createFolder($this->rootFolder, self::RELS_FOLDER_NAME);
 
@@ -153,7 +141,7 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
      * @throws \SpoutX\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
-    private function createRelsFile()
+    private function createRelsFile(): self
     {
         $relsFileContents = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -175,7 +163,7 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create the folder or one of the files
      * @return FileSystemHelper
      */
-    private function createDocPropsFolderAndFiles()
+    private function createDocPropsFolderAndFiles(): self
     {
         $this->docPropsFolder = $this->createFolder($this->rootFolder, self::DOC_PROPS_FOLDER_NAME);
 
@@ -191,7 +179,7 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
-    private function createAppXmlFile()
+    private function createAppXmlFile(): self
     {
         $appName = self::APP_NAME;
         $appXmlFileContents = <<<EOD
@@ -213,7 +201,7 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
-    private function createThemeXmlFile()
+    private function createThemeXmlFile(): self
     {
         $appXmlFileContents = <<<EOD
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -232,7 +220,7 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
-    private function createCoreXmlFile()
+    private function createCoreXmlFile(): self
     {
         $createdDate = (new \DateTime())->format(\DateTime::W3C);
         $coreXmlFileContents = <<<EOD
@@ -255,7 +243,7 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create at least one of the folders
      * @return FileSystemHelper
      */
-    private function createXlFolderAndSubFolders()
+    private function createXlFolderAndSubFolders(): self
     {
         $this->xlFolder = $this->createFolder($this->rootFolder, self::XL_FOLDER_NAME);
         $this->createXlRelsFolder();
@@ -272,7 +260,7 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create the folder
      * @return FileSystemHelper
      */
-    private function createXlRelsFolder()
+    private function createXlRelsFolder(): self
     {
         $this->xlRelsFolder = $this->createFolder($this->xlFolder, self::RELS_FOLDER_NAME);
 
@@ -285,7 +273,7 @@ EOD;
      * @throws \SpoutX\Common\Exception\IOException If unable to create the folder
      * @return FileSystemHelper
      */
-    private function createXlWorksheetsFolder()
+    private function createXlWorksheetsFolder(): self
     {
         $this->xlWorksheetsFolder = $this->createFolder($this->xlFolder, self::WORKSHEETS_FOLDER_NAME);
         $this->xlWorksheetsRelsFolder = $this->createFolder($this->xlWorksheetsFolder, self::RELS_FOLDER_NAME);
@@ -299,7 +287,7 @@ EOD;
      * @param Worksheet[] $worksheets
      * @return FileSystemHelper
      */
-    public function createContentTypesFile($worksheets)
+    public function createContentTypesFile(array $worksheets): self
     {
         $contentTypesXmlFileContents = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -337,7 +325,7 @@ EOD;
      * @param Worksheet[] $worksheets
      * @return FileSystemHelper
      */
-    public function createWorkbookFile($worksheets)
+    public function createWorkbookFile(array $worksheets): self
     {
         $workbookXmlFileContents = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -368,11 +356,10 @@ EOD;
     /**
      * Creates the "workbook.xml.res" file under the "xl/_res" folder
      *
-     * @param CommentManager $commentManager
      * @param Worksheet[] $worksheets
      * @return FileSystemHelper
      */
-    public function createWorkbookRelsFile($commentManager, $worksheets)
+    public function createWorkbookRelsFile(CommentManager $commentManager, array $worksheets): self
     {
         // <Relationship Id="rIdTheme" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>
         $workbookRelsXmlFileContents = <<<'EOD'
@@ -415,12 +402,11 @@ EOD;
     /**
      * Creates the "comments{i}.xml" file under the "xl" folder
      *
-     * @param CommentManager $commentManager
      * @param Worksheet[] $worksheets
      * @throws
      * @return FileSystemHelper
      */
-    public function createCommentsFile($commentManager, $worksheets)
+    public function createCommentsFile(CommentManager $commentManager, array $worksheets): self
     {
         $firstComment = true;
         foreach ($worksheets as $worksheet) {
@@ -443,10 +429,9 @@ EOD;
     /**
      * Creates the "styles.xml" file under the "xl" folder
      *
-     * @param StyleManager $styleManager
      * @return FileSystemHelper
      */
-    public function createStylesFile($styleManager)
+    public function createStylesFile(StyleManager $styleManager): self
     {
         $stylesXmlFileContents = $styleManager->getStylesXMLFileContent();
         $this->createFileWithContents($this->xlFolder, self::STYLES_XML_FILE_NAME, $stylesXmlFileContents);
@@ -460,7 +445,7 @@ EOD;
      * @param resource $streamPointer Pointer to the stream to copy the zip
      * @return void
      */
-    public function zipRootFolderAndCopyToStream($streamPointer)
+    public function zipRootFolderAndCopyToStream($streamPointer): void
     {
         $zip = $this->zipHelper->createZip($this->rootFolder);
 

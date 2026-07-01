@@ -28,7 +28,7 @@ class WriterFactory
      * @throws \SpoutX\Common\Exception\UnsupportedTypeException
      * @return WriterInterface
      */
-    public function create($writerType)
+    public function create(string $writerType): WriterInterface
     {
         switch ($writerType) {
             case Type::XLSX: return $this->getXLSXWriter();
@@ -37,10 +37,7 @@ class WriterFactory
         }
     }
 
-    /**
-     * @return XLSXWriter
-     */
-    private function getXLSXWriter()
+    private function getXLSXWriter(): XLSXWriter
     {
         $styleBuilder = new StyleBuilder();
         $optionsManager = new XLSXOptionsManager($styleBuilder);
