@@ -335,6 +335,7 @@ use SpoutX\Writer\XLSX\Entity\DocumentProperties;
 
 $writer->setDocumentProperties(new DocumentProperties(
     title: 'Q1 Report', creator: 'Me', keywords: 'finance,q1', application: 'TBL Manager',
+    customProperties: ['Department' => 'Finance', 'Reviewed' => 'yes'],
 )); // after openToFile()
 ```
 
@@ -346,9 +347,12 @@ use SpoutX\Common\Entity\RichText;
 use SpoutX\Common\Entity\TextRun;
 use SpoutX\Common\Entity\Style\Color;
 
+use SpoutX\Common\Entity\TextRunVerticalAlignment;
+
 $cell = new Cell(new RichText(
     new TextRun('Hello ', bold: true, fontColor: Color::RED),
     new TextRun('world', italic: true, fontSize: 14, fontName: 'Calibri'),
+    new TextRun('2', verticalAlignment: TextRunVerticalAlignment::Superscript),
 ));
 ```
 
