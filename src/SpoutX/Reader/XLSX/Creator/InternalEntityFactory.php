@@ -75,7 +75,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
     ): Sheet {
         $rowIterator = $this->createRowIterator($filePath, $sheetDataXMLFilePath, $optionsManager, $sharedStringsManager);
 
-        return new Sheet($rowIterator, $sheetIndex, $sheetName, $isSheetActive, $isSheetVisible);
+        return new Sheet($rowIterator, $sheetIndex, $sheetName, $isSheetActive, $isSheetVisible, $filePath, $sheetDataXMLFilePath);
     }
 
     /**
