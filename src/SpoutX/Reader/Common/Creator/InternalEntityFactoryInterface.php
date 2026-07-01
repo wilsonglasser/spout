@@ -16,11 +16,11 @@ interface InternalEntityFactoryInterface
      * @param Cell[] $cells
      * @return Row
      */
-    public function createRow(array $cells = []);
+    public function createRow(array $cells = []): Row;
 
     /**
      * @param mixed $cellValue
      * @return Cell
      */
-    public function createCell($cellValue);
+    public function createCell(mixed $cellValue): Cell;
 }

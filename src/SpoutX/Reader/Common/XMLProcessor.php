@@ -25,15 +25,15 @@ class XMLProcessor
     public const PROCESSING_STOP = 2;
 
     /** @var \SpoutX\Reader\Wrapper\XMLReader The XMLReader object that will help read sheet's XML data */
-    protected $xmlReader;
+    protected XMLReader $xmlReader;
 
     /** @var array Registered callbacks */
-    private $callbacks = [];
+    private array $callbacks = [];
 
     /**
      * @param \SpoutX\Reader\Wrapper\XMLReader $xmlReader XMLReader object
      */
-    public function __construct($xmlReader)
+    public function __construct(XMLReader $xmlReader)
     {
         $this->xmlReader = $xmlReader;
     }
@@ -44,7 +44,7 @@ class XMLProcessor
      * @param callable $callback Callback to execute when the read node has the given name and type
      * @return XMLProcessor
      */
-    public function registerCallback($nodeName, $nodeType, $callback)
+    public function registerCallback(string $nodeName, int $nodeType, array $callback): self
     {
         $callbackKey = $this->getCallbackKey($nodeName, $nodeType);
         $this->callbacks[$callbackKey] = $this->getInvokableCallbackData($callback);
@@ -57,7 +57,7 @@ class XMLProcessor
      * @param int $nodeType Type of the node [NODE_TYPE_START || NODE_TYPE_END]
      * @return string Key used to store the associated callback
      */
-    private function getCallbackKey($nodeName, $nodeType)
+    private function getCallbackKey(string $nodeName, int $nodeType): string
     {
         return "$nodeName$nodeType";
     }
@@ -71,7 +71,7 @@ class XMLProcessor
      * @param callable $callback Array reference to a callback: [OBJECT, METHOD_NAME]
      * @return array Associative array containing the elements needed to invoke the callback using Reflection
      */
-    private function getInvokableCallbackData($callback)
+    private function getInvokableCallbackData(array $callback): array
     {
         $callbackObject = $callback[0];
         $callbackMethodName = $callback[1];
@@ -88,9 +88,8 @@ class XMLProcessor
      * Stops whenever a callback indicates that reading should stop or at the end of the file.
      *
      * @throws \SpoutX\Reader\Exception\XMLProcessingException
-     * @return void
      */
-    public function readUntilStopped()
+    public function readUntilStopped(): void
     {
         while ($this->xmlReader->read()) {
             $nodeType = $this->xmlReader->nodeType;
@@ -116,7 +115,7 @@ class XMLProcessor
      * @param int $nodeType Type of the node [NODE_TYPE_START || NODE_TYPE_END]
      * @return array|null Callback data to be used for execution when a node of the given name/type is read or NULL if none found
      */
-    private function getRegisteredCallbackData($nodeNamePossiblyWithPrefix, $nodeNameWithoutPrefix, $nodeType)
+    private function getRegisteredCallbackData(string $nodeNamePossiblyWithPrefix, string $nodeNameWithoutPrefix, int $nodeType): ?array
     {
         // With prefixed nodes, we should match if (by order of preference):
         //  1. the callback was registered with the prefixed node name (e.g. "x:worksheet")
@@ -139,7 +138,7 @@ class XMLProcessor
      * @param array $args Arguments to pass to the callback
      * @return int Callback response
      */
-    private function invokeCallback($callbackData, $args)
+    private function invokeCallback(array $callbackData, array $args): int
     {
         $reflectionMethod = $callbackData[self::CALLBACK_REFLECTION_METHOD];
         $callbackObject = $callbackData[self::CALLBACK_REFLECTION_OBJECT];

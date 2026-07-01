@@ -14,17 +14,14 @@ interface CachingStrategyInterface
      *
      * @param string $sharedString The string to be added to the cache
      * @param int $sharedStringIndex Index of the shared string in the sharedStrings.xml file
-     * @return void
      */
-    public function addStringForIndex($sharedString, $sharedStringIndex);
+    public function addStringForIndex(string $sharedString, int $sharedStringIndex): void;
 
     /**
      * Closes the cache after the last shared string was added.
      * This prevents any additional string from being added to the cache.
-     *
-     * @return void
      */
-    public function closeCache();
+    public function closeCache(): void;
 
     /**
      * Returns the string located at the given index from the cache.
@@ -33,12 +30,10 @@ interface CachingStrategyInterface
      * @throws \SpoutX\Reader\Exception\SharedStringNotFoundException If no shared string found for the given index
      * @return string The shared string at the given index
      */
-    public function getStringAtIndex($sharedStringIndex);
+    public function getStringAtIndex(int $sharedStringIndex): string;
 
     /**
      * Destroys the cache, freeing memory and removing any created artifacts
-     *
-     * @return void
      */
-    public function clearCache();
+    public function clearCache(): void;
 }

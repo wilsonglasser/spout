@@ -22,7 +22,7 @@ class HelperFactory extends \SpoutX\Common\Creator\HelperFactory
      * @param bool $shouldUse1904Dates Whether date/time values should use a calendar starting in 1904 instead of 1900
      * @return CellValueFormatter
      */
-    public function createCellValueFormatter($sharedStringsManager, $styleManager, $shouldFormatDates, $shouldUse1904Dates)
+    public function createCellValueFormatter(SharedStringsManager $sharedStringsManager, StyleManager $styleManager, bool $shouldFormatDates, bool $shouldUse1904Dates): CellValueFormatter
     {
         $escaper = $this->createStringsEscaper();
 
@@ -32,7 +32,7 @@ class HelperFactory extends \SpoutX\Common\Creator\HelperFactory
     /**
      * @return Escaper\XLSX
      */
-    public function createStringsEscaper()
+    public function createStringsEscaper(): Escaper\XLSX
     {
         /* @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
         return new Escaper\XLSX();

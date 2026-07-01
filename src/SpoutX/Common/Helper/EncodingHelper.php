@@ -26,16 +26,13 @@ class EncodingHelper
     public const BOM_UTF32_LE = "\xFF\xFE\x00\x00";
     public const BOM_UTF32_BE = "\x00\x00\xFE\xFF";
 
-    /** @var \SpoutX\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
-    protected $globalFunctionsHelper;
+    /** Helper to work with global functions */
+    protected GlobalFunctionsHelper $globalFunctionsHelper;
 
     /** @var array Map representing the encodings supporting BOMs (key) and their associated BOM (value) */
-    protected $supportedEncodingsWithBom;
+    protected array $supportedEncodingsWithBom;
 
-    /**
-     * @param \SpoutX\Common\Helper\GlobalFunctionsHelper $globalFunctionsHelper
-     */
-    public function __construct($globalFunctionsHelper)
+    public function __construct(GlobalFunctionsHelper $globalFunctionsHelper)
     {
         $this->globalFunctionsHelper = $globalFunctionsHelper;
 
@@ -55,7 +52,7 @@ class EncodingHelper
      * @param string $encoding Encoding of the file to check
      * @return int Bytes offset to apply to skip the BOM (0 means no BOM)
      */
-    public function getBytesOffsetToSkipBOM($filePointer, $encoding)
+    public function getBytesOffsetToSkipBOM($filePointer, string $encoding): int
     {
         $byteOffsetToSkipBom = 0;
 
@@ -76,7 +73,7 @@ class EncodingHelper
      * @param string $encoding Encoding of the file to check
      * @return bool TRUE if the file has a BOM, FALSE otherwise
      */
-    protected function hasBOM($filePointer, $encoding)
+    protected function hasBOM($filePointer, string $encoding): bool
     {
         $hasBOM = false;
 
@@ -100,7 +97,7 @@ class EncodingHelper
      * @throws \SpoutX\Common\Exception\EncodingConversionException If conversion is not supported or if the conversion failed
      * @return string The converted, UTF-8 string
      */
-    public function attemptConversionToUTF8($string, $sourceEncoding)
+    public function attemptConversionToUTF8(string $string, string $sourceEncoding): string
     {
         return $this->attemptConversion($string, $sourceEncoding, self::ENCODING_UTF8);
     }
@@ -113,7 +110,7 @@ class EncodingHelper
      * @throws \SpoutX\Common\Exception\EncodingConversionException If conversion is not supported or if the conversion failed
      * @return string The converted string, encoded with the given encoding
      */
-    public function attemptConversionFromUTF8($string, $targetEncoding)
+    public function attemptConversionFromUTF8(string $string, string $targetEncoding): string
     {
         return $this->attemptConversion($string, self::ENCODING_UTF8, $targetEncoding);
     }
@@ -128,7 +125,7 @@ class EncodingHelper
      * @throws \SpoutX\Common\Exception\EncodingConversionException If conversion is not supported or if the conversion failed
      * @return string The converted string, encoded with the given encoding
      */
-    protected function attemptConversion($string, $sourceEncoding, $targetEncoding)
+    protected function attemptConversion(string $string, string $sourceEncoding, string $targetEncoding): string
     {
         // if source and target encodings are the same, it's a no-op
         if ($sourceEncoding === $targetEncoding) {
@@ -157,7 +154,7 @@ class EncodingHelper
      *
      * @return bool TRUE if "iconv" is available and can be used, FALSE otherwise
      */
-    protected function canUseIconv()
+    protected function canUseIconv(): bool
     {
         return $this->globalFunctionsHelper->function_exists('iconv');
     }
@@ -168,7 +165,7 @@ class EncodingHelper
      *
      * @return bool TRUE if "mb_string" functions are available and can be used, FALSE otherwise
      */
-    protected function canUseMbString()
+    protected function canUseMbString(): bool
     {
         return $this->globalFunctionsHelper->function_exists('mb_convert_encoding');
     }

@@ -12,15 +12,13 @@ use SpoutX\Reader\Exception\XMLProcessingException;
 trait XMLInternalErrorsHelper
 {
     /** @var bool Stores whether XML errors were initially stored internally - used to reset */
-    protected $initialUseInternalErrorsValue;
+    protected bool $initialUseInternalErrorsValue;
 
     /**
      * To avoid displaying lots of warning/error messages on screen,
      * stores errors internally instead.
-     *
-     * @return void
      */
-    protected function useXMLInternalErrors()
+    protected function useXMLInternalErrors(): void
     {
         libxml_clear_errors();
         $this->initialUseInternalErrorsValue = libxml_use_internal_errors(true);
@@ -31,9 +29,8 @@ trait XMLInternalErrorsHelper
      * It also always resets the "libxml_use_internal_errors" setting back to its initial value.
      *
      * @throws \SpoutX\Reader\Exception\XMLProcessingException
-     * @return void
      */
-    protected function resetXMLInternalErrorsSettingAndThrowIfXMLErrorOccured()
+    protected function resetXMLInternalErrorsSettingAndThrowIfXMLErrorOccured(): void
     {
         if ($this->hasXMLErrorOccured()) {
             $this->resetXMLInternalErrorsSetting();
@@ -48,7 +45,7 @@ trait XMLInternalErrorsHelper
      *
      * @return bool TRUE if an error occured, FALSE otherwise
      */
-    private function hasXMLErrorOccured()
+    private function hasXMLErrorOccured(): bool
     {
         return (libxml_get_last_error() !== false);
     }
@@ -59,7 +56,7 @@ trait XMLInternalErrorsHelper
      *
      * @return string|null Last XML error message or null if no error
      */
-    private function getLastXMLErrorMessage()
+    private function getLastXMLErrorMessage(): ?string
     {
         $errorMessage = null;
         $error = libxml_get_last_error();
@@ -71,10 +68,7 @@ trait XMLInternalErrorsHelper
         return $errorMessage;
     }
 
-    /**
-     * @return void
-     */
-    protected function resetXMLInternalErrorsSetting()
+    protected function resetXMLInternalErrorsSetting(): void
     {
         libxml_use_internal_errors($this->initialUseInternalErrorsValue);
     }

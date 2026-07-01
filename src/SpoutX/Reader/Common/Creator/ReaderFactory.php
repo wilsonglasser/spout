@@ -26,7 +26,7 @@ class ReaderFactory
      * Map file extensions to reader types
      * @var array
      */
-    private static $extensionReaderMap = [
+    private static array $extensionReaderMap = [
         'xlsx' => Type::XLSX,
     ];
 
@@ -37,7 +37,7 @@ class ReaderFactory
      * @throws \SpoutX\Common\Exception\UnsupportedTypeException
      * @return ReaderInterface
      */
-    public static function create($readerType)
+    public static function create(string $readerType): ReaderInterface
     {
         switch ($readerType) {
             case Type::XLSX: return self::getXLSXReader();
@@ -54,7 +54,7 @@ class ReaderFactory
      * @throws \SpoutX\Common\Exception\UnsupportedTypeException
      * @return ReaderInterface
      */
-    public static function createFromFile($path)
+    public static function createFromFile(string $path): ReaderInterface
     {
         if (!\is_file($path)) {
             throw new IOException(
@@ -76,7 +76,7 @@ class ReaderFactory
     /**
      * @return XLSXReader
      */
-    private static function getXLSXReader()
+    private static function getXLSXReader(): XLSXReader
     {
         $optionsManager = new XLSXOptionsManager();
         $helperFactory = new XLSXHelperFactory();

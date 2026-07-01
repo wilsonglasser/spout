@@ -13,7 +13,7 @@ use SpoutX\Common\Exception\InvalidArgumentException;
 class CellHelper
 {
     // Using ord() is super slow... Using a pre-computed hash table instead.
-    private static $columnLetterToIndexMapping = [
+    private static array $columnLetterToIndexMapping = [
         'A' => 0, 'B' => 1, 'C' => 2, 'D' => 3, 'E' => 4, 'F' => 5, 'G' => 6,
         'H' => 7, 'I' => 8, 'J' => 9, 'K' => 10, 'L' => 11, 'M' => 12, 'N' => 13,
         'O' => 14, 'P' => 15, 'Q' => 16, 'R' => 17, 'S' => 18, 'T' => 19, 'U' => 20,
@@ -30,7 +30,7 @@ class CellHelper
      * @throws \SpoutX\Common\Exception\InvalidArgumentException When the given cell index is invalid
      * @return int
      */
-    public static function getColumnIndexFromCellIndex($cellIndex)
+    public static function getColumnIndexFromCellIndex(string $cellIndex): int
     {
         if (!self::isValidCellIndex($cellIndex)) {
             throw new InvalidArgumentException('Cannot get column index from an invalid cell index.');
@@ -75,7 +75,7 @@ class CellHelper
      * @param string $cellIndex The Excel cell index ('A1', 'BC13', ...)
      * @return bool
      */
-    protected static function isValidCellIndex($cellIndex)
+    protected static function isValidCellIndex(string $cellIndex): bool
     {
         return (preg_match('/^[A-Z]{1,3}\d+$/', $cellIndex) === 1);
     }

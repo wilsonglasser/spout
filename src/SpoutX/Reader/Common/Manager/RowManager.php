@@ -13,7 +13,7 @@ use SpoutX\Reader\Common\Creator\InternalEntityFactoryInterface;
 class RowManager
 {
     /** @var InternalEntityFactoryInterface Factory to create entities */
-    private $entityFactory;
+    private InternalEntityFactoryInterface $entityFactory;
 
     /**
      * @param InternalEntityFactoryInterface $entityFactory Factory to create entities
@@ -30,7 +30,7 @@ class RowManager
      * @param Row $row
      * @return bool
      */
-    public function isEmpty(Row $row)
+    public function isEmpty(Row $row): bool
     {
         foreach ($row->getCells() as $cell) {
             if (!$cell->isEmpty()) {
@@ -47,7 +47,7 @@ class RowManager
      * @param Row $row
      * @return Row
      */
-    public function fillMissingIndexesWithEmptyCells(Row $row)
+    public function fillMissingIndexesWithEmptyCells(Row $row): Row
     {
         if ($row->getNumCells() === 0) {
             return $row;

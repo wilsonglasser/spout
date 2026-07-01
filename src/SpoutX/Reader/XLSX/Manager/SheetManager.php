@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace SpoutX\Reader\XLSX\Manager;
 
+use SpoutX\Common\Helper\Escaper;
+use SpoutX\Common\Manager\OptionsManagerInterface;
 use SpoutX\Reader\Common\Entity\Options;
 use SpoutX\Reader\Common\XMLProcessor;
+use SpoutX\Reader\Wrapper\XMLReader;
 use SpoutX\Reader\XLSX\Creator\InternalEntityFactory;
 use SpoutX\Reader\XLSX\Sheet;
 
@@ -39,31 +42,31 @@ class SheetManager
     public const SHEET_STATE_HIDDEN = 'hidden';
 
     /** @var string Path of the XLSX file being read */
-    protected $filePath;
+    protected string $filePath;
 
     /** @var \SpoutX\Common\Manager\OptionsManagerInterface Reader's options manager */
-    protected $optionsManager;
+    protected OptionsManagerInterface $optionsManager;
 
     /** @var \SpoutX\Reader\XLSX\Manager\SharedStringsManager Manages shared strings */
-    protected $sharedStringsManager;
+    protected SharedStringsManager $sharedStringsManager;
 
     /** @var \SpoutX\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
-    protected $globalFunctionsHelper;
+    protected \SpoutX\Common\Helper\GlobalFunctionsHelper $globalFunctionsHelper;
 
     /** @var InternalEntityFactory Factory to create entities */
-    protected $entityFactory;
+    protected InternalEntityFactory $entityFactory;
 
     /** @var \SpoutX\Common\Helper\Escaper\XLSX Used to unescape XML data */
-    protected $escaper;
+    protected Escaper\XLSX $escaper;
 
     /** @var array List of sheets */
-    protected $sheets;
+    protected array $sheets;
 
     /** @var int Index of the sheet currently read */
-    protected $currentSheetIndex;
+    protected int $currentSheetIndex;
 
     /** @var int Index of the active sheet (0 by default) */
-    protected $activeSheetIndex;
+    protected int $activeSheetIndex;
 
     /**
      * @param string $filePath Path of the XLSX file being read
@@ -71,9 +74,8 @@ class SheetManager
      * @param \SpoutX\Reader\XLSX\Manager\SharedStringsManager $sharedStringsManager Manages shared strings
      * @param \SpoutX\Common\Helper\Escaper\XLSX $escaper Used to unescape XML data
      * @param InternalEntityFactory $entityFactory Factory to create entities
-     * @param mixed $sharedStringsManager
      */
-    public function __construct($filePath, $optionsManager, $sharedStringsManager, $escaper, $entityFactory)
+    public function __construct(string $filePath, OptionsManagerInterface $optionsManager, SharedStringsManager $sharedStringsManager, Escaper\XLSX $escaper, InternalEntityFactory $entityFactory)
     {
         $this->filePath = $filePath;
         $this->optionsManager = $optionsManager;
@@ -88,7 +90,7 @@ class SheetManager
      *
      * @return Sheet[] Sheets within the XLSX file
      */
-    public function getSheets()
+    public function getSheets(): array
     {
         $this->sheets = [];
         $this->currentSheetIndex = 0;
@@ -114,7 +116,7 @@ class SheetManager
      * @param \SpoutX\Reader\Wrapper\XMLReader $xmlReader XMLReader object, positioned on a "<workbookPr>" starting node
      * @return int A return code that indicates what action should the processor take next
      */
-    protected function processWorkbookPropertiesStartingNode($xmlReader)
+    protected function processWorkbookPropertiesStartingNode(XMLReader $xmlReader): int
     {
         $shouldUse1904Dates = (bool) $xmlReader->getAttribute(self::XML_ATTRIBUTE_DATE_1904);
         $this->optionsManager->setOption(Options::SHOULD_USE_1904_DATES, $shouldUse1904Dates);
@@ -126,7 +128,7 @@ class SheetManager
      * @param \SpoutX\Reader\Wrapper\XMLReader $xmlReader XMLReader object, positioned on a "<workbookView>" starting node
      * @return int A return code that indicates what action should the processor take next
      */
-    protected function processWorkbookViewStartingNode($xmlReader)
+    protected function processWorkbookViewStartingNode(XMLReader $xmlReader): int
     {
         // The "workbookView" node is located before "sheet" nodes, ensuring that
         // the active sheet is known before parsing sheets data.
@@ -139,7 +141,7 @@ class SheetManager
      * @param \SpoutX\Reader\Wrapper\XMLReader $xmlReader XMLReader object, positioned on a "<sheet>" starting node
      * @return int A return code that indicates what action should the processor take next
      */
-    protected function processSheetStartingNode($xmlReader)
+    protected function processSheetStartingNode(XMLReader $xmlReader): int
     {
         $isSheetActive = ($this->currentSheetIndex === $this->activeSheetIndex);
         $this->sheets[] = $this->getSheetFromSheetXMLNode($xmlReader, $this->currentSheetIndex, $isSheetActive);
@@ -151,7 +153,7 @@ class SheetManager
     /**
      * @return int A return code that indicates what action should the processor take next
      */
-    protected function processSheetsEndingNode()
+    protected function processSheetsEndingNode(): int
     {
         return XMLProcessor::PROCESSING_STOP;
     }
@@ -166,7 +168,7 @@ class SheetManager
      * @param bool $isSheetActive Whether this sheet was defined as active
      * @return \SpoutX\Reader\XLSX\Sheet Sheet instance
      */
-    protected function getSheetFromSheetXMLNode($xmlReaderOnSheetNode, $sheetIndexZeroBased, $isSheetActive)
+    protected function getSheetFromSheetXMLNode(XMLReader $xmlReaderOnSheetNode, int $sheetIndexZeroBased, bool $isSheetActive): Sheet
     {
         $sheetId = $xmlReaderOnSheetNode->getAttribute(self::XML_ATTRIBUTE_R_ID);
 
@@ -194,7 +196,7 @@ class SheetManager
      * @param string $sheetId The sheet ID, as defined in "workbook.xml"
      * @return string The XML file path describing the sheet inside "workbook.xml.res", for the given sheet ID
      */
-    protected function getSheetDataXMLFilePathForSheetId($sheetId)
+    protected function getSheetDataXMLFilePathForSheetId(?string $sheetId): string
     {
         $sheetDataXMLFilePath = '';
 

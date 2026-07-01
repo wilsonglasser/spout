@@ -22,7 +22,7 @@ class DateFormatHelper
      *
      * @var array Mapping between Excel format characters and PHP format characters
      */
-    private static $excelDateFormatToPHPDateFormatMapping = [
+    private static array $excelDateFormatToPHPDateFormatMapping = [
         self::KEY_GENERAL => [
             // Time
             'am/pm' => 'A',  // Uppercase Ante meridiem and Post meridiem
@@ -86,7 +86,7 @@ class DateFormatHelper
      * @return    mixed        Excel date/time value
      *                            or boolean FALSE on failure
      */
-    public static function toExcelDateFormat($dateValue = 0)
+    public static function toExcelDateFormat(mixed $dateValue = 0)
     {
         $saveTimeZone = date_default_timezone_get();
         date_default_timezone_set('UTC');
@@ -114,7 +114,7 @@ class DateFormatHelper
      * @param string $excelDateFormat Excel date format
      * @return string PHP date format (as defined here: http://php.net/manual/en/function.date.php)
      */
-    public static function toPHPDateFormat($excelDateFormat)
+    public static function toPHPDateFormat(string $excelDateFormat): string
     {
         // Remove brackets potentially present at the beginning of the format string
         // and text portion of the format at the end of it (starting with ";")
@@ -173,7 +173,7 @@ class DateFormatHelper
      * @param string $excelDateFormat Date format as defined by Excel
      * @return bool Whether the given date format has the 12-hour format marker
      */
-    private static function has12HourFormatMarker($excelDateFormat)
+    private static function has12HourFormatMarker(string $excelDateFormat): bool
     {
         return (stripos($excelDateFormat, 'am/pm') !== false);
     }

@@ -61,7 +61,7 @@ class CachingStrategyFactory
      * @param HelperFactory $helperFactory Factory to create helpers
      * @return CachingStrategyInterface The best caching strategy
      */
-    public function createBestCachingStrategy($sharedStringsUniqueCount, $tempFolder, $helperFactory)
+    public function createBestCachingStrategy(?int $sharedStringsUniqueCount, string $tempFolder, HelperFactory $helperFactory): CachingStrategyInterface
     {
         if ($this->isInMemoryStrategyUsageSafe($sharedStringsUniqueCount)) {
             return new InMemoryStrategy($sharedStringsUniqueCount);
@@ -77,7 +77,7 @@ class CachingStrategyFactory
      * @param int|null $sharedStringsUniqueCount Number of unique shared strings (NULL if unknown)
      * @return bool
      */
-    protected function isInMemoryStrategyUsageSafe($sharedStringsUniqueCount)
+    protected function isInMemoryStrategyUsageSafe(?int $sharedStringsUniqueCount): bool
     {
         // if the number of shared strings in unknown, do not use "in memory" strategy
         if ($sharedStringsUniqueCount === null) {

@@ -15,15 +15,15 @@ use SpoutX\Reader\Exception\SharedStringNotFoundException;
 class InMemoryStrategy implements CachingStrategyInterface
 {
     /** @var \SplFixedArray Array used to cache the shared strings */
-    protected $inMemoryCache;
+    protected \SplFixedArray $inMemoryCache;
 
     /** @var bool Whether the cache has been closed */
-    protected $isCacheClosed;
+    protected bool $isCacheClosed;
 
     /**
      * @param int $sharedStringsUniqueCount Number of unique shared strings
      */
-    public function __construct($sharedStringsUniqueCount)
+    public function __construct(int $sharedStringsUniqueCount)
     {
         $this->inMemoryCache = new \SplFixedArray($sharedStringsUniqueCount);
         $this->isCacheClosed = false;
@@ -34,9 +34,8 @@ class InMemoryStrategy implements CachingStrategyInterface
      *
      * @param string $sharedString The string to be added to the cache
      * @param int $sharedStringIndex Index of the shared string in the sharedStrings.xml file
-     * @return void
      */
-    public function addStringForIndex($sharedString, $sharedStringIndex)
+    public function addStringForIndex(string $sharedString, int $sharedStringIndex): void
     {
         if (!$this->isCacheClosed) {
             $this->inMemoryCache->offsetSet($sharedStringIndex, $sharedString);
@@ -46,10 +45,8 @@ class InMemoryStrategy implements CachingStrategyInterface
     /**
      * Closes the cache after the last shared string was added.
      * This prevents any additional string from being added to the cache.
-     *
-     * @return void
      */
-    public function closeCache()
+    public function closeCache(): void
     {
         $this->isCacheClosed = true;
     }
@@ -61,7 +58,7 @@ class InMemoryStrategy implements CachingStrategyInterface
      * @throws \SpoutX\Reader\Exception\SharedStringNotFoundException If no shared string found for the given index
      * @return string The shared string at the given index
      */
-    public function getStringAtIndex($sharedStringIndex)
+    public function getStringAtIndex(int $sharedStringIndex): string
     {
         try {
             return $this->inMemoryCache->offsetGet($sharedStringIndex);
@@ -72,10 +69,8 @@ class InMemoryStrategy implements CachingStrategyInterface
 
     /**
      * Destroys the cache, freeing memory and removing any created artifacts
-     *
-     * @return void
      */
-    public function clearCache()
+    public function clearCache(): void
     {
         unset($this->inMemoryCache);
         $this->isCacheClosed = false;

@@ -16,11 +16,9 @@ class GlobalFunctionsHelper
      * Wrapper around global function fopen()
      * @see fopen()
      *
-     * @param string $fileName
-     * @param string $mode
      * @return resource|bool
      */
-    public function fopen($fileName, $mode)
+    public function fopen(string $fileName, string $mode)
     {
         return fopen($fileName, $mode);
     }
@@ -30,7 +28,6 @@ class GlobalFunctionsHelper
      * @see fgets()
      *
      * @param resource $handle
-     * @param int|null $length
      * @return string
      */
     public function fgets($handle, ?int $length = null)
@@ -43,10 +40,9 @@ class GlobalFunctionsHelper
      * @see fputs()
      *
      * @param resource $handle
-     * @param string $string
      * @return int
      */
-    public function fputs($handle, $string)
+    public function fputs($handle, string $string)
     {
         return fputs($handle, $string);
     }
@@ -56,9 +52,8 @@ class GlobalFunctionsHelper
      * @see fflush()
      *
      * @param resource $handle
-     * @return bool
      */
-    public function fflush($handle)
+    public function fflush($handle): bool
     {
         return fflush($handle);
     }
@@ -68,10 +63,8 @@ class GlobalFunctionsHelper
      * @see fseek()
      *
      * @param resource $handle
-     * @param int $offset
-     * @return int
      */
-    public function fseek($handle, $offset)
+    public function fseek($handle, int $offset): int
     {
         return fseek($handle, $offset);
     }
@@ -81,10 +74,9 @@ class GlobalFunctionsHelper
      * @see fwrite()
      *
      * @param resource $handle
-     * @param string $string
      * @return int
      */
-    public function fwrite($handle, $string)
+    public function fwrite($handle, string $string)
     {
         return fwrite($handle, $string);
     }
@@ -94,9 +86,8 @@ class GlobalFunctionsHelper
      * @see fclose()
      *
      * @param resource $handle
-     * @return bool
      */
-    public function fclose($handle)
+    public function fclose($handle): bool
     {
         return fclose($handle);
     }
@@ -106,9 +97,8 @@ class GlobalFunctionsHelper
      * @see rewind()
      *
      * @param resource $handle
-     * @return bool
      */
-    public function rewind($handle)
+    public function rewind($handle): bool
     {
         return rewind($handle);
     }
@@ -116,11 +106,8 @@ class GlobalFunctionsHelper
     /**
      * Wrapper around global function file_exists()
      * @see file_exists()
-     *
-     * @param string $fileName
-     * @return bool
      */
-    public function file_exists($fileName)
+    public function file_exists(string $fileName): bool
     {
         return file_exists($fileName);
     }
@@ -129,10 +116,9 @@ class GlobalFunctionsHelper
      * Wrapper around global function file_get_contents()
      * @see file_get_contents()
      *
-     * @param string $filePath
      * @return string
      */
-    public function file_get_contents($filePath)
+    public function file_get_contents(string $filePath)
     {
         $realFilePath = $this->convertToUseRealPath($filePath);
 
@@ -146,7 +132,7 @@ class GlobalFunctionsHelper
      * @param string $filePath File path
      * @return string The file path using a real path
      */
-    protected function convertToUseRealPath($filePath)
+    protected function convertToUseRealPath(string $filePath)
     {
         $realFilePath = $filePath;
 
@@ -169,7 +155,7 @@ class GlobalFunctionsHelper
      * @param string $path Path pointing to a document
      * @return bool TRUE if path is a zip stream, FALSE otherwise
      */
-    protected function isZipStream($path)
+    protected function isZipStream(string $path): bool
     {
         return (strpos($path, 'zip://') === 0);
     }
@@ -179,9 +165,8 @@ class GlobalFunctionsHelper
      * @see feof()
      *
      * @param resource $handle
-     * @return bool
      */
-    public function feof($handle)
+    public function feof($handle): bool
     {
         return feof($handle);
     }
@@ -189,11 +174,8 @@ class GlobalFunctionsHelper
     /**
      * Wrapper around global function is_readable()
      * @see is_readable()
-     *
-     * @param string $fileName
-     * @return bool
      */
-    public function is_readable($fileName)
+    public function is_readable(string $fileName): bool
     {
         return is_readable($fileName);
     }
@@ -201,12 +183,8 @@ class GlobalFunctionsHelper
     /**
      * Wrapper around global function basename()
      * @see basename()
-     *
-     * @param string $path
-     * @param string $suffix
-     * @return string
      */
-    public function basename(string $path, string $suffix = '')
+    public function basename(string $path, string $suffix = ''): string
     {
         return basename($path, $suffix);
     }
@@ -214,11 +192,8 @@ class GlobalFunctionsHelper
     /**
      * Wrapper around global function header()
      * @see header()
-     *
-     * @param string $string
-     * @return void
      */
-    public function header($string)
+    public function header(string $string): void
     {
         header($string);
     }
@@ -226,10 +201,8 @@ class GlobalFunctionsHelper
     /**
      * Wrapper around global function ob_end_clean()
      * @see ob_end_clean()
-     *
-     * @return void
      */
-    public function ob_end_clean()
+    public function ob_end_clean(): void
     {
         if (ob_get_length() > 0) {
             ob_end_clean();
@@ -245,7 +218,7 @@ class GlobalFunctionsHelper
      * @param string $targetEncoding The encoding the source string should be converted to
      * @return string|bool the converted string or FALSE on failure.
      */
-    public function iconv($string, $sourceEncoding, $targetEncoding)
+    public function iconv(string $string, string $sourceEncoding, string $targetEncoding)
     {
         return iconv($sourceEncoding, $targetEncoding, $string);
     }
@@ -259,7 +232,7 @@ class GlobalFunctionsHelper
      * @param string $targetEncoding The encoding the source string should be converted to
      * @return string|bool the converted string or FALSE on failure.
      */
-    public function mb_convert_encoding($string, $sourceEncoding, $targetEncoding)
+    public function mb_convert_encoding(string $string, string $sourceEncoding, string $targetEncoding)
     {
         return mb_convert_encoding($string, $targetEncoding, $sourceEncoding);
     }
@@ -270,7 +243,7 @@ class GlobalFunctionsHelper
      *
      * @return array
      */
-    public function stream_get_wrappers()
+    public function stream_get_wrappers(): array
     {
         return stream_get_wrappers();
     }
@@ -278,11 +251,8 @@ class GlobalFunctionsHelper
     /**
      * Wrapper around global function function_exists()
      * @see function_exists()
-     *
-     * @param string $functionName
-     * @return bool
      */
-    public function function_exists($functionName)
+    public function function_exists(string $functionName): bool
     {
         return function_exists($functionName);
     }

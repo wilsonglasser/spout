@@ -34,25 +34,25 @@ class SharedStringsManager
     public const XML_ATTRIBUTE_VALUE_PRESERVE = 'preserve';
 
     /** @var string Path of the XLSX file being read */
-    protected $filePath;
+    protected string $filePath;
 
     /** @var string Temporary folder where the temporary files to store shared strings will be stored */
-    protected $tempFolder;
+    protected string $tempFolder;
 
     /** @var WorkbookRelationshipsManager Helps retrieving workbook relationships */
-    protected $workbookRelationshipsManager;
+    protected WorkbookRelationshipsManager $workbookRelationshipsManager;
 
     /** @var InternalEntityFactory Factory to create entities */
-    protected $entityFactory;
+    protected InternalEntityFactory $entityFactory;
 
     /** @var HelperFactory $helperFactory Factory to create helpers */
-    protected $helperFactory;
+    protected HelperFactory $helperFactory;
 
     /** @var CachingStrategyFactory Factory to create shared strings caching strategies */
-    protected $cachingStrategyFactory;
+    protected CachingStrategyFactory $cachingStrategyFactory;
 
     /** @var CachingStrategyInterface The best caching strategy for storing shared strings */
-    protected $cachingStrategy;
+    protected ?CachingStrategyInterface $cachingStrategy = null;
 
     /**
      * @param string $filePath Path of the XLSX file being read
@@ -63,12 +63,12 @@ class SharedStringsManager
      * @param CachingStrategyFactory $cachingStrategyFactory Factory to create shared strings caching strategies
      */
     public function __construct(
-        $filePath,
-        $tempFolder,
-        $workbookRelationshipsManager,
-        $entityFactory,
-        $helperFactory,
-        $cachingStrategyFactory
+        string $filePath,
+        string $tempFolder,
+        WorkbookRelationshipsManager $workbookRelationshipsManager,
+        InternalEntityFactory $entityFactory,
+        HelperFactory $helperFactory,
+        CachingStrategyFactory $cachingStrategyFactory
     ) {
         $this->filePath = $filePath;
         $this->tempFolder = $tempFolder;
@@ -86,7 +86,7 @@ class SharedStringsManager
      *
      * @return bool
      */
-    public function hasSharedStrings()
+    public function hasSharedStrings(): bool
     {
         return $this->workbookRelationshipsManager->hasSharedStringsXMLFile();
     }
@@ -102,9 +102,8 @@ class SharedStringsManager
      * we need to use a XML reader that provides streaming like the XMLReader library.
      *
      * @throws \SpoutX\Common\Exception\IOException If shared strings XML file can't be read
-     * @return void
      */
-    public function extractSharedStrings()
+    public function extractSharedStrings(): void
     {
         $sharedStringsXMLFilePath = $this->workbookRelationshipsManager->getSharedStringsXMLFilePath();
         $xmlReader = $this->entityFactory->createXMLReader();
@@ -143,7 +142,7 @@ class SharedStringsManager
      * @throws \SpoutX\Common\Exception\IOException If sharedStrings.xml is invalid and can't be read
      * @return int|null Number of unique shared strings in the sharedStrings.xml file
      */
-    protected function getSharedStringsUniqueCount($xmlReader)
+    protected function getSharedStringsUniqueCount(XMLReader $xmlReader): ?int
     {
         $xmlReader->next(self::XML_NODE_SST);
 
@@ -169,7 +168,7 @@ class SharedStringsManager
      * @param int|null $sharedStringsUniqueCount Number of unique shared strings (NULL if unknown)
      * @return CachingStrategyInterface
      */
-    protected function getBestSharedStringsCachingStrategy($sharedStringsUniqueCount)
+    protected function getBestSharedStringsCachingStrategy(?int $sharedStringsUniqueCount): CachingStrategyInterface
     {
         return $this->cachingStrategyFactory
                 ->createBestCachingStrategy($sharedStringsUniqueCount, $this->tempFolder, $this->helperFactory);
@@ -180,9 +179,8 @@ class SharedStringsManager
      *
      * @param \SpoutX\Reader\Wrapper\XMLReader $xmlReader XML Reader positioned on a "<si>" node
      * @param int $sharedStringIndex Index of the processed shared strings item
-     * @return void
      */
-    protected function processSharedStringsItem($xmlReader, $sharedStringIndex)
+    protected function processSharedStringsItem(XMLReader $xmlReader, int $sharedStringIndex): void
     {
         $sharedStringValue = '';
 
@@ -210,7 +208,7 @@ class SharedStringsManager
      * @param \DOMElement $textNode Text node to check
      * @return bool Whether the given text node's value must be extracted
      */
-    protected function shouldExtractTextNodeValue($textNode)
+    protected function shouldExtractTextNodeValue(\DOMElement $textNode): bool
     {
         $parentTagName = $textNode->parentNode->localName;
 
@@ -223,7 +221,7 @@ class SharedStringsManager
      * @param \DOMElement $textNode The text node element (<t>) whose whitespace may be preserved
      * @return bool Whether whitespace should be preserved
      */
-    protected function shouldPreserveWhitespace($textNode)
+    protected function shouldPreserveWhitespace(\DOMElement $textNode): bool
     {
         $spaceValue = $textNode->getAttribute(self::XML_ATTRIBUTE_XML_SPACE);
 
@@ -237,17 +235,15 @@ class SharedStringsManager
      * @throws \SpoutX\Reader\Exception\SharedStringNotFoundException If no shared string found for the given index
      * @return string The shared string at the given index
      */
-    public function getStringAtIndex($sharedStringIndex)
+    public function getStringAtIndex(int $sharedStringIndex): string
     {
         return $this->cachingStrategy->getStringAtIndex($sharedStringIndex);
     }
 
     /**
      * Destroys the cache, freeing memory and removing any created artifacts
-     *
-     * @return void
      */
-    public function cleanup()
+    public function cleanup(): void
     {
         if ($this->cachingStrategy) {
             $this->cachingStrategy->clearCache();

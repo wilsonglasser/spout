@@ -12,13 +12,10 @@ namespace SpoutX\Common\Helper;
  */
 class StringHelper
 {
-    /** @var bool Whether the mbstring extension is loaded */
-    protected static $hasMbstringSupport;
+    /** Whether the mbstring extension is loaded */
+    protected static ?bool $hasMbstringSupport = null;
 
-    /**
-     *
-     */
-    public static function hasMbstringSupport()
+    public static function hasMbstringSupport(): bool
     {
         if (self::$hasMbstringSupport === null) {
             self::$hasMbstringSupport = extension_loaded('mbstring');
@@ -31,11 +28,8 @@ class StringHelper
      * It uses the multi-bytes function is available.
      * @see strlen
      * @see mb_strlen
-     *
-     * @param string $string
-     * @return int
      */
-    public static function getStringLength($string)
+    public static function getStringLength(string $string): int
     {
         return self::hasMbstringSupport() ? mb_strlen($string) : strlen($string);
     }
@@ -50,7 +44,7 @@ class StringHelper
      * @param string $string Haystack
      * @return int Char/substring's first occurrence position within the string if found (starts at 0) or -1 if not found
      */
-    public static function getCharFirstOccurrencePosition($char, $string)
+    public static function getCharFirstOccurrencePosition(string $char, string $string): int
     {
         $position = self::hasMbstringSupport() ? mb_strpos($string, $char) : strpos($string, $char);
 
@@ -67,7 +61,7 @@ class StringHelper
      * @param string $string Haystack
      * @return int Char/substring's last occurrence position within the string if found (starts at 0) or -1 if not found
      */
-    public static function getCharLastOccurrencePosition($char, $string)
+    public static function getCharLastOccurrencePosition(string $char, string $string): int
     {
         $position = self::hasMbstringSupport() ? mb_strrpos($string, $char) : strrpos($string, $char);
 

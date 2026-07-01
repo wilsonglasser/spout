@@ -19,7 +19,7 @@ class ReaderEntityFactory
      * @throws \SpoutX\Common\Exception\UnsupportedTypeException
      * @return ReaderInterface
      */
-    public static function createReader($readerType)
+    public static function createReader(string $readerType): ReaderInterface
     {
         return (new ReaderFactory())->create($readerType);
     }
@@ -32,7 +32,7 @@ class ReaderEntityFactory
      * @throws \SpoutX\Common\Exception\UnsupportedTypeException
      * @return ReaderInterface
      */
-    public static function createReaderFromFile($path)
+    public static function createReaderFromFile(string $path): ReaderInterface
     {
         return (new ReaderFactory())->createFromFile($path);
     }

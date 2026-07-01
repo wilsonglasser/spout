@@ -43,19 +43,19 @@ class CellValueFormatter
     public const ERRONEOUS_EXCEL_LEAP_YEAR_DAY = 60;
 
     /** @var SharedStringsManager Manages shared strings */
-    protected $sharedStringsManager;
+    protected SharedStringsManager $sharedStringsManager;
 
     /** @var StyleManager Manages styles */
-    protected $styleManager;
+    protected StyleManager $styleManager;
 
     /** @var bool Whether date/time values should be returned as PHP objects or be formatted as strings */
-    protected $shouldFormatDates;
+    protected bool $shouldFormatDates;
 
     /** @var bool Whether date/time values should use a calendar starting in 1904 instead of 1900 */
-    protected $shouldUse1904Dates;
+    protected bool $shouldUse1904Dates;
 
     /** @var \SpoutX\Common\Helper\Escaper\XLSX Used to unescape XML data */
-    protected $escaper;
+    protected \SpoutX\Common\Helper\Escaper\XLSX $escaper;
 
     /**
      * @param SharedStringsManager $sharedStringsManager Manages shared strings
@@ -64,7 +64,7 @@ class CellValueFormatter
      * @param bool $shouldUse1904Dates Whether date/time values should use a calendar starting in 1904 instead of 1900
      * @param \SpoutX\Common\Helper\Escaper\XLSX $escaper Used to unescape XML data
      */
-    public function __construct($sharedStringsManager, $styleManager, $shouldFormatDates, $shouldUse1904Dates, $escaper)
+    public function __construct(SharedStringsManager $sharedStringsManager, StyleManager $styleManager, bool $shouldFormatDates, bool $shouldUse1904Dates, \SpoutX\Common\Helper\Escaper\XLSX $escaper)
     {
         $this->sharedStringsManager = $sharedStringsManager;
         $this->styleManager = $styleManager;
@@ -80,7 +80,7 @@ class CellValueFormatter
      * @throws InvalidValueException If the value is not valid
      * @return string|int|float|bool|\DateTime The value associated with the cell
      */
-    public function extractAndFormatNodeValue($node)
+    public function extractAndFormatNodeValue(\DOMNode $node): string|int|float|bool|\DateTime
     {
         // Default cell type is "n"
         $cellType = $node->getAttribute(self::XML_ATTRIBUTE_TYPE) ?: self::CELL_TYPE_NUMERIC;
@@ -115,7 +115,7 @@ class CellValueFormatter
      * @param \DOMNode $node
      * @return string The value associated with the cell
      */
-    protected function getVNodeValue($node)
+    protected function getVNodeValue(\DOMNode $node): string
     {
         // for cell types having a "v" tag containing the value.
         // if not, the returned value should be empty string.
@@ -130,7 +130,7 @@ class CellValueFormatter
      * @param \DOMNode $node
      * @return string The value associated with the cell
      */
-    protected function formatInlineStringCellValue($node)
+    protected function formatInlineStringCellValue(\DOMNode $node): string
     {
         // inline strings are formatted this way:
         // <c r="A1" t="inlineStr"><is><t>[INLINE_STRING]</t></is></c>
@@ -146,7 +146,7 @@ class CellValueFormatter
      * @param string $nodeValue
      * @return string The value associated with the cell
      */
-    protected function formatSharedStringCellValue($nodeValue)
+    protected function formatSharedStringCellValue(string $nodeValue): string
     {
         // shared strings are formatted this way:
         // <c r="A1" t="s"><v>[SHARED_STRING_INDEX]</v></c>
@@ -163,7 +163,7 @@ class CellValueFormatter
      * @param string $nodeValue
      * @return string The value associated with the cell
      */
-    protected function formatStrCellValue($nodeValue)
+    protected function formatStrCellValue(string $nodeValue): string
     {
         $escapedCellValue = trim($nodeValue);
         $cellValue = $this->escaper->unescape($escapedCellValue);
@@ -177,9 +177,9 @@ class CellValueFormatter
      *
      * @param string $nodeValue
      * @param int $cellStyleId 0 being the default style
-     * @return int|float|\DateTime The value associated with the cell
+     * @return int|float|\DateTime|string The value associated with the cell
      */
-    protected function formatNumericCellValue($nodeValue, $cellStyleId)
+    protected function formatNumericCellValue(string $nodeValue, int $cellStyleId): int|float|\DateTime|string
     {
         // Numeric values can represent numbers as well as timestamps.
         // We need to look at the style of the cell to determine whether it is one or the other.
@@ -207,9 +207,9 @@ class CellValueFormatter
      * @param float $nodeValue
      * @param int $cellStyleId 0 being the default style
      * @throws InvalidValueException If the value is not a valid timestamp
-     * @return \DateTime The value associated with the cell
+     * @return \DateTime|string The value associated with the cell
      */
-    protected function formatExcelTimestampValue($nodeValue, $cellStyleId)
+    protected function formatExcelTimestampValue(float $nodeValue, int $cellStyleId): \DateTime|string
     {
         if ($this->isValidTimestampValue($nodeValue)) {
             $cellValue = $this->formatExcelTimestampValueAsDateTimeValue($nodeValue, $cellStyleId);
@@ -227,7 +227,7 @@ class CellValueFormatter
      * @param float $timestampValue
      * @return bool
      */
-    protected function isValidTimestampValue($timestampValue)
+    protected function isValidTimestampValue(float $timestampValue): bool
     {
         // @NOTE: some versions of Excel don't support negative dates (e.g. Excel for Mac 2011)
         return (
@@ -245,7 +245,7 @@ class CellValueFormatter
      * @param int $cellStyleId 0 being the default style
      * @return \DateTime|string The value associated with the cell
      */
-    protected function formatExcelTimestampValueAsDateTimeValue($nodeValue, $cellStyleId)
+    protected function formatExcelTimestampValueAsDateTimeValue(float $nodeValue, int $cellStyleId): \DateTime|string
     {
         $baseDate = $this->shouldUse1904Dates ? '1904-01-01' : '1899-12-30';
 
@@ -274,7 +274,7 @@ class CellValueFormatter
      * @param string $nodeValue
      * @return bool The value associated with the cell
      */
-    protected function formatBooleanCellValue($nodeValue)
+    protected function formatBooleanCellValue(string $nodeValue): bool
     {
         return (bool) $nodeValue;
     }
@@ -287,7 +287,7 @@ class CellValueFormatter
      * @throws InvalidValueException If the value is not a valid date
      * @return \DateTime|string The value associated with the cell
      */
-    protected function formatDateCellValue($nodeValue)
+    protected function formatDateCellValue(string $nodeValue): \DateTime|string
     {
         // Mitigate thrown Exception on invalid date-time format (http://php.net/manual/en/datetime.construct.php)
         try {

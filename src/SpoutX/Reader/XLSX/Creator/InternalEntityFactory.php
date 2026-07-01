@@ -6,6 +6,7 @@ namespace SpoutX\Reader\XLSX\Creator;
 
 use SpoutX\Common\Entity\Cell;
 use SpoutX\Common\Entity\Row;
+use SpoutX\Common\Manager\OptionsManagerInterface;
 use SpoutX\Reader\Common\Creator\InternalEntityFactoryInterface;
 use SpoutX\Reader\Common\Entity\Options;
 use SpoutX\Reader\Common\XMLProcessor;
@@ -22,15 +23,11 @@ use SpoutX\Reader\XLSX\SheetIterator;
 class InternalEntityFactory implements InternalEntityFactoryInterface
 {
     /** @var HelperFactory */
-    private $helperFactory;
+    private HelperFactory $helperFactory;
 
     /** @var ManagerFactory */
-    private $managerFactory;
+    private ManagerFactory $managerFactory;
 
-    /**
-     * @param ManagerFactory $managerFactory
-     * @param HelperFactory $helperFactory
-     */
     public function __construct(ManagerFactory $managerFactory, HelperFactory $helperFactory)
     {
         $this->managerFactory = $managerFactory;
@@ -43,7 +40,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
      * @param SharedStringsManager $sharedStringsManager Manages shared strings
      * @return SheetIterator
      */
-    public function createSheetIterator($filePath, $optionsManager, $sharedStringsManager)
+    public function createSheetIterator(string $filePath, OptionsManagerInterface $optionsManager, SharedStringsManager $sharedStringsManager): SheetIterator
     {
         $sheetManager = $this->managerFactory->createSheetManager(
             $filePath,
@@ -67,15 +64,15 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
      * @return Sheet
      */
     public function createSheet(
-        $filePath,
-        $sheetDataXMLFilePath,
-        $sheetIndex,
-        $sheetName,
-        $isSheetActive,
-        $isSheetVisible,
-        $optionsManager,
-        $sharedStringsManager
-    ) {
+        string $filePath,
+        string $sheetDataXMLFilePath,
+        int $sheetIndex,
+        string $sheetName,
+        bool $isSheetActive,
+        bool $isSheetVisible,
+        OptionsManagerInterface $optionsManager,
+        SharedStringsManager $sharedStringsManager
+    ): Sheet {
         $rowIterator = $this->createRowIterator($filePath, $sheetDataXMLFilePath, $optionsManager, $sharedStringsManager);
 
         return new Sheet($rowIterator, $sheetIndex, $sheetName, $isSheetActive, $isSheetVisible);
@@ -88,7 +85,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
      * @param SharedStringsManager $sharedStringsManager Manages shared strings
      * @return RowIterator
      */
-    private function createRowIterator($filePath, $sheetDataXMLFilePath, $optionsManager, $sharedStringsManager)
+    private function createRowIterator(string $filePath, string $sheetDataXMLFilePath, OptionsManagerInterface $optionsManager, SharedStringsManager $sharedStringsManager): RowIterator
     {
         $xmlReader = $this->createXMLReader();
         $xmlProcessor = $this->createXMLProcessor($xmlReader);
@@ -123,7 +120,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
      * @param Cell[] $cells
      * @return Row
      */
-    public function createRow(array $cells = [])
+    public function createRow(array $cells = []): Row
     {
         return new Row($cells, null);
     }
@@ -132,7 +129,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
      * @param mixed $cellValue
      * @return Cell
      */
-    public function createCell($cellValue)
+    public function createCell(mixed $cellValue): Cell
     {
         return new Cell($cellValue);
     }
@@ -140,7 +137,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
     /**
      * @return \ZipArchive
      */
-    public function createZipArchive()
+    public function createZipArchive(): \ZipArchive
     {
         return new \ZipArchive();
     }
@@ -148,16 +145,15 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
     /**
      * @return XMLReader
      */
-    public function createXMLReader()
+    public function createXMLReader(): XMLReader
     {
         return new XMLReader();
     }
 
     /**
-     * @param $xmlReader
      * @return XMLProcessor
      */
-    public function createXMLProcessor($xmlReader)
+    public function createXMLProcessor(XMLReader $xmlReader): XMLProcessor
     {
         return new XMLProcessor($xmlReader);
     }

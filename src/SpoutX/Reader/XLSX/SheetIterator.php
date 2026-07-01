@@ -15,16 +15,16 @@ use SpoutX\Reader\XLSX\Manager\SheetManager;
 class SheetIterator implements IteratorInterface
 {
     /** @var \SpoutX\Reader\XLSX\Sheet[] The list of sheet present in the file */
-    protected $sheets;
+    protected array $sheets;
 
     /** @var int The index of the sheet being read (zero-based) */
-    protected $currentSheetIndex = 0;
+    protected int $currentSheetIndex = 0;
 
     /**
      * @param SheetManager $sheetManager Manages sheets
      * @throws \SpoutX\Reader\Exception\NoSheetsFoundException If there are no sheets in the file
      */
-    public function __construct($sheetManager)
+    public function __construct(SheetManager $sheetManager)
     {
         // Fetch all available sheets
         $this->sheets = $sheetManager->getSheets();
@@ -97,10 +97,8 @@ class SheetIterator implements IteratorInterface
 
     /**
      * Cleans up what was created to iterate over the object.
-     *
-     * @return void
      */
-    public function end()
+    public function end(): void
     {
         // make sure we are not leaking memory in case the iteration stopped before the end
         foreach ($this->sheets as $sheet) {
