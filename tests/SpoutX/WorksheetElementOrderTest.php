@@ -16,6 +16,7 @@ use SpoutX\Writer\XLSX\Entity\PageMargin;
 use SpoutX\Writer\XLSX\Entity\PageOrientation;
 use SpoutX\Writer\XLSX\Entity\PageSetup;
 use SpoutX\Writer\XLSX\Entity\PaperSize;
+use SpoutX\Writer\XLSX\Entity\SheetProtection;
 use SpoutX\Writer\XLSX\Entity\SheetView;
 
 /**
@@ -55,6 +56,7 @@ final class WorksheetElementOrderTest extends TestCase
         $sheet->setHeaderFooter(new HeaderFooter(oddHeader: '&CReport'));
         $sheet->setSheetView((new SheetView())->setFreezeRow(2));
         $sheet->addColumnDimension(new ColumnDimension('A', 30));
+        $sheet->setSheetProtection(new SheetProtection(lockSheet: true));
         $sheet->setAutoFilter('A1:C1');
         $sheet->mergeCells('A1:B1');
         $sheet->addDataValidation(DataValidation::listFromValues('C2:C10', ['Yes', 'No']));
@@ -79,6 +81,7 @@ final class WorksheetElementOrderTest extends TestCase
             '<sheetViews>',
             '<cols>',
             '<sheetData>',
+            '<sheetProtection',
             '<autoFilter',
             '<mergeCells>',
             '<dataValidations',

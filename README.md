@@ -306,6 +306,60 @@ $sheet->addDataValidation(new DataValidation(
 ));
 ```
 
+## Protection, visibility, properties & rich text
+
+**Sheet & workbook protection** (locks *editing*, optionally password-guarded)
+
+```php
+use SpoutX\Writer\XLSX\Entity\SheetProtection;
+use SpoutX\Writer\XLSX\Entity\WorkbookProtection;
+
+$sheet->setSheetProtection(new SheetProtection(password: 'secret', lockSheet: true, lockSort: true));
+$writer->setWorkbookProtection(new WorkbookProtection(password: 'secret', lockStructure: true)); // after openToFile()
+```
+
+**Tab visibility** (independent of protection). `lockStructure` above is what keeps a hidden tab hidden.
+
+```php
+use SpoutX\Writer\XLSX\Entity\SheetVisibility;
+
+$sheet->setVisibility(SheetVisibility::Hidden);      // unhideable by the user via the UI? no
+$sheet->setVisibility(SheetVisibility::VeryHidden);  // not unhideable from the UI (only via code)
+// $sheet->setIsVisible(false) is kept and maps to Hidden
+```
+
+**Document properties**
+
+```php
+use SpoutX\Writer\XLSX\Entity\DocumentProperties;
+
+$writer->setDocumentProperties(new DocumentProperties(
+    title: 'Q1 Report', creator: 'Me', keywords: 'finance,q1', application: 'TBL Manager',
+)); // after openToFile()
+```
+
+**Rich text** (multiple formats in one cell)
+
+```php
+use SpoutX\Common\Entity\Cell;
+use SpoutX\Common\Entity\RichText;
+use SpoutX\Common\Entity\TextRun;
+use SpoutX\Common\Entity\Style\Color;
+
+$cell = new Cell(new RichText(
+    new TextRun('Hello ', bold: true, fontColor: Color::RED),
+    new TextRun('world', italic: true, fontSize: 14, fontName: 'Calibri'),
+));
+```
+
+**Reading merge cells**
+
+```php
+foreach ($reader->getSheetIterator() as $sheet) {
+    $ranges = $sheet->getMergeCells();   // e.g. ['A1:C1', 'A3:A5']
+}
+```
+
 ---
 
 ## Migrating from Box\Spout / Spout
