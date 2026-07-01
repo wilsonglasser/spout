@@ -444,6 +444,20 @@ EOD;
             fwrite($worksheetFilePointer, '</mergeCells>'.PHP_EOL);
         }
 
+        // <hyperlinks> precedes the print settings in the CT_Worksheet sequence.
+        // Relationship IDs (rId_hyperlink{N}) are assigned by 1-based insertion order
+        // and must match the worksheet .rels file (see FileSystemHelper).
+        $hyperlinks = $sheet->getHyperlinks();
+        if (count($hyperlinks) > 0) {
+            fwrite($worksheetFilePointer, '<hyperlinks>'.PHP_EOL);
+            $hyperlinkId = 1;
+            foreach ($hyperlinks as $cellRef => $url) {
+                fwrite($worksheetFilePointer, "\t".'<hyperlink ref="' . $cellRef . '" r:id="rId_hyperlink' . $hyperlinkId . '"/>'.PHP_EOL);
+                $hyperlinkId++;
+            }
+            fwrite($worksheetFilePointer, '</hyperlinks>'.PHP_EOL);
+        }
+
         // Print settings (pageMargins -> pageSetup -> headerFooter) must precede
         // the legacy drawing (comments) in the CT_Worksheet element sequence.
         $pageMargin = $sheet->getPageMargin();

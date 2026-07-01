@@ -374,13 +374,29 @@ EOD;
             $worksheetId = $worksheet->getId();
             $workbookRelsXmlFileContents .= '<Relationship Id="rIdSheet' . $worksheetId . '" Target="worksheets/sheet' . $worksheetId . '.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>';
 
+            // A single xl/worksheets/_rels/sheetN.xml.rels file must carry ALL of a
+            // worksheet's relationships: comments (vmlDrawing + comments) AND external
+            // hyperlinks. Accumulate them together instead of writing competing files.
+            $sheetRelationships = '';
+
             if (count($worksheet->getExternalSheet()->getComments())) {
-                // creates a xl/worksheets/_rels file
-                $sheetRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-<Relationship Id="rId_comments_vml'.$worksheetId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing" Target="../drawings/vmlDrawing'.$worksheetId.'.vml"/>
-<Relationship Id="rId_comments'.$worksheetId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="../comments'.$worksheetId.'.xml"/>
-</Relationships>';
+                $sheetRelationships .= '<Relationship Id="rId_comments_vml'.$worksheetId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing" Target="../drawings/vmlDrawing'.$worksheetId.'.vml"/>';
+                $sheetRelationships .= '<Relationship Id="rId_comments'.$worksheetId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="../comments'.$worksheetId.'.xml"/>';
+            }
+
+            // Hyperlinks: rId_hyperlink{N} by 1-based insertion order, matching the
+            // <hyperlink r:id="..."/> written in WorksheetManager::close().
+            $hyperlinkId = 1;
+            foreach ($worksheet->getExternalSheet()->getHyperlinks() as $url) {
+                $sheetRelationships .= '<Relationship Id="rId_hyperlink'.$hyperlinkId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$this->escaper->escape($url).'" TargetMode="External"/>';
+                $hyperlinkId++;
+            }
+
+            if ($sheetRelationships !== '') {
+                $sheetRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.PHP_EOL
+                    .'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                    .$sheetRelationships
+                    .'</Relationships>';
 
                 $this->createFileWithContents($this->xlWorksheetsRelsFolder, 'sheet'.$worksheetId.'.xml.rels', $sheetRels);
             }
@@ -389,12 +405,6 @@ EOD;
         $workbookRelsXmlFileContents .= '</Relationships>';
 
         $this->createFileWithContents($this->xlRelsFolder, self::WORKBOOK_RELS_XML_FILE_NAME, $workbookRelsXmlFileContents);
-
-
-
-        /**
-         * TODO - Escrever o rels do proprio sheet1 se houver comentarios!
-         */
 
         return $this;
     }

@@ -60,6 +60,9 @@ class Sheet
     /** @var SheetView|null Sheet view (freeze panes, zoom, gridlines, RTL) */
     private ?SheetView $sheetView = null;
 
+    /** @var array<string, string> External hyperlinks, keyed by cell reference ([cellRef => url]) */
+    private array $hyperlinks = [];
+
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
      * @param string $associatedWorkbookId ID of the sheet's associated workbook
@@ -202,6 +205,27 @@ class Sheet
     public function setSheetView(?SheetView $sheetView): self
     {
         $this->sheetView = $sheetView;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, string> [cellRef => url]
+     */
+    public function getHyperlinks(): array
+    {
+        return $this->hyperlinks;
+    }
+
+    /**
+     * Adds an external hyperlink (URL, mailto:, ...) on the given cell reference.
+     *
+     * @param string $cellRef Cell reference, e.g. "A1"
+     * @param string $url The external target
+     */
+    public function addHyperlink(string $cellRef, string $url): self
+    {
+        $this->hyperlinks[$cellRef] = $url;
 
         return $this;
     }
