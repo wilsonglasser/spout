@@ -75,6 +75,47 @@ final class DocumentPropertiesTest extends TestCase
         self::assertStringNotContainsString('<dc:title>', $core);
     }
 
+    public function testCustomProperties(): void
+    {
+        $writer = WriterEntityFactory::createWriter(Type::XLSX);
+        $writer->openToFile($this->tmpFile);
+        $writer->setDocumentProperties(new DocumentProperties(
+            title: 'X',
+            customProperties: ['Department' => 'Finance', 'Reviewed' => 'yes & done'],
+        ));
+        $writer->addRow(WriterEntityFactory::createRowFromArray(['a']));
+        $writer->close();
+
+        $custom = $this->read('docProps/custom.xml');
+        $types = $this->read('[Content_Types].xml');
+        $rels = $this->read('_rels/.rels');
+
+        self::assertTrue((new \DOMDocument())->loadXML($custom), 'custom.xml not well-formed');
+        self::assertStringContainsString('pid="2" name="Department"><vt:lpwstr>Finance</vt:lpwstr>', $custom);
+        self::assertStringContainsString('pid="3" name="Reviewed"><vt:lpwstr>yes &amp; done</vt:lpwstr>', $custom);
+
+        // wired into content types and package rels
+        self::assertStringContainsString('PartName="/docProps/custom.xml"', $types);
+        self::assertStringContainsString('Id="rIdCustom"', $rels);
+        self::assertStringContainsString('Target="docProps/custom.xml"', $rels);
+    }
+
+    public function testNoCustomPropertiesOmitsCustomXml(): void
+    {
+        $writer = WriterEntityFactory::createWriter(Type::XLSX);
+        $writer->openToFile($this->tmpFile);
+        $writer->setDocumentProperties(new DocumentProperties(title: 'X'));
+        $writer->addRow(WriterEntityFactory::createRowFromArray(['a']));
+        $writer->close();
+
+        $zip = new \ZipArchive();
+        $zip->open($this->tmpFile);
+        self::assertFalse($zip->getFromName('docProps/custom.xml'), 'custom.xml should not exist');
+        $rels = $zip->getFromName('_rels/.rels');
+        $zip->close();
+        self::assertStringNotContainsString('rIdCustom', (string) $rels);
+    }
+
     private function read(string $innerPath): string
     {
         $zip = new \ZipArchive();

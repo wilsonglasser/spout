@@ -27,6 +27,7 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
     public const RELS_FILE_NAME = '.rels';
     public const APP_XML_FILE_NAME = 'app.xml';
     public const CORE_XML_FILE_NAME = 'core.xml';
+    public const CUSTOM_XML_FILE_NAME = 'custom.xml';
     public const CONTENT_TYPES_XML_FILE_NAME = '[Content_Types].xml';
     public const WORKBOOK_XML_FILE_NAME = 'workbook.xml';
     public const WORKBOOK_RELS_XML_FILE_NAME = 'workbook.xml.rels';
@@ -128,20 +129,21 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
      */
     private function createRelsFolderAndFile(): self
     {
+        // Only create the folder here (at open). The .rels file is written at close
+        // (createRelsFile) so a custom-properties relationship can be added when
+        // document properties are set after openToFile().
         $this->relsFolder = $this->createFolder($this->rootFolder, self::RELS_FOLDER_NAME);
-
-        $this->createRelsFile();
 
         return $this;
     }
 
     /**
-     * Creates the ".rels" file under the "_rels" folder (under root)
+     * Creates the ".rels" file under the "_rels" folder (under root), adding the
+     * custom-properties relationship when custom document properties are present.
      *
      * @throws \SpoutX\Common\Exception\IOException If unable to create the file
-     * @return FileSystemHelper
      */
-    private function createRelsFile(): self
+    public function createRelsFile(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
     {
         $relsFileContents = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -149,8 +151,13 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
     <Relationship Id="rIdWorkbook" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
     <Relationship Id="rIdCore" Type="http://schemas.openxmlformats.org/officedocument/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
     <Relationship Id="rIdApp" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
-</Relationships>
 EOD;
+
+        if ($properties !== null && $properties->customProperties !== []) {
+            $relsFileContents .= PHP_EOL . '    <Relationship Id="rIdCustom" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties" Target="docProps/custom.xml"/>';
+        }
+
+        $relsFileContents .= PHP_EOL . '</Relationships>';
 
         $this->createFileWithContents($this->relsFolder, self::RELS_FILE_NAME, $relsFileContents);
 
@@ -181,6 +188,30 @@ EOD;
     {
         $this->createAppXmlFile($properties);
         $this->createCoreXmlFile($properties);
+        if ($properties !== null && $properties->customProperties !== []) {
+            $this->createCustomXmlFile($properties);
+        }
+
+        return $this;
+    }
+
+    private function createCustomXmlFile(\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties): self
+    {
+        // pid must increment for each property, starting at 2
+        $pid = 2;
+        $propertiesXml = '';
+        foreach ($properties->customProperties as $name => $value) {
+            $propertiesXml .= '<property fmtid="{D5CDD505-2E9C-101B-9397-08002B2CF9AE}" pid="' . $pid . '" name="'
+                . $this->escaper->escape((string) $name) . '"><vt:lpwstr>' . $this->escaper->escape($value) . '</vt:lpwstr></property>';
+            ++$pid;
+        }
+
+        $customXmlFileContents = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            . '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">'
+            . $propertiesXml
+            . '</Properties>';
+
+        $this->createFileWithContents($this->docPropsFolder, self::CUSTOM_XML_FILE_NAME, $customXmlFileContents);
 
         return $this;
     }
@@ -318,7 +349,7 @@ EOD;
      * @param Worksheet[] $worksheets
      * @return FileSystemHelper
      */
-    public function createContentTypesFile(array $worksheets): self
+    public function createContentTypesFile(array $worksheets, ?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
     {
         $contentTypesXmlFileContents = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -342,8 +373,13 @@ EOD;
     <Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml" PartName="/xl/sharedStrings.xml"/>
     <Override ContentType="application/vnd.openxmlformats-package.core-properties+xml" PartName="/docProps/core.xml"/>
     <Override ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml" PartName="/docProps/app.xml"/>
-</Types>
 EOD;
+
+        if ($properties !== null && $properties->customProperties !== []) {
+            $contentTypesXmlFileContents .= PHP_EOL . '    <Override ContentType="application/vnd.openxmlformats-officedocument.custom-properties+xml" PartName="/docProps/custom.xml"/>';
+        }
+
+        $contentTypesXmlFileContents .= PHP_EOL . '</Types>';
 
         $this->createFileWithContents($this->rootFolder, self::CONTENT_TYPES_XML_FILE_NAME, $contentTypesXmlFileContents);
 
