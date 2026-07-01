@@ -12,7 +12,9 @@ use SpoutX\Writer\XLSX\Entity\DataValidation;
 use SpoutX\Writer\XLSX\Entity\HeaderFooter;
 use SpoutX\Writer\XLSX\Entity\PageMargin;
 use SpoutX\Writer\XLSX\Entity\PageSetup;
+use SpoutX\Writer\XLSX\Entity\SheetProtection;
 use SpoutX\Writer\XLSX\Entity\SheetView;
+use SpoutX\Writer\XLSX\Entity\SheetVisibility;
 
 /**
  * Class Sheet
@@ -31,8 +33,8 @@ class Sheet
     /** @var string Name of the sheet */
     private string $name;
 
-    /** @var bool Visibility of the sheet */
-    private bool $isVisible;
+    /** @var SheetVisibility Visibility of the sheet tab */
+    private SheetVisibility $visibility = SheetVisibility::Visible;
 
     /** @var SheetManager Sheet manager */
     private SheetManager $sheetManager;
@@ -66,6 +68,9 @@ class Sheet
 
     /** @var DataValidation[] Data validations (dropdowns, numeric/date constraints) */
     private array $dataValidations = [];
+
+    /** @var SheetProtection|null Worksheet edit protection */
+    private ?SheetProtection $sheetProtection = null;
 
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
@@ -275,16 +280,43 @@ class Sheet
      */
     public function isVisible(): bool
     {
-        return $this->isVisible;
+        return $this->visibility === SheetVisibility::Visible;
     }
 
     /**
-     * @param bool $isVisible Visibility of the sheet
+     * @param bool $isVisible Visibility of the sheet (false maps to Hidden)
      * @return Sheet
      */
     public function setIsVisible(bool $isVisible): self
     {
-        $this->isVisible = $isVisible;
+        $this->visibility = $isVisible ? SheetVisibility::Visible : SheetVisibility::Hidden;
+
+        return $this;
+    }
+
+    public function getVisibility(): SheetVisibility
+    {
+        return $this->visibility;
+    }
+
+    /**
+     * Sets the tab visibility, including VeryHidden (not unhideable from the UI).
+     */
+    public function setVisibility(SheetVisibility $visibility): self
+    {
+        $this->visibility = $visibility;
+
+        return $this;
+    }
+
+    public function getSheetProtection(): ?SheetProtection
+    {
+        return $this->sheetProtection;
+    }
+
+    public function setSheetProtection(?SheetProtection $sheetProtection): self
+    {
+        $this->sheetProtection = $sheetProtection;
 
         return $this;
     }

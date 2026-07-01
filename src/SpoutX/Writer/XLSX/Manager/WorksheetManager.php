@@ -433,6 +433,13 @@ EOD;
             unset($afterContent);
         }
 
+        // <sheetProtection> comes right after <sheetData>, before <autoFilter>,
+        // in the CT_Worksheet sequence.
+        $sheetProtection = $sheet->getSheetProtection();
+        if ($sheetProtection !== null) {
+            fwrite($worksheetFilePointer, $sheetProtection->getXml().PHP_EOL);
+        }
+
         if ($sheet->getAutoFilter() !== null) {
             fwrite($worksheetFilePointer, ' <autoFilter ref="' . $sheet->getAutoFilter() . '"><extLst /></autoFilter>'.PHP_EOL);
         }
