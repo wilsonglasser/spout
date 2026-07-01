@@ -246,6 +246,68 @@ $writer->setTempFolder('/custom/tmp');
 
 ---
 
+## Page setup, views, hyperlinks & data validation
+
+These XLSX features were ported from OpenSpout v5 and adapted to SpoutX's mutable,
+per-sheet model. They are configured on the sheet (`$writer->getCurrentSheet()`).
+
+**Print page setup**
+
+```php
+use SpoutX\Writer\XLSX\Entity\PageSetup;
+use SpoutX\Writer\XLSX\Entity\PageMargin;
+use SpoutX\Writer\XLSX\Entity\HeaderFooter;
+use SpoutX\Writer\XLSX\Entity\PageOrientation;
+use SpoutX\Writer\XLSX\Entity\PaperSize;
+
+$sheet->setPageSetup(new PageSetup(PageOrientation::Landscape, PaperSize::A4, fitToHeight: 1, fitToWidth: 1));
+$sheet->setPageMargin(new PageMargin(top: 1.0, bottom: 1.0));
+$sheet->setHeaderFooter(new HeaderFooter(oddHeader: '&CMy report', oddFooter: '&RPage &P of &N'));
+```
+
+**Freeze panes / sheet views**
+
+```php
+use SpoutX\Writer\XLSX\Entity\SheetView;
+
+// Freeze the first (header) row:
+$sheet->setSheetView((new SheetView())->setFreezeRow(2));
+// Freeze the first column:  ->setFreezeColumn('B')
+// Zoom / gridlines:         (new SheetView())->setZoomScale(150)->setShowGridLines(false)
+```
+
+**Hyperlinks**
+
+```php
+$sheet->addHyperlink('A1', 'https://example.com');
+$sheet->addHyperlink('A2', 'mailto:hello@example.com');
+```
+
+**Data validation (dropdowns and constraints)**
+
+```php
+use SpoutX\Writer\XLSX\Entity\DataValidation;
+use SpoutX\Writer\XLSX\Entity\ValidationType;
+use SpoutX\Writer\XLSX\Entity\ValidationOperator;
+
+// Dropdown from a fixed list (values must not contain commas):
+$sheet->addDataValidation(DataValidation::listFromValues('A2:A100', ['Yes', 'No', 'Maybe']));
+// Dropdown backed by a cell range:
+$sheet->addDataValidation(DataValidation::listFromRange('B2:B100', 'Lists!$A$1:$A$10'));
+// Whole-number constraint with a custom error message:
+$sheet->addDataValidation(new DataValidation(
+    sqref: 'C2:C100',
+    type: ValidationType::Whole,
+    formula1: '1',
+    formula2: '100',
+    operator: ValidationOperator::Between,
+    errorTitle: 'Out of range',
+    error: 'Enter a number from 1 to 100',
+));
+```
+
+---
+
 ## Migrating from Box\Spout / Spout
 
 - Namespace changed from `Box\Spout\…` to **`SpoutX\…`**.
