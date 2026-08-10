@@ -1,0 +1,550 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SpoutX\Writer\XLSX\Helper;
+
+use SpoutX\Writer\Common\Entity\Worksheet;
+use SpoutX\Writer\Common\Helper\FileSystemWithRootFolderHelperInterface;
+use SpoutX\Writer\Common\Helper\ZipHelper;
+use SpoutX\Writer\XLSX\Manager\Comment\CommentManager;
+use SpoutX\Writer\XLSX\Manager\Style\StyleManager;
+
+/**
+ * Class FileSystemHelper
+ * This class provides helper functions to help with the file system operations
+ * like files/folders creation & deletion for XLSX files
+ */
+class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements FileSystemWithRootFolderHelperInterface
+{
+    public const APP_NAME = 'Spout';
+
+    public const RELS_FOLDER_NAME = '_rels';
+    public const DOC_PROPS_FOLDER_NAME = 'docProps';
+    public const XL_FOLDER_NAME = 'xl';
+    public const WORKSHEETS_FOLDER_NAME = 'worksheets';
+
+    public const RELS_FILE_NAME = '.rels';
+    public const APP_XML_FILE_NAME = 'app.xml';
+    public const CORE_XML_FILE_NAME = 'core.xml';
+    public const CUSTOM_XML_FILE_NAME = 'custom.xml';
+    public const CONTENT_TYPES_XML_FILE_NAME = '[Content_Types].xml';
+    public const WORKBOOK_XML_FILE_NAME = 'workbook.xml';
+    public const WORKBOOK_RELS_XML_FILE_NAME = 'workbook.xml.rels';
+    public const STYLES_XML_FILE_NAME = 'styles.xml';
+
+    /** @var ZipHelper Helper to perform tasks with Zip archive */
+    private ZipHelper $zipHelper;
+
+    /** @var \SpoutX\Common\Helper\Escaper\XLSX Used to escape XML data */
+    private \SpoutX\Common\Helper\Escaper\XLSX $escaper;
+
+    /** @var string Path to the root folder inside the temp folder where the files to create the XLSX will be stored */
+    private string $rootFolder;
+
+    /** @var string Path to the "_rels" folder inside the root folder */
+    private string $relsFolder;
+
+    /** @var string Path to the "docProps" folder inside the root folder */
+    private string $docPropsFolder;
+
+    /** @var string Path to the "xl" folder inside the root folder */
+    private string $xlFolder;
+
+    /** @var string Path to the "_rels" folder inside the "xl" folder */
+    private string $xlRelsFolder;
+
+    /** @var string Path to the "worksheets" folder inside the "xl" folder */
+    private string $xlWorksheetsFolder;
+
+    /** @var string Path to the "worksheets/_rels" folder inside the "xl" folder */
+    private string $xlWorksheetsRelsFolder;
+
+    /**
+     * @param string $baseFolderPath The path of the base folder where all the I/O can occur
+     * @param ZipHelper $zipHelper Helper to perform tasks with Zip archive
+     * @param \SpoutX\Common\Helper\Escaper\XLSX $escaper Used to escape XML data
+     */
+    public function __construct(string $baseFolderPath, ZipHelper $zipHelper, \SpoutX\Common\Helper\Escaper\XLSX $escaper)
+    {
+        parent::__construct($baseFolderPath);
+        $this->zipHelper = $zipHelper;
+        $this->escaper = $escaper;
+    }
+
+    public function getRootFolder(): string
+    {
+        return $this->rootFolder;
+    }
+
+    public function getXlFolder(): string
+    {
+        return $this->xlFolder;
+    }
+
+    public function getXlWorksheetsFolder(): string
+    {
+        return $this->xlWorksheetsFolder;
+    }
+
+
+    public function getXlWorksheetsRelsFolder(): string
+    {
+        return $this->xlWorksheetsRelsFolder;
+    }
+
+    /**
+     * Creates all the folders needed to create a XLSX file, as well as the files that won't change.
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create at least one of the base folders
+     * @return void
+     */
+    public function createBaseFilesAndFolders(): void
+    {
+        $this
+            ->createRootFolder()
+            ->createRelsFolderAndFile()
+            ->createDocPropsFolderAndFiles()
+            ->createXlFolderAndSubFolders();
+    }
+
+    /**
+     * Creates the folder that will be used as root
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the folder
+     * @return FileSystemHelper
+     */
+    private function createRootFolder(): self
+    {
+        $this->rootFolder = $this->createFolder($this->baseFolderRealPath, uniqid('xlsx', true));
+
+        return $this;
+    }
+
+    /**
+     * Creates the "_rels" folder under the root folder as well as the ".rels" file in it
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the folder or the ".rels" file
+     * @return FileSystemHelper
+     */
+    private function createRelsFolderAndFile(): self
+    {
+        // Only create the folder here (at open). The .rels file is written at close
+        // (createRelsFile) so a custom-properties relationship can be added when
+        // document properties are set after openToFile().
+        $this->relsFolder = $this->createFolder($this->rootFolder, self::RELS_FOLDER_NAME);
+
+        return $this;
+    }
+
+    /**
+     * Creates the ".rels" file under the "_rels" folder (under root), adding the
+     * custom-properties relationship when custom document properties are present.
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the file
+     */
+    public function createRelsFile(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
+    {
+        $relsFileContents = <<<'EOD'
+<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+    <Relationship Id="rIdWorkbook" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+    <Relationship Id="rIdCore" Type="http://schemas.openxmlformats.org/officedocument/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+    <Relationship Id="rIdApp" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+EOD;
+
+        if ($properties !== null && $properties->customProperties !== []) {
+            $relsFileContents .= PHP_EOL . '    <Relationship Id="rIdCustom" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties" Target="docProps/custom.xml"/>';
+        }
+
+        $relsFileContents .= PHP_EOL . '</Relationships>';
+
+        $this->createFileWithContents($this->relsFolder, self::RELS_FILE_NAME, $relsFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "docProps" folder under the root folder as well as the "app.xml" and "core.xml" files in it
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the folder or one of the files
+     * @return FileSystemHelper
+     */
+    private function createDocPropsFolderAndFiles(): self
+    {
+        // Only create the folder here (at open time). The app.xml/core.xml files are
+        // written at close (see createDocPropsFiles) so that document properties set
+        // after openToFile() are picked up.
+        $this->docPropsFolder = $this->createFolder($this->rootFolder, self::DOC_PROPS_FOLDER_NAME);
+
+        return $this;
+    }
+
+    /**
+     * Writes docProps/app.xml and docProps/core.xml at finalization, honouring the
+     * (optionally) user-provided document properties.
+     */
+    public function createDocPropsFiles(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
+    {
+        $this->createAppXmlFile($properties);
+        $this->createCoreXmlFile($properties);
+        if ($properties !== null && $properties->customProperties !== []) {
+            $this->createCustomXmlFile($properties);
+        }
+
+        return $this;
+    }
+
+    private function createCustomXmlFile(\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties): self
+    {
+        // pid must increment for each property, starting at 2
+        $pid = 2;
+        $propertiesXml = '';
+        foreach ($properties->customProperties as $name => $value) {
+            $propertiesXml .= '<property fmtid="{D5CDD505-2E9C-101B-9397-08002B2CF9AE}" pid="' . $pid . '" name="'
+                . $this->escaper->escape((string) $name) . '"><vt:lpwstr>' . $this->escaper->escape($value) . '</vt:lpwstr></property>';
+            ++$pid;
+        }
+
+        $customXmlFileContents = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            . '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">'
+            . $propertiesXml
+            . '</Properties>';
+
+        $this->createFileWithContents($this->docPropsFolder, self::CUSTOM_XML_FILE_NAME, $customXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "app.xml" file under the "docProps" folder
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the file
+     * @return FileSystemHelper
+     */
+    private function createAppXmlFile(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
+    {
+        $appName = $this->escaper->escape($properties?->application ?? self::APP_NAME);
+        $appXmlFileContents = <<<EOD
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
+    <Application>$appName</Application>
+    <TotalTime>0</TotalTime>
+</Properties>
+EOD;
+
+        $this->createFileWithContents($this->docPropsFolder, self::APP_XML_FILE_NAME, $appXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "themes/theme1.xml" file under the "docProps" folder
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the file
+     * @return FileSystemHelper
+     */
+    private function createThemeXmlFile(): self
+    {
+        $appXmlFileContents = <<<EOD
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office Theme"><a:themeElements><a:clrScheme name="Office"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="1F497D"/></a:dk2><a:lt2><a:srgbClr val="EEECE1"/></a:lt2><a:accent1><a:srgbClr val="4F81BD"/></a:accent1><a:accent2><a:srgbClr val="C0504D"/></a:accent2><a:accent3><a:srgbClr val="9BBB59"/></a:accent3><a:accent4><a:srgbClr val="8064A2"/></a:accent4><a:accent5><a:srgbClr val="4BACC6"/></a:accent5><a:accent6><a:srgbClr val="F79646"/></a:accent6><a:hlink><a:srgbClr val="0000FF"/></a:hlink><a:folHlink><a:srgbClr val="800080"/></a:folHlink></a:clrScheme><a:fontScheme name="Office"><a:majorFont><a:latin typeface="Cambria"/><a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/><a:font script="Hang" typeface="맑은 고딕"/><a:font script="Hans" typeface="宋体"/><a:font script="Hant" typeface="新細明體"/><a:font script="Arab" typeface="Times New Roman"/><a:font script="Hebr" typeface="Times New Roman"/><a:font script="Thai" typeface="Tahoma"/><a:font script="Ethi" typeface="Nyala"/><a:font script="Beng" typeface="Vrinda"/><a:font script="Gujr" typeface="Shruti"/><a:font script="Khmr" typeface="MoolBoran"/><a:font script="Knda" typeface="Tunga"/><a:font script="Guru" typeface="Raavi"/><a:font script="Cans" typeface="Euphemia"/><a:font script="Cher" typeface="Plantagenet Cherokee"/><a:font script="Yiii" typeface="Microsoft Yi Baiti"/><a:font script="Tibt" typeface="Microsoft Himalaya"/><a:font script="Thaa" typeface="MV Boli"/><a:font script="Deva" typeface="Mangal"/><a:font script="Telu" typeface="Gautami"/><a:font script="Taml" typeface="Latha"/><a:font script="Syrc" typeface="Estrangelo Edessa"/><a:font script="Orya" typeface="Kalinga"/><a:font script="Mlym" typeface="Kartika"/><a:font script="Laoo" typeface="DokChampa"/><a:font script="Sinh" typeface="Iskoola Pota"/><a:font script="Mong" typeface="Mongolian Baiti"/><a:font script="Viet" typeface="Times New Roman"/><a:font script="Uigh" typeface="Microsoft Uighur"/><a:font script="Geor" typeface="Sylfaen"/></a:majorFont><a:minorFont><a:latin typeface="Calibri"/><a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/><a:font script="Hang" typeface="맑은 고딕"/><a:font script="Hans" typeface="宋体"/><a:font script="Hant" typeface="新細明體"/><a:font script="Arab" typeface="Arial"/><a:font script="Hebr" typeface="Arial"/><a:font script="Thai" typeface="Tahoma"/><a:font script="Ethi" typeface="Nyala"/><a:font script="Beng" typeface="Vrinda"/><a:font script="Gujr" typeface="Shruti"/><a:font script="Khmr" typeface="DaunPenh"/><a:font script="Knda" typeface="Tunga"/><a:font script="Guru" typeface="Raavi"/><a:font script="Cans" typeface="Euphemia"/><a:font script="Cher" typeface="Plantagenet Cherokee"/><a:font script="Yiii" typeface="Microsoft Yi Baiti"/><a:font script="Tibt" typeface="Microsoft Himalaya"/><a:font script="Thaa" typeface="MV Boli"/><a:font script="Deva" typeface="Mangal"/><a:font script="Telu" typeface="Gautami"/><a:font script="Taml" typeface="Latha"/><a:font script="Syrc" typeface="Estrangelo Edessa"/><a:font script="Orya" typeface="Kalinga"/><a:font script="Mlym" typeface="Kartika"/><a:font script="Laoo" typeface="DokChampa"/><a:font script="Sinh" typeface="Iskoola Pota"/><a:font script="Mong" typeface="Mongolian Baiti"/><a:font script="Viet" typeface="Arial"/><a:font script="Uigh" typeface="Microsoft Uighur"/><a:font script="Geor" typeface="Sylfaen"/></a:minorFont></a:fontScheme><a:fmtScheme name="Office"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="50000"/><a:satMod val="300000"/></a:schemeClr></a:gs><a:gs pos="35000"><a:schemeClr val="phClr"><a:tint val="37000"/><a:satMod val="300000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:tint val="15000"/><a:satMod val="350000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="16200000" scaled="1"/></a:gradFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:shade val="51000"/><a:satMod val="130000"/></a:schemeClr></a:gs><a:gs pos="80000"><a:schemeClr val="phClr"><a:shade val="93000"/><a:satMod val="130000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="94000"/><a:satMod val="135000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="16200000" scaled="0"/></a:gradFill></a:fillStyleLst><a:lnStyleLst><a:ln w="9525" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"><a:shade val="95000"/><a:satMod val="105000"/></a:schemeClr></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="25400" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln><a:ln w="38100" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst><a:outerShdw blurRad="40000" dist="20000" dir="5400000" rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="38000"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad="40000" dist="23000" dir="5400000" rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="35000"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad="40000" dist="23000" dir="5400000" rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="35000"/></a:srgbClr></a:outerShdw></a:effectLst><a:scene3d><a:camera prst="orthographicFront"><a:rot lat="0" lon="0" rev="0"/></a:camera><a:lightRig rig="threePt" dir="t"><a:rot lat="0" lon="0" rev="1200000"/></a:lightRig></a:scene3d><a:sp3d><a:bevelT w="63500" h="25400"/></a:sp3d></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="40000"/><a:satMod val="350000"/></a:schemeClr></a:gs><a:gs pos="40000"><a:schemeClr val="phClr"><a:tint val="45000"/><a:shade val="99000"/><a:satMod val="350000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="20000"/><a:satMod val="255000"/></a:schemeClr></a:gs></a:gsLst><a:path path="circle"><a:fillToRect l="50000" t="-80000" r="50000" b="180000"/></a:path></a:gradFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="80000"/><a:satMod val="300000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="30000"/><a:satMod val="200000"/></a:schemeClr></a:gs></a:gsLst><a:path path="circle"><a:fillToRect l="50000" t="50000" r="50000" b="50000"/></a:path></a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>
+EOD;
+
+        $this->createFolder($this->xlFolder, 'themes');
+        $this->createFileWithContents($this->xlFolder, 'themes/theme1.xml', $appXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "core.xml" file under the "docProps" folder
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the file
+     * @return FileSystemHelper
+     */
+    private function createCoreXmlFile(?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
+    {
+        $createdDate = (new \DateTime())->format(\DateTime::W3C);
+
+        // Emit only the metadata fields that were set (element => value).
+        $elements = [
+            'dc:title' => $properties?->title,
+            'dc:subject' => $properties?->subject,
+            'dc:creator' => $properties?->creator,
+            'cp:lastModifiedBy' => $properties?->lastModifiedBy,
+            'cp:keywords' => $properties?->keywords,
+            'dc:description' => $properties?->description,
+            'cp:category' => $properties?->category,
+            'dc:language' => $properties?->language,
+        ];
+        $metadataXml = '';
+        foreach ($elements as $tag => $value) {
+            if ($value !== null) {
+                $metadataXml .= '<' . $tag . '>' . $this->escaper->escape($value) . '</' . $tag . '>';
+            }
+        }
+
+        $coreXmlFileContents = <<<EOD
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    $metadataXml<dcterms:created xsi:type="dcterms:W3CDTF">$createdDate</dcterms:created>
+    <dcterms:modified xsi:type="dcterms:W3CDTF">$createdDate</dcterms:modified>
+    <cp:revision>0</cp:revision>
+</cp:coreProperties>
+EOD;
+
+        $this->createFileWithContents($this->docPropsFolder, self::CORE_XML_FILE_NAME, $coreXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "xl" folder under the root folder as well as its subfolders
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create at least one of the folders
+     * @return FileSystemHelper
+     */
+    private function createXlFolderAndSubFolders(): self
+    {
+        $this->xlFolder = $this->createFolder($this->rootFolder, self::XL_FOLDER_NAME);
+        $this->createXlRelsFolder();
+        $this->createXlWorksheetsFolder();
+
+        //$this->createThemeXmlFile();
+
+        return $this;
+    }
+
+    /**
+     * Creates the "_rels" folder under the "xl" folder
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the folder
+     * @return FileSystemHelper
+     */
+    private function createXlRelsFolder(): self
+    {
+        $this->xlRelsFolder = $this->createFolder($this->xlFolder, self::RELS_FOLDER_NAME);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "worksheets" folder under the "xl" folder
+     *
+     * @throws \SpoutX\Common\Exception\IOException If unable to create the folder
+     * @return FileSystemHelper
+     */
+    private function createXlWorksheetsFolder(): self
+    {
+        $this->xlWorksheetsFolder = $this->createFolder($this->xlFolder, self::WORKSHEETS_FOLDER_NAME);
+        $this->xlWorksheetsRelsFolder = $this->createFolder($this->xlWorksheetsFolder, self::RELS_FOLDER_NAME);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "[Content_Types].xml" file under the root folder
+     *
+     * @param Worksheet[] $worksheets
+     * @return FileSystemHelper
+     */
+    public function createContentTypesFile(array $worksheets, ?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
+    {
+        $contentTypesXmlFileContents = <<<'EOD'
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+    <Default ContentType="application/xml" Extension="xml"/>
+    <Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>
+    <Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>
+    <Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/>
+EOD;
+
+        /** @var Worksheet $worksheet */
+        foreach ($worksheets as $worksheet) {
+            $contentTypesXmlFileContents .= '<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" PartName="/xl/worksheets/sheet' . $worksheet->getId() . '.xml"/>'.PHP_EOL;
+            if (count($worksheet->getExternalSheet()->getComments())) {
+                $contentTypesXmlFileContents .= '<Override PartName="/xl/comments' . $worksheet->getId() . '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml"/>'.PHP_EOL;
+            }
+        }
+
+        $contentTypesXmlFileContents .= <<<'EOD'
+    <Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" PartName="/xl/styles.xml"/>
+    <Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml" PartName="/xl/sharedStrings.xml"/>
+    <Override ContentType="application/vnd.openxmlformats-package.core-properties+xml" PartName="/docProps/core.xml"/>
+    <Override ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml" PartName="/docProps/app.xml"/>
+EOD;
+
+        if ($properties !== null && $properties->customProperties !== []) {
+            $contentTypesXmlFileContents .= PHP_EOL . '    <Override ContentType="application/vnd.openxmlformats-officedocument.custom-properties+xml" PartName="/docProps/custom.xml"/>';
+        }
+
+        $contentTypesXmlFileContents .= PHP_EOL . '</Types>';
+
+        $this->createFileWithContents($this->rootFolder, self::CONTENT_TYPES_XML_FILE_NAME, $contentTypesXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "workbook.xml" file under the "xl" folder
+     *
+     * @param Worksheet[] $worksheets
+     * @return FileSystemHelper
+     */
+    public function createWorkbookFile(array $worksheets, ?\SpoutX\Writer\XLSX\Entity\WorkbookProtection $protection = null): self
+    {
+        $workbookXmlFileContents = <<<'EOD'
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+EOD;
+
+        // <workbookProtection> precedes <sheets> in the CT_Workbook sequence.
+        if ($protection !== null) {
+            $workbookXmlFileContents .= $protection->getXml();
+        }
+
+        $workbookXmlFileContents .= '<sheets>';
+
+        /** @var Worksheet $worksheet */
+        foreach ($worksheets as $worksheet) {
+            $worksheetName = $worksheet->getExternalSheet()->getName();
+            $worksheetVisibility = $worksheet->getExternalSheet()->getVisibility()->value;
+            $worksheetId = $worksheet->getId();
+            $workbookXmlFileContents .= '<sheet name="' . $this->escaper->escape($worksheetName) . '" sheetId="' . $worksheetId . '" r:id="rIdSheet' . $worksheetId . '" state="' . $worksheetVisibility . '"/>';
+        }
+
+        $workbookXmlFileContents .= <<<'EOD'
+    </sheets>
+    <definedNames/>
+    <calcPr calcId="999999" calcMode="auto" calcCompleted="1" fullCalcOnLoad="0" forceFullCalc="0"/>    
+</workbook>
+EOD;
+
+        $this->createFileWithContents($this->xlFolder, self::WORKBOOK_XML_FILE_NAME, $workbookXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "workbook.xml.res" file under the "xl/_res" folder
+     *
+     * @param Worksheet[] $worksheets
+     * @return FileSystemHelper
+     */
+    public function createWorkbookRelsFile(CommentManager $commentManager, array $worksheets): self
+    {
+        // <Relationship Id="rIdTheme" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>
+        $workbookRelsXmlFileContents = <<<'EOD'
+<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+    <Relationship Id="rIdStyles" Target="styles.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"/>
+    <Relationship Id="rIdSharedStrings" Target="sharedStrings.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings"/>
+EOD;
+
+        /** @var Worksheet $worksheet */
+        foreach ($worksheets as $worksheet) {
+            $worksheetId = $worksheet->getId();
+            $workbookRelsXmlFileContents .= '<Relationship Id="rIdSheet' . $worksheetId . '" Target="worksheets/sheet' . $worksheetId . '.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>';
+
+            // A single xl/worksheets/_rels/sheetN.xml.rels file must carry ALL of a
+            // worksheet's relationships: comments (vmlDrawing + comments) AND external
+            // hyperlinks. Accumulate them together instead of writing competing files.
+            $sheetRelationships = '';
+
+            if (count($worksheet->getExternalSheet()->getComments())) {
+                $sheetRelationships .= '<Relationship Id="rId_comments_vml'.$worksheetId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing" Target="../drawings/vmlDrawing'.$worksheetId.'.vml"/>';
+                $sheetRelationships .= '<Relationship Id="rId_comments'.$worksheetId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="../comments'.$worksheetId.'.xml"/>';
+            }
+
+            // Hyperlinks: rId_hyperlink{N} by 1-based insertion order, matching the
+            // <hyperlink r:id="..."/> written in WorksheetManager::close().
+            $hyperlinkId = 1;
+            foreach ($worksheet->getExternalSheet()->getHyperlinks() as $url) {
+                $sheetRelationships .= '<Relationship Id="rId_hyperlink'.$hyperlinkId.'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'.$this->escaper->escape($url).'" TargetMode="External"/>';
+                $hyperlinkId++;
+            }
+
+            if ($sheetRelationships !== '') {
+                $sheetRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'.PHP_EOL
+                    .'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                    .$sheetRelationships
+                    .'</Relationships>';
+
+                $this->createFileWithContents($this->xlWorksheetsRelsFolder, 'sheet'.$worksheetId.'.xml.rels', $sheetRels);
+            }
+        }
+
+        $workbookRelsXmlFileContents .= '</Relationships>';
+
+        $this->createFileWithContents($this->xlRelsFolder, self::WORKBOOK_RELS_XML_FILE_NAME, $workbookRelsXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "comments{i}.xml" file under the "xl" folder
+     *
+     * @param Worksheet[] $worksheets
+     * @throws
+     * @return FileSystemHelper
+     */
+    public function createCommentsFile(CommentManager $commentManager, array $worksheets): self
+    {
+        $firstComment = true;
+        foreach ($worksheets as $worksheet) {
+            $worksheetId = $worksheet->getId();
+
+            if (count($worksheet->getExternalSheet()->getComments())) {
+                $this->createFileWithContents($this->xlFolder, 'comments'.$worksheetId.'.xml', $commentManager->getCommentsXMLFileContent($worksheet));
+                if ($firstComment) {
+                    $firstComment = false;
+
+                    $this->createFolder($this->xlFolder, 'drawings');
+                }
+                $this->createFileWithContents($this->xlFolder, 'drawings/vmlDrawing'.$worksheetId.'.vml', $commentManager->getVMLCommentsFileContent($worksheet));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Creates the "styles.xml" file under the "xl" folder
+     *
+     * @return FileSystemHelper
+     */
+    public function createStylesFile(StyleManager $styleManager): self
+    {
+        $stylesXmlFileContents = $styleManager->getStylesXMLFileContent();
+        $this->createFileWithContents($this->xlFolder, self::STYLES_XML_FILE_NAME, $stylesXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Zips the root folder and streams the contents of the zip into the given stream
+     *
+     * @param resource $streamPointer Pointer to the stream to copy the zip
+     * @return void
+     */
+    public function zipRootFolderAndCopyToStream($streamPointer): void
+    {
+        $zip = $this->zipHelper->createZip($this->rootFolder);
+
+        $zipFilePath = $this->zipHelper->getZipFilePath($zip);
+
+        // In order to have the file's mime type detected properly, files need to be added
+        // to the zip file in a particular order.
+        // "[Content_Types].xml" then at least 2 files located in "xl" folder should be zipped first.
+        $this->zipHelper->addFileToArchive($zip, $this->rootFolder, self::CONTENT_TYPES_XML_FILE_NAME);
+        $this->zipHelper->addFileToArchive($zip, $this->rootFolder, self::XL_FOLDER_NAME . '/' . self::WORKBOOK_XML_FILE_NAME);
+        $this->zipHelper->addFileToArchive($zip, $this->rootFolder, self::XL_FOLDER_NAME . '/' . self::STYLES_XML_FILE_NAME);
+
+        $this->zipHelper->addFolderToArchive($zip, $this->rootFolder, ZipHelper::EXISTING_FILES_SKIP);
+        $this->zipHelper->closeArchiveAndCopyToStream($zip, $streamPointer);
+
+        // once the zip is copied, remove it
+        $this->deleteFile($zipFilePath);
+    }
+}

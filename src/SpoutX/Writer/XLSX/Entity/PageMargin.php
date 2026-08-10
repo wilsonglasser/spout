@@ -1,0 +1,21 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SpoutX\Writer\XLSX\Entity;
+
+/**
+ * Print page margins (in inches). Defaults match Excel's "Normal" margins.
+ */
+class PageMargin
+{
+    public function __construct(
+        public float $top = 0.75,
+        public float $right = 0.7,
+        public float $bottom = 0.75,
+        public float $left = 0.7,
+        public float $header = 0.3,
+        public float $footer = 0.3,
+    ) {
+    }
+}

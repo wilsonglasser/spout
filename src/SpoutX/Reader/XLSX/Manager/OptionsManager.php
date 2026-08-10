@@ -1,0 +1,39 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SpoutX\Reader\XLSX\Manager;
+
+use SpoutX\Common\Manager\OptionsManagerAbstract;
+use SpoutX\Reader\Common\Entity\Options;
+
+/**
+ * Class OptionsManager
+ * XLSX Reader options manager
+ */
+class OptionsManager extends OptionsManagerAbstract
+{
+    /**
+     * {@inheritdoc}
+     */
+    protected function getSupportedOptions(): array
+    {
+        return [
+            Options::TEMP_FOLDER,
+            Options::SHOULD_FORMAT_DATES,
+            Options::SHOULD_PRESERVE_EMPTY_ROWS,
+            Options::SHOULD_USE_1904_DATES,
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setDefaultOptions(): void
+    {
+        $this->setOption(Options::TEMP_FOLDER, sys_get_temp_dir());
+        $this->setOption(Options::SHOULD_FORMAT_DATES, false);
+        $this->setOption(Options::SHOULD_PRESERVE_EMPTY_ROWS, false);
+        $this->setOption(Options::SHOULD_USE_1904_DATES, false);
+    }
+}
