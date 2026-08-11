@@ -293,6 +293,9 @@ EOD;
                 $cellXML .= $this->getRichTextRunXml($run);
             }
             $cellXML .= '</is></c>';
+        } elseif ($type === CellType::Text && $value !== '') {
+            // Explicit text: no numeric coercion, "0123" stays "0123".
+            $cellXML .= $this->getCellXMLFragmentForNonEmptyString($this->setColumnMaxCharacters($columnIndex, (string) $value));
         } elseif ($type === CellType::String && preg_match('/[^-.0-9]/', $value)) {
             $cellXML .= $this->getCellXMLFragmentForNonEmptyString($this->setColumnMaxCharacters($columnIndex, $value));
         } elseif ($type === CellType::Formula) {
@@ -463,6 +466,12 @@ EOD;
                     // Outline level
                     if ($columnDimension->getOutlineLevel() > 0) {
                         $attributes['outlineLevel'] = $columnDimension->getOutlineLevel();
+                    }
+
+                    // Column-level default style (e.g. a number format for the whole column)
+                    if ($columnDimension->getStyle() !== null) {
+                        $registeredStyle = $this->styleManager->registerStyle($columnDimension->getStyle());
+                        $attributes['style'] = $registeredStyle->getId();
                     }
 
                     $xml = '';

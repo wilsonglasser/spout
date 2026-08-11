@@ -28,4 +28,10 @@ enum CellType: int
     case Error = 6;
     /** Rich text: a {@see RichText} value with multiple formatted runs */
     case RichText = 7;
+    /**
+     * Text, always written as a string — unlike {@see CellType::String}, the
+     * writer never coerces a numeric-looking value ("0123", "2026") to a number,
+     * so leading zeros and digit-only identifiers survive the round-trip.
+     */
+    case Text = 8;
 }

@@ -74,10 +74,10 @@ class StyleManager implements StyleManagerInterface
     {
         if ($cell instanceof Cell) {
             $cellStyle = $cell->getStyle();
-            $value = $cell->isString() ? $cell->getValue() : null;
+            $value = $cell->isString() || $cell->isText() ? $cell->getValue() : null;
         } else {
             $cellStyle = isset($cell[2]) ? $cell[2] : null;
-            $value = $cell[0] === CellType::String ? $cell[1] : null;
+            $value = $cell[0] === CellType::String || $cell[0] === CellType::Text ? $cell[1] : null;
         }
 
         // if the "wrap text" option is already set, no-op

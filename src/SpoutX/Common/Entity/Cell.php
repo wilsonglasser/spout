@@ -135,6 +135,12 @@ class Cell
         return $this->type === CellType::String;
     }
 
+    /** Explicit text (never coerced to a number by the writer). */
+    public function isText(): bool
+    {
+        return $this->type === CellType::Text;
+    }
+
     public function isDate(): bool
     {
         return $this->type === CellType::Date;

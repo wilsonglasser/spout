@@ -22,13 +22,27 @@ class ColumnDimension
      * @param float      $width       Column width. A negative value means the width should be ignored by the writer.
      * @param bool       $autoSize    Whether the column width should be calculated from its content
      * @param bool       $visible     Whether the column is visible
+     * @param Style|null $style       Default style for the whole column (e.g. a number format)
      */
     public function __construct(
         private string|int $columnIndex = 'A',
         private float $width = -1,
         private bool $autoSize = false,
         private bool $visible = true,
+        private ?Style $style = null,
     ) {
+    }
+
+    public function getStyle(): ?Style
+    {
+        return $this->style;
+    }
+
+    public function setStyle(?Style $style): self
+    {
+        $this->style = $style;
+
+        return $this;
     }
 
     /**
