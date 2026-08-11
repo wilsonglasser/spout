@@ -203,6 +203,9 @@ EOD;
     private function applyStyleAndGetCellXML(Cell|array $cell, Style $rowStyle, int $rowIndex, int $cellIndex): string
     {
         $isObject = $cell instanceof Cell;
+        if (!$isObject) {
+            $cell = $this->normalizeShorthandCell($cell);
+        }
         // Apply row and extra styles
         if ($isObject) {
             $cellStyle = $cell->getStyle();
@@ -221,6 +224,37 @@ EOD;
         $registeredStyle = $this->styleManager->registerStyle($newCellStyle);
 
         return $this->getCellXML($rowIndex, $cellIndex, $cell, $registeredStyle->getId());
+    }
+
+    /**
+     * Defensive normalization for array-shorthand cells ([CellType, value, ?Style]).
+     * Under strict_types, a raw object (e.g. Carbon) or array passed as
+     * CellType::String would fatal in the wrap-text strpos()/preg_match() calls,
+     * and a non-DateTime passed as CellType::Date would fatal in
+     * DateFormatHelper. Coerce instead of crashing the export.
+     *
+     * @param array{0: CellType, 1: mixed, 2?: Style} $cell
+     * @return array{0: CellType, 1: mixed, 2?: Style}
+     */
+    private function normalizeShorthandCell(array $cell): array
+    {
+        $type = $cell[0];
+        $value = $cell[1];
+
+        if ($type === CellType::String && $value !== null && !is_string($value)) {
+            if ($value instanceof \DateTimeInterface) {
+                $cell[1] = $value->format('Y-m-d H:i:s');
+            } elseif (is_scalar($value) || $value instanceof \Stringable) {
+                $cell[1] = (string) $value;
+            } else {
+                $cell[1] = json_encode($value) ?: '';
+            }
+        } elseif ($type === CellType::Date && !($value instanceof \DateTimeInterface)) {
+            $cell[0] = CellType::String;
+            $cell[1] = (is_scalar($value) || $value instanceof \Stringable) ? (string) $value : '';
+        }
+
+        return $cell;
     }
 
     /**

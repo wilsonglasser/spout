@@ -92,7 +92,7 @@ class DateFormatHelper
         date_default_timezone_set('UTC');
 
         $normalizedDate = '';
-        if ((is_object($dateValue)) && ($dateValue instanceof DateTime)) {
+        if ((is_object($dateValue)) && ($dateValue instanceof \DateTimeInterface)) {
             $normalizedDate = $dateValue->format('Y-m-d-H-i-s');
         } elseif (is_numeric($dateValue)) {
             $normalizedDate = date('Y-m-d-H-i-s', $dateValue);
