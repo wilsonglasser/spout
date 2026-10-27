@@ -339,6 +339,17 @@ $writer->setDocumentProperties(new DocumentProperties(
 )); // after openToFile()
 ```
 
+**Macros (.xlsm)**: embed the `xl/vbaProject.bin` of an `.xlsm` saved by Excel (it is a zip). The VBA project's
+workbook module must match the workbook code name (`ThisWorkbook` by default; a pt-BR Excel names it
+`EstaPastaDeTrabalho`) and its sheet modules the sheets' code names (`SheetN` by default). Save with `.xlsm`.
+
+```php
+$writer->openToFile('model.xlsm');
+$writer->setVbaProject(file_get_contents('vbaProject.bin'));               // after openToFile()
+$writer->setVbaProject($binary, workbookCodeName: 'EstaPastaDeTrabalho');  // when the project came from a pt-BR Excel
+$writer->getCurrentSheet()->setCodeName('shForm');                         // optional, default SheetN
+```
+
 **Rich text** (multiple formats in one cell)
 
 ```php

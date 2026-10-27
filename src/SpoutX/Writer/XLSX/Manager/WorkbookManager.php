@@ -70,15 +70,18 @@ class WorkbookManager extends WorkbookManagerAbstract
     {
         $worksheets = $this->getWorksheets();
 
-        $documentProperties = $this->getWorkbook()->getDocumentProperties();
+        $workbook = $this->getWorkbook();
+        $documentProperties = $workbook->getDocumentProperties();
+        $hasVbaProject = $workbook->hasVbaProject();
 
         $this->fileSystemHelper
             ->createRelsFile($documentProperties)
             ->createDocPropsFiles($documentProperties)
-            ->createContentTypesFile($worksheets, $documentProperties)
-            ->createWorkbookFile($worksheets, $this->getWorkbook()->getProtection())
+            ->createContentTypesFile($worksheets, $documentProperties, $hasVbaProject)
+            ->createWorkbookFile($worksheets, $workbook->getProtection(), $hasVbaProject ? $workbook->getCodeName() : null)
+            ->createVbaProjectFile($workbook->getVbaProject())
             ->createCommentsFile($this->getCommentManager(), $worksheets)
-            ->createWorkbookRelsFile($this->getCommentManager(), $worksheets)
+            ->createWorkbookRelsFile($this->getCommentManager(), $worksheets, $hasVbaProject)
             ->createStylesFile($this->styleManager)
             ->zipRootFolderAndCopyToStream($finalFilePointer);
     }

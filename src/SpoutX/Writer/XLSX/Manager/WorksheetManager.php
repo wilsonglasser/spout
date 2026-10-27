@@ -443,12 +443,14 @@ EOD;
         $sheetView = $sheet->getSheetView();
         $hasColumnDimensions = count($sheet->getColumnDimensions()) > 0;
         $needsFitToPagePr = $pageSetup !== null && $pageSetup->isFitToPage();
+        $codeName = $sheet->getCodeName();
+        $needsSheetPr = $needsFitToPagePr || $codeName !== null;
 
         // Content that must appear BEFORE <sheetData> (in CT_Worksheet order:
         // <sheetPr> then <sheetViews> then <cols>) has to be spliced in ahead of the
         // already-streamed sheet data. We buffer everything after the insertion point
         // and rewrite it.
-        if ($hasColumnDimensions || $needsFitToPagePr || $sheetView !== null) {
+        if ($hasColumnDimensions || $needsSheetPr || $sheetView !== null) {
 
             // I didn't found a way to append a file in the middle without storing all content =/
             $afterContent =  stream_get_contents($worksheetFilePointer, -1, $this->beforeSheetDataPointer);
@@ -456,8 +458,10 @@ EOD;
             fseek($worksheetFilePointer, $this->beforeSheetDataPointer);
 
             // <sheetPr> precedes <sheetViews> and <cols> in the schema
-            if ($needsFitToPagePr) {
-                fwrite($worksheetFilePointer, '<sheetPr><pageSetUpPr fitToPage="true"/></sheetPr>'.PHP_EOL);
+            if ($needsSheetPr) {
+                $codeNameAttribute = $codeName !== null ? ' codeName="' . $codeName . '"' : '';
+                $pageSetUpPr = $needsFitToPagePr ? '<pageSetUpPr fitToPage="true"/>' : '';
+                fwrite($worksheetFilePointer, '<sheetPr' . $codeNameAttribute . '>' . $pageSetUpPr . '</sheetPr>'.PHP_EOL);
             }
 
             // <sheetViews> precedes <cols>

@@ -32,6 +32,7 @@ class FileSystemHelper extends \SpoutX\Common\Helper\FileSystemHelper implements
     public const WORKBOOK_XML_FILE_NAME = 'workbook.xml';
     public const WORKBOOK_RELS_XML_FILE_NAME = 'workbook.xml.rels';
     public const STYLES_XML_FILE_NAME = 'styles.xml';
+    public const VBA_PROJECT_FILE_NAME = 'vbaProject.bin';
 
     /** @var ZipHelper Helper to perform tasks with Zip archive */
     private ZipHelper $zipHelper;
@@ -349,7 +350,7 @@ EOD;
      * @param Worksheet[] $worksheets
      * @return FileSystemHelper
      */
-    public function createContentTypesFile(array $worksheets, ?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null): self
+    public function createContentTypesFile(array $worksheets, ?\SpoutX\Writer\XLSX\Entity\DocumentProperties $properties = null, bool $hasVbaProject = false): self
     {
         $contentTypesXmlFileContents = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -357,8 +358,15 @@ EOD;
     <Default ContentType="application/xml" Extension="xml"/>
     <Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>
     <Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>
-    <Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/>
 EOD;
+
+        // A macro-enabled workbook (.xlsm) declares its main part as such; Excel refuses an .xlsm with the .xlsx one.
+        if ($hasVbaProject) {
+            $contentTypesXmlFileContents .= PHP_EOL . '    <Override ContentType="application/vnd.ms-excel.sheet.macroEnabled.main+xml" PartName="/xl/workbook.xml"/>';
+            $contentTypesXmlFileContents .= PHP_EOL . '    <Override ContentType="application/vnd.ms-office.vbaProject" PartName="/xl/' . self::VBA_PROJECT_FILE_NAME . '"/>' . PHP_EOL;
+        } else {
+            $contentTypesXmlFileContents .= PHP_EOL . '    <Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/>' . PHP_EOL;
+        }
 
         /** @var Worksheet $worksheet */
         foreach ($worksheets as $worksheet) {
@@ -392,12 +400,17 @@ EOD;
      * @param Worksheet[] $worksheets
      * @return FileSystemHelper
      */
-    public function createWorkbookFile(array $worksheets, ?\SpoutX\Writer\XLSX\Entity\WorkbookProtection $protection = null): self
+    public function createWorkbookFile(array $worksheets, ?\SpoutX\Writer\XLSX\Entity\WorkbookProtection $protection = null, ?string $codeName = null): self
     {
         $workbookXmlFileContents = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 EOD;
+
+        // <workbookPr> precedes <workbookProtection>; its codeName binds the VBA project's workbook module.
+        if ($codeName !== null) {
+            $workbookXmlFileContents .= '<workbookPr codeName="' . $this->escaper->escape($codeName) . '"/>';
+        }
 
         // <workbookProtection> precedes <sheets> in the CT_Workbook sequence.
         if ($protection !== null) {
@@ -432,7 +445,7 @@ EOD;
      * @param Worksheet[] $worksheets
      * @return FileSystemHelper
      */
-    public function createWorkbookRelsFile(CommentManager $commentManager, array $worksheets): self
+    public function createWorkbookRelsFile(CommentManager $commentManager, array $worksheets, bool $hasVbaProject = false): self
     {
         // <Relationship Id="rIdTheme" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>
         $workbookRelsXmlFileContents = <<<'EOD'
@@ -475,9 +488,25 @@ EOD;
             }
         }
 
+        if ($hasVbaProject) {
+            $workbookRelsXmlFileContents .= '<Relationship Id="rIdVbaProject" Target="' . self::VBA_PROJECT_FILE_NAME . '" Type="http://schemas.microsoft.com/office/2006/relationships/vbaProject"/>';
+        }
+
         $workbookRelsXmlFileContents .= '</Relationships>';
 
         $this->createFileWithContents($this->xlRelsFolder, self::WORKBOOK_RELS_XML_FILE_NAME, $workbookRelsXmlFileContents);
+
+        return $this;
+    }
+
+    /**
+     * Creates the "vbaProject.bin" file under the "xl" folder (macro-enabled workbook only)
+     */
+    public function createVbaProjectFile(?string $vbaProject): self
+    {
+        if ($vbaProject !== null) {
+            $this->createFileWithContents($this->xlFolder, self::VBA_PROJECT_FILE_NAME, $vbaProject);
+        }
 
         return $this;
     }

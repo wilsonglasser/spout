@@ -145,6 +145,31 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
     }
 
     /**
+     * Embeds a VBA project, turning the file into a macro-enabled workbook: save it with the .xlsm extension.
+     * The binary is the xl/vbaProject.bin of an .xlsm saved by Excel. Its workbook module must be named
+     * $workbookCodeName and its sheet modules must match the sheets' code names (SheetN by default,
+     * see Sheet::setCodeName()). Null removes it.
+     * Must be called after the writer has been opened.
+     *
+     * @throws WriterNotOpenedException If the writer has not been opened yet
+     * @throws \InvalidArgumentException If the binary is not an OLE compound file
+     */
+    public function setVbaProject(?string $vbaProject, string $workbookCodeName = 'ThisWorkbook'): self
+    {
+        $this->throwIfWorkbookIsNotAvailable();
+
+        if ($vbaProject !== null && !str_starts_with($vbaProject, "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1")) {
+            throw new \InvalidArgumentException('The VBA project must be the vbaProject.bin (OLE compound file) of an .xlsm');
+        }
+
+        $workbook = $this->workbookManager->getWorkbook();
+        $workbook->setVbaProject($vbaProject);
+        $workbook->setCodeName($workbookCodeName);
+
+        return $this;
+    }
+
+    /**
      * Returns the current sheet
      *
      * @throws WriterNotOpenedException If the writer has not been opened yet

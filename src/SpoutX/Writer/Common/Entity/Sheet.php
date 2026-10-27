@@ -36,6 +36,9 @@ class Sheet
     /** @var SheetVisibility Visibility of the sheet tab */
     private SheetVisibility $visibility = SheetVisibility::Visible;
 
+    /** @var string|null VBA code name of the sheet (<sheetPr codeName>), defaults to SheetN in a macro-enabled workbook */
+    private ?string $codeName = null;
+
     /** @var SheetManager Sheet manager */
     private SheetManager $sheetManager;
 
@@ -96,6 +99,27 @@ class Sheet
     public function getIndex(): int
     {
         return $this->index;
+    }
+
+    public function getCodeName(): ?string
+    {
+        return $this->codeName;
+    }
+
+    /**
+     * Sets the VBA code name of the sheet: the name its document module has in the VBA project.
+     *
+     * @throws \InvalidArgumentException If the name is not a valid VBA identifier
+     */
+    public function setCodeName(?string $codeName): self
+    {
+        if ($codeName !== null && preg_match('/^[A-Za-z][A-Za-z0-9_]{0,30}$/', $codeName) !== 1) {
+            throw new \InvalidArgumentException('Invalid sheet code name: ' . $codeName);
+        }
+
+        $this->codeName = $codeName;
+
+        return $this;
     }
 
     public function getAssociatedWorkbookId(): string

@@ -25,6 +25,12 @@ class Workbook
     /** @var DocumentProperties|null Document metadata (title/author/...) */
     private ?DocumentProperties $documentProperties = null;
 
+    /** @var string|null Raw xl/vbaProject.bin (OLE compound file); set = macro-enabled workbook (.xlsm) */
+    private ?string $vbaProject = null;
+
+    /** @var string VBA code name of the workbook, must match the workbook module of the VBA project */
+    private string $codeName = 'ThisWorkbook';
+
     /**
      * Workbook constructor.
      */
@@ -72,5 +78,30 @@ class Workbook
     public function setDocumentProperties(?DocumentProperties $documentProperties): void
     {
         $this->documentProperties = $documentProperties;
+    }
+
+    public function getVbaProject(): ?string
+    {
+        return $this->vbaProject;
+    }
+
+    public function hasVbaProject(): bool
+    {
+        return $this->vbaProject !== null;
+    }
+
+    public function setVbaProject(?string $vbaProject): void
+    {
+        $this->vbaProject = $vbaProject;
+    }
+
+    public function getCodeName(): string
+    {
+        return $this->codeName;
+    }
+
+    public function setCodeName(string $codeName): void
+    {
+        $this->codeName = $codeName;
     }
 }

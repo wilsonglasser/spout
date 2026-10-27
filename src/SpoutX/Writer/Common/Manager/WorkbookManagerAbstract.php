@@ -304,6 +304,15 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
     {
         $worksheets = $this->getWorksheets();
 
+        // The sheet modules of a VBA project are bound to the sheets by code name: Excel's default is SheetN.
+        if ($this->getWorkbook()->hasVbaProject()) {
+            foreach ($worksheets as $worksheet) {
+                $sheet = $worksheet->getExternalSheet();
+                if ($sheet->getCodeName() === null) {
+                    $sheet->setCodeName('Sheet' . ($sheet->getIndex() + 1));
+                }
+            }
+        }
 
         $defaultRowStyle = $this->optionsManager->getOption(Options::DEFAULT_ROW_STYLE);
 
